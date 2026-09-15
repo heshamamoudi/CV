@@ -31,10 +31,12 @@ _ = Required("Site:BaseUrl", "Site__BaseUrl");
 
 builder.Services.AddDbContext<Profile.Api.Data.ProfileContext>(o => o.UseNpgsql(connectionString, n =>
     n.ExecutionStrategy(d => new Profile.Api.Data.RetryingStrategy(d))));
+builder.Services.AddScoped<Profile.Api.Content.ContentService>();
 
 var app = builder.Build();
 
 app.MapGet("/health", () => Results.Text("ok"));
+Profile.Api.Content.PublicApi.MapPublicApi(app);
 
 /* Migrate and seed before serving. Retried: on a cold start the app and Postgres
    come up together and losing that race is normal. Switched off in tests. */
