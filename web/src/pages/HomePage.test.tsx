@@ -14,7 +14,9 @@ const home: HomeData = {
   featuredProject: null,
   projects: [],
   technologies: [{ category: 'قواعد البيانات', items: ['PostgreSQL'] }],
-  certificates: [], education: [], languages: [],
+  certificates: [{ title: 'مطور JavaScript متكامل', issuer: 'Udacity', issuedOn: '2022-09' }],
+  education: [{ degree: 'بكالوريوس تقنية المعلومات', institution: 'جامعة الملك عبدالعزيز' }],
+  languages: [{ name: 'العربية', level: 'اللغة الأم' }],
   updatedAt: '2026-09-15T00:00:00Z',
 };
 
@@ -27,5 +29,20 @@ describe('HomePage', () => {
     expect(screen.getByText('شركة التنفيذي')).toBeInTheDocument();
     expect(screen.getByText(/حتى الآن/)).toBeInTheDocument();
     expect(screen.getByText('PostgreSQL')).toBeInTheDocument();
+  });
+
+  it('keeps the certificates, education and languages the server rendered', () => {
+    render(<MemoryRouter><HomePage home={home} /></MemoryRouter>);
+
+    expect(screen.getByText('مطور JavaScript متكامل — Udacity')).toBeInTheDocument();
+    expect(screen.getByText('بكالوريوس تقنية المعلومات — جامعة الملك عبدالعزيز')).toBeInTheDocument();
+    expect(screen.getByText('العربية — اللغة الأم')).toBeInTheDocument();
+  });
+
+  it('does not render a link the server blanked', () => {
+    render(<MemoryRouter><HomePage home={{ ...home, profile: { ...home.profile, linkedInUrl: '' } }} /></MemoryRouter>);
+
+    expect(screen.queryByText('LinkedIn')).not.toBeInTheDocument();
+    expect(screen.getByText('GitHub')).toBeInTheDocument(); // not vacuous
   });
 });

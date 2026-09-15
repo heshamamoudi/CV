@@ -3,6 +3,7 @@ import type { HomeData } from '../types';
 import { useStrings } from '../i18n/useStrings';
 import { JourneyList } from '../components/JourneyList';
 
+/** Must render the same content as PageRenderer.Home, or crawlers and visitors see different pages. */
 export function HomePage({ home }: { home: HomeData }) {
   const t = useStrings(home.lang);
   const p = home.profile;
@@ -41,14 +42,25 @@ export function HomePage({ home }: { home: HomeData }) {
         <h2>{t('section.about')}</h2>
         <p>{p.about}</p>
         <p>{p.summary}</p>
+        <List heading={t('section.certificates')} items={home.certificates.map(c => `${c.title} — ${c.issuer}`)} />
+        <List heading={t('section.education')} items={home.education.map(e => `${e.degree} — ${e.institution}`)} />
+        <List heading={t('section.languages')} items={home.languages.map(l => `${l.name} — ${l.level}`)} />
       </section>
       <section id="contact">
         <h2>{t('section.contact')}</h2>
         <address>
-          <a href={`mailto:${p.email}`}>{p.email}</a> <a href={p.linkedInUrl} rel="me">LinkedIn</a>{' '}
-          <a href={p.gitHubUrl} rel="me">GitHub</a> {p.location}
+          <a href={`mailto:${p.email}`}>{p.email}</a>{' '}
+          {/* The server blanks any link that is not http(s); an empty one is not rendered. */}
+          {p.linkedInUrl && <><a href={p.linkedInUrl} rel="me">LinkedIn</a>{' '}</>}
+          {p.gitHubUrl && <><a href={p.gitHubUrl} rel="me">GitHub</a>{' '}</>}
+          {p.location}
         </address>
       </section>
     </>
   );
+}
+
+function List({ heading, items }: { heading: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (<><h3>{heading}</h3><ul>{items.map(i => <li key={i}>{i}</li>)}</ul></>);
 }

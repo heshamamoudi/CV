@@ -19,7 +19,7 @@ export function useHome(lang: Lang): HomeData | null {
     fetch(`/api/public/${lang}/home`).then(r => (r.ok ? r.json() : null)).then((data: HomeData | null) => {
       if (data) homeCache.set(lang, data);
       if (live) setHome(data);
-    });
+    }).catch(() => { /* offline: keep what is on screen rather than an unhandled rejection */ });
     return () => { live = false; };
   }, [lang]);
   return home;
@@ -33,7 +33,8 @@ export function useProject(lang: Lang, slug: string): ProjectDto | null | undefi
     let live = true;
     fetch(`/api/public/${lang}/projects/${encodeURIComponent(slug)}`)
       .then(r => (r.ok ? r.json() : null))
-      .then((data: ProjectDto | null) => { if (live) setProject(data); });
+      .then((data: ProjectDto | null) => { if (live) setProject(data); })
+      .catch(() => { if (live) setProject(null); });
     return () => { live = false; };
   }, [lang, slug, initial]);
   return project;

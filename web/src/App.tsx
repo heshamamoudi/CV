@@ -32,6 +32,15 @@ function ProjectRoute() {
   );
 }
 
+/** Unknown paths keep the language of their first segment, as the server's 404 does. */
+function NotFoundRoute() {
+  const first = window.location.pathname.split('/').filter(Boolean)[0];
+  const lang: Lang = isLang(first) ? first : 'en';
+  const home = useHome(lang);
+  usePageTitle(home ? pageTitle('notfound', lang, home, null) : null);
+  return <Layout lang={lang}><NotFoundPage lang={lang} /></Layout>;
+}
+
 export function App() {
   return (
     <Routes>
@@ -40,7 +49,7 @@ export function App() {
       <Route path="/:lang/journey" element={<WithHome kind="journey" render={home => <JourneyPage home={home} />} />} />
       <Route path="/:lang/projects" element={<WithHome kind="projects" render={home => <ProjectsPage home={home} />} />} />
       <Route path="/:lang/projects/:slug" element={<ProjectRoute />} />
-      <Route path="*" element={<Layout lang="en"><NotFoundPage lang="en" /></Layout>} />
+      <Route path="*" element={<NotFoundRoute />} />
     </Routes>
   );
 }
