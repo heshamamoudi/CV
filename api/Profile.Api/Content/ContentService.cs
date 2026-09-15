@@ -71,6 +71,14 @@ public sealed class ContentService(ProfileContext db)
         return rows.Select(p => (p.Slug, p.IsComplete(Lang.En), p.IsComplete(Lang.Ar), p.UpdatedAt)).ToList();
     }
 
+    /// <summary>The current slug of a project that used to be reachable at <paramref name="oldSlug"/>.</summary>
+    public async Task<string?> CurrentSlugAsync(string oldSlug, CancellationToken ct = default)
+    {
+        var redirect = await db.ProjectSlugRedirects.AsNoTracking().FirstOrDefaultAsync(r => r.OldSlug == oldSlug, ct);
+        if (redirect is null) return null;
+        return await db.Projects.AsNoTracking().Where(p => p.Id == redirect.ProjectId && p.Visible).Select(p => p.Slug).FirstOrDefaultAsync(ct);
+    }
+
     /// <summary>
     /// A link a visitor can click is http or https, or it is nothing. HTML
     /// encoding cannot stop "javascript:alert(1)" - it contains nothing to
