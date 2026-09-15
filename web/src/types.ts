@@ -1,9 +1,12 @@
 export type Lang = 'en' | 'ar';
 
+export interface ImageDto { src: string; srcSet: string; width: number; height: number; alt: string; }
+
 export interface ProfileDto {
   name: string; headline: string; eyebrow: string; heroTitle: string; heroSubtitle: string;
   summary: string; location: string; about: string; quote: string;
   email: string; linkedInUrl: string; gitHubUrl: string;
+  heroImage?: ImageDto | null; portrait?: ImageDto | null;
 }
 export interface JourneyDto {
   id: number; title: string; organisation: string; summary: string; highlights: string[];
@@ -12,6 +15,7 @@ export interface JourneyDto {
 export interface ProjectDto {
   slug: string; title: string; summary: string; body: string; technologies: string[];
   featured: boolean; availableInOtherLanguage: boolean;
+  cover?: ImageDto | null;
 }
 export interface HomeData {
   lang: Lang; profile: ProfileDto; journey: JourneyDto[]; featuredProject: ProjectDto | null;
