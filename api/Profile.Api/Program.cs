@@ -27,16 +27,23 @@ string Required(string key, string envName) =>
         : throw new InvalidOperationException($"{envName} is not set.");
 
 var connectionString = Required("ConnectionStrings:DefaultConnection", "ConnectionStrings__DefaultConnection");
-_ = Required("Site:BaseUrl", "Site__BaseUrl");
+var baseUrl = Required("Site:BaseUrl", "Site__BaseUrl");
 
 builder.Services.AddDbContext<Profile.Api.Data.ProfileContext>(o => o.UseNpgsql(connectionString, n =>
     n.ExecutionStrategy(d => new Profile.Api.Data.RetryingStrategy(d))));
 builder.Services.AddScoped<Profile.Api.Content.ContentService>();
+builder.Services.AddSingleton(new Profile.Api.Seo.SiteOptions(baseUrl.TrimEnd('/')));
+builder.Services.AddSingleton<Profile.Api.Seo.PageTemplate>();
+builder.Services.AddScoped<Profile.Api.Seo.PageRenderer>();
 
 var app = builder.Build();
 
+app.UseMiddleware<Profile.Api.Seo.CanonicalHostMiddleware>();
+app.UseStaticFiles();
+
 app.MapGet("/health", () => Results.Text("ok"));
 Profile.Api.Content.PublicApi.MapPublicApi(app);
+Profile.Api.Seo.PageRoutes.MapPages(app);
 
 /* Migrate and seed before serving. Retried: on a cold start the app and Postgres
    come up together and losing that race is normal. Switched off in tests. */
