@@ -155,10 +155,13 @@ public static partial class MediaAdmin
     private static int Dimension(string? value) =>
         int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var n) && n is > 0 and <= 20000 ? n : 0;
 
-    /// <summary>Trimmed, then cut to at most <paramref name="max"/> characters without splitting a surrogate pair.</summary>
+    /// <summary>
+    /// Control characters dropped (Postgres refuses NUL), trimmed, then cut to at most
+    /// <paramref name="max"/> characters without splitting a surrogate pair.
+    /// </summary>
     private static string Clip(string? value, int max)
     {
-        var trimmed = (value ?? "").Trim();
+        var trimmed = new string((value ?? "").Where(c => !char.IsControl(c)).ToArray()).Trim();
         if (trimmed.Length <= max) return trimmed;
         var cut = char.IsHighSurrogate(trimmed[max - 1]) ? max - 1 : max;
         return trimmed[..cut];

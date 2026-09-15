@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +11,6 @@ namespace Profile.Api.Admin;
 public static partial class CvAdmin
 {
     public const int MaxBytes = 10 * 1024 * 1024;
-
-    private static readonly byte[] PdfSignature = "%PDF-"u8.ToArray();
 
     public static void Map(RouteGroupBuilder admin, WebApplication app)
     {
@@ -34,14 +31,14 @@ public static partial class CvAdmin
             using var stream = new MemoryStream((int)file.Length);
             await file.CopyToAsync(stream, ct);
             var bytes = stream.ToArray();
-            if (!IsPdf(bytes)) return new Problems().Add("file", "must be a PDF").Result();
+            if (MediaSignature.Detect(bytes) != "application/pdf") return new Problems().Add("file", "must be a PDF").Result();
 
             var row = await db.CvFiles.FirstOrDefaultAsync(c => c.Lang == lang, ct);
             if (row is null) db.CvFiles.Add(row = new CvFile { Lang = lang });
-            var name = Path.GetFileName(file.FileName);
+            var name = new string(Path.GetFileName(file.FileName).Where(c => !char.IsControl(c)).ToArray()).Trim();
             row.FileName = name.Length is > 0 and <= 200 ? name : "cv.pdf";
             row.Bytes = bytes;
-            row.Sha256 = Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
+            row.Sha256 = MediaSignature.Sha256(bytes);
             row.UploadedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
@@ -87,6 +84,4 @@ public static partial class CvAdmin
         }
         return name.Length > 0 ? $"{name}-CV-{lang}.pdf" : $"CV-{lang}.pdf";
     }
-
-    private static bool IsPdf(ReadOnlySpan<byte> bytes) => bytes.StartsWith(PdfSignature);
 }
