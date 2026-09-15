@@ -26,14 +26,14 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: dotnet test
-        run: docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet test tests/Profile.Api.Tests --nologo -v minimal
+        run: docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0@sha256:bb32ba3ba3ea36e38572d9d8db76fa15f7cbf722f3f886e06bca6d528bd4fba8 dotnet test tests/Profile.Api.Tests --nologo -v minimal
 
   test-web:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: vitest and build
-        run: docker run --rm -v "$PWD:/src" -w /src/web node:22-alpine sh -c "npm ci && npm test && npm run build"
+        run: docker run --rm -v "$PWD:/src" -w /src/web node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 sh -c "npm ci && npm test && npm run build"
 
   amd64:
     needs: [test-api, test-web]
