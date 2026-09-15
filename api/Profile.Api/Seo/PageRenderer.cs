@@ -239,6 +239,13 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         return JsonSerializer.Serialize(new Dictionary<string, object?> { ["@context"] = "https://schema.org", ["@graph"] = graph }, Json);
     }
 
+    /// <summary>The signed-in admin app's page: never indexed, and no content embedded - the app loads it from the admin API.</summary>
+    public string RenderAdminShell(string title) => template.Html
+        .Replace("<!--app-lang-->", Lang.En)
+        .Replace("<!--app-dir-->", "ltr")
+        .Replace("<!--app-head-->", "<title>" + E(title) + "</title><meta name=\"robots\" content=\"noindex\">")
+        .Replace("<!--app-body-->", "<script type=\"application/json\" id=\"page-data\">{\"kind\":\"admin\"}</script>");
+
     internal static string TwinPath(string path, string lang) => "/" + Lang.Other(lang) + path[(1 + lang.Length)..];
 
     private static string E(string value) => Html.Encode(value);
