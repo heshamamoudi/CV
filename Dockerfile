@@ -22,7 +22,12 @@ RUN dotnet publish api/Profile.Api/Profile.Api.csproj -c Release -o /app --no-re
 COPY --from=web /web/dist /app/wwwroot
 RUN mkdir -p /app/templates && mv /app/wwwroot/index.html /app/templates/page.html
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled-composite-extra@sha256:7a088c77c50392f9fd2745476e92f6e818680b5dda07037bdade94af5198626a AS final
+# Azure Linux 3.0 distroless: no shell, no package manager, ICU included for
+# Arabic. Chosen on 2026-09-15 by scanning with the platform's Trivy (0.74.0):
+# this digest had 0 known vulnerabilities across its 14 OS packages, where the
+# Ubuntu chiseled variants carried 5-6 fixable glibc findings that Microsoft had
+# not yet rebuilt (a chiseled image cannot be patched in place).
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless-extra@sha256:7a9720282e566a5561964011981100024a5311061b0ad78258666b18089ad991 AS final
 WORKDIR /app
 # Root-owned on purpose: the app user can read and run its binaries but not
 # change them, even if the filesystem were ever mounted writable.
