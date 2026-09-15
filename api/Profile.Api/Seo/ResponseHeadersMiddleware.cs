@@ -9,7 +9,7 @@ namespace Profile.Api.Seo;
 public sealed class ResponseHeadersMiddleware(RequestDelegate next, SiteOptions site)
 {
     public const string ContentSecurityPolicy =
-        "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; " +
+        "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; " +
         "connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 
     public Task InvokeAsync(HttpContext http)
