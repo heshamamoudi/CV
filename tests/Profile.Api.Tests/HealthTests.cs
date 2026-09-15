@@ -34,6 +34,9 @@ public class HealthTests
     [Theory]
     [InlineData("ConnectionStrings:DefaultConnection", "ConnectionStrings__DefaultConnection")]
     [InlineData("Site:BaseUrl", "Site__BaseUrl")]
+    [InlineData("CloudflareAccess:TeamDomain", "CloudflareAccess__TeamDomain")]
+    [InlineData("CloudflareAccess:Audience", "CloudflareAccess__Audience")]
+    [InlineData("CloudflareAccess:AllowedEmails", "CloudflareAccess__AllowedEmails")]
     public void A_missing_setting_names_its_variable(string key, string envName)
     {
         using var factory = TestApp.Create().WithWebHostBuilder(b => b.UseSetting(key, ""));

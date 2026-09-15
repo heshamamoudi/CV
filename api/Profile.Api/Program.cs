@@ -28,6 +28,9 @@ string Required(string key, string envName) =>
 
 var connectionString = Required("ConnectionStrings:DefaultConnection", "ConnectionStrings__DefaultConnection");
 var baseUrl = Required("Site:BaseUrl", "Site__BaseUrl");
+_ = Required("CloudflareAccess:TeamDomain", "CloudflareAccess__TeamDomain");
+_ = Required("CloudflareAccess:Audience", "CloudflareAccess__Audience");
+_ = Required("CloudflareAccess:AllowedEmails", "CloudflareAccess__AllowedEmails");
 
 builder.Services.AddDbContext<Profile.Api.Data.ProfileContext>(o => o.UseNpgsql(connectionString, n =>
     n.ExecutionStrategy(d => new Profile.Api.Data.RetryingStrategy(d))));
@@ -37,6 +40,18 @@ builder.Services.AddSingleton(new Profile.Api.Seo.SiteOptions(
     builder.Configuration.GetValue("Site:Indexable", true)));
 builder.Services.AddSingleton<Profile.Api.Seo.PageTemplate>();
 builder.Services.AddScoped<Profile.Api.Seo.PageRenderer>();
+
+/* Admin identity comes only from Cloudflare Access, verified here on every
+   request - never trusted merely because Access sits in front. */
+builder.Services.Configure<Profile.Api.Admin.Access.AccessOptions>(builder.Configuration.GetSection("CloudflareAccess"));
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<Profile.Api.Admin.Access.IAccessKeySource, Profile.Api.Admin.Access.CloudflareAccessKeySource>();
+builder.Services.AddAuthentication(Profile.Api.Admin.Access.AccessAuthenticationHandler.Scheme)
+    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Profile.Api.Admin.Access.AccessAuthenticationHandler>(
+        Profile.Api.Admin.Access.AccessAuthenticationHandler.Scheme, _ => { });
+builder.Services.AddAuthorization(o => o.AddPolicy("admin", p => p.RequireAuthenticatedUser()));
+builder.Services.AddSingleton<Profile.Api.Admin.Access.SameOriginFilter>();
+
 builder.WebHost.ConfigureKestrel(k => k.AddServerHeader = false);
 
 var app = builder.Build();
@@ -52,6 +67,8 @@ app.UseStaticFiles(new StaticFileOptions
             c.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
     },
 });
+app.UseAuthentication();
+app.UseAuthorization();
 
 /* HLT-1: healthy means "can actually serve", and every page needs the database.
    Bounded at 2 s: the container probe gives up at 3 s, and the retrying strategy
@@ -71,6 +88,7 @@ app.MapGet("/health", async (Profile.Api.Data.ProfileContext db) =>
         return Results.Text("database unavailable", statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 });
+Profile.Api.Admin.AdminApi.MapAdmin(app);
 Profile.Api.Content.PublicApi.MapPublicApi(app);
 Profile.Api.Seo.Discovery.MapDiscovery(app);
 Profile.Api.Seo.PageRoutes.MapPages(app);
