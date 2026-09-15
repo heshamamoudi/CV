@@ -36,6 +36,29 @@ var app = builder.Build();
 
 app.MapGet("/health", () => Results.Text("ok"));
 
+/* Migrate and seed before serving. Retried: on a cold start the app and Postgres
+   come up together and losing that race is normal. Switched off in tests. */
+if (builder.Configuration.GetValue("Startup:Migrate", true))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<Profile.Api.Data.ProfileContext>();
+    var log = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    for (var attempt = 1; ; attempt++)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+            break;
+        }
+        catch (Exception ex) when (attempt < 12)
+        {
+            log.LogWarning("database not ready ({Message}); retry {Attempt}/12", ex.Message, attempt);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+    }
+    await Profile.Api.Data.ContentSeed.EnsureAsync(db);
+}
+
 app.Run();
 return 0;
 
