@@ -46,7 +46,7 @@ public static partial class MediaAdmin
             {
                 form = await request.ReadFormAsync(ct);
             }
-            catch (InvalidDataException)
+            catch (Exception e) when (e is InvalidDataException or IOException)
             {
                 return new Problems().Add("form", "malformed multipart form").Result();
             }
@@ -115,7 +115,8 @@ public static partial class MediaAdmin
                 await db.PageSeo.AnyAsync(p => p.ShareMediaId == id, ct);
             if (inUse) return Results.Problem(statusCode: StatusCodes.Status409Conflict, title: "this image is in use");
 
-            var media = await db.Media.Include(m => m.Renditions).FirstOrDefaultAsync(m => m.Id == id, ct);
+            // Renditions go with it by the database cascade; including them would read every image byte just to delete.
+            var media = await db.Media.FirstOrDefaultAsync(m => m.Id == id, ct);
             if (media is null) return Results.NotFound();
             db.Media.Remove(media);
             await db.SaveChangesAsync(ct);
@@ -125,6 +126,9 @@ public static partial class MediaAdmin
         // Public. A new upload is a new id, so a rendition never changes and can be cached for a year.
         app.MapGet("/media/{id:guid}/{file}", async (ProfileContext db, Guid id, string file, HttpContext http, CancellationToken ct) =>
         {
+            // One spelling of the id too: the route accepts any GUID format, the cache key must not.
+            if (http.Request.RouteValues["id"] as string != id.ToString("N")) return Results.NotFound();
+
             var dot = file.IndexOf('.');
             if (dot < 1 || !int.TryParse(file.AsSpan(0, dot), NumberStyles.None, CultureInfo.InvariantCulture, out var width)
                 || !MediaUrls.Widths.Contains(width))

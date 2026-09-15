@@ -78,11 +78,13 @@ public sealed class ContentService(ProfileContext db)
     }
 
     /// <summary>The current slug of a project that used to be reachable at <paramref name="oldSlug"/>.</summary>
-    public async Task<string?> CurrentSlugAsync(string oldSlug, CancellationToken ct = default)
+    public async Task<string?> CurrentSlugAsync(string oldSlug, string lang, CancellationToken ct = default)
     {
         var redirect = await db.ProjectSlugRedirects.AsNoTracking().FirstOrDefaultAsync(r => r.OldSlug == oldSlug, ct);
         if (redirect is null) return null;
-        return await db.Projects.AsNoTracking().Where(p => p.Id == redirect.ProjectId && p.Visible).Select(p => p.Slug).FirstOrDefaultAsync(ct);
+        var project = await db.Projects.AsNoTracking().FirstOrDefaultAsync(p => p.Id == redirect.ProjectId && p.Visible, ct);
+        // Only where the page exists in this language - a 301 that lands on a 404 helps nobody.
+        return project is not null && project.IsComplete(lang) ? project.Slug : null;
     }
 
     /// <summary>

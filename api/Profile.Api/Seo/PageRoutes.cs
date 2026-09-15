@@ -49,10 +49,12 @@ public static class PageRoutes
         ProjectDto? project = null;
         if (kind == PageKind.Project)
         {
-            project = await content.ProjectAsync(lang, slug!, ct);
+            // Postgres refuses NUL in a text parameter; an address with control characters is simply not a page.
+            if (slug!.Any(char.IsControl)) return await NotFoundAsync(lang, content, renderer, ct);
+            project = await content.ProjectAsync(lang, slug, ct);
             if (project is null)
             {
-                if (await content.CurrentSlugAsync(slug!, ct) is { } current)
+                if (await content.CurrentSlugAsync(slug, lang, ct) is { } current)
                     return Results.Redirect($"/{lang}/projects/{current}{http.Request.QueryString}", permanent: true);
                 return await NotFoundAsync(lang, content, renderer, ct);
             }

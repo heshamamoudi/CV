@@ -24,7 +24,19 @@ public static partial class CvAdmin
             if (!Lang.IsSupported(lang)) return Results.NotFound();
             if (!request.HasFormContentType) return new Problems().Add("file", "multipart form required").Result();
 
-            var form = await request.ReadFormAsync(ct);
+            IFormCollection form;
+            try
+            {
+                form = await request.ReadFormAsync(ct);
+            }
+            catch (Exception e) when (e is InvalidDataException or IOException)
+            {
+                return new Problems().Add("file", "malformed multipart form").Result();
+            }
+            catch (BadHttpRequestException e)
+            {
+                return Results.Problem(statusCode: e.StatusCode, title: "the upload could not be read");
+            }
             if (form.Files.GetFile("file") is not { } file) return new Problems().Add("file", "required").Result();
             if (file.Length > MaxBytes) return new Problems().Add("file", "at most 10 MB").Result();
 
@@ -46,6 +58,7 @@ public static partial class CvAdmin
 
         admin.MapDelete("/cv/{lang}", async (ProfileContext db, string lang, CancellationToken ct) =>
         {
+            if (!Lang.IsSupported(lang)) return Results.NotFound();
             var row = await db.CvFiles.FirstOrDefaultAsync(c => c.Lang == lang, ct);
             if (row is null) return Results.NotFound();
             db.CvFiles.Remove(row);
