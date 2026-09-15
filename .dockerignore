@@ -1,0 +1,9 @@
+.git
+.github
+docs
+tests
+**/bin
+**/obj
+**/node_modules
+web/dist
+.env

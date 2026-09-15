@@ -1,1 +1,8 @@
-node_modules
+bin/
+obj/
+node_modules/
+web/dist/
+.env
+*.user
+.vs/
+TestResults/
