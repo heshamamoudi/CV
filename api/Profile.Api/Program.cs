@@ -53,7 +53,24 @@ app.UseStaticFiles(new StaticFileOptions
     },
 });
 
-app.MapGet("/health", () => Results.Text("ok"));
+/* HLT-1: healthy means "can actually serve", and every page needs the database.
+   Bounded at 2 s: the container probe gives up at 3 s, and the retrying strategy
+   would otherwise spend ~20 s proving an outage. It reports nothing about the
+   connection - no host, no message - only whether it works. */
+app.MapGet("/health", async (Profile.Api.Data.ProfileContext db) =>
+{
+    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+    try
+    {
+        return await db.Database.CanConnectAsync(timeout.Token)
+            ? Results.Text("ok")
+            : Results.Text("database unavailable", statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+    catch (Exception)
+    {
+        return Results.Text("database unavailable", statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+});
 Profile.Api.Content.PublicApi.MapPublicApi(app);
 Profile.Api.Seo.Discovery.MapDiscovery(app);
 Profile.Api.Seo.PageRoutes.MapPages(app);

@@ -24,7 +24,9 @@ RUN mkdir -p /app/templates && mv /app/wwwroot/index.html /app/templates/page.ht
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled-composite-extra@sha256:7a088c77c50392f9fd2745476e92f6e818680b5dda07037bdade94af5198626a AS final
 WORKDIR /app
-COPY --from=build --chown=1654:1654 /app .
+# Root-owned on purpose: the app user can read and run its binaries but not
+# change them, even if the filesystem were ever mounted writable.
+COPY --from=build /app .
 USER 1654
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080

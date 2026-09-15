@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router';
 import { isLang } from './paths';
 import { useHome, useProject } from './data';
 import { pageTitle, usePageTitle } from './title';

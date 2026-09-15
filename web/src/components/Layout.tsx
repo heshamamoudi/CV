@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router';
 import type { Lang } from '../types';
 import { useStrings } from '../i18n/useStrings';
 import { otherLang, twinPath } from '../paths';

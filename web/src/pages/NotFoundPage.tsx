@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import type { Lang } from '../types';
 import { useStrings } from '../i18n/useStrings';
 
