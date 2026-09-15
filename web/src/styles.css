@@ -1,0 +1,10 @@
+:root { color-scheme: dark; --bg: #0b1016; --fg: #e8edf2; --muted: #9aa7b4; --accent: #8fc7ff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: system-ui, "Segoe UI", Tahoma, sans-serif; line-height: 1.6; }
+header nav { display: flex; flex-wrap: wrap; gap: 1rem; padding-block: 1rem; padding-inline: 1.5rem; }
+a { color: var(--accent); }
+main { max-width: 64rem; margin-inline: auto; padding-inline: 1.5rem; padding-block-end: 4rem; }
+section { padding-block: 2rem; border-block-end: 1px solid #1c2733; }
+.journey { padding-inline-start: 1.25rem; }
+p, li { color: var(--muted); }
+h1, h2, h3 { color: var(--fg); text-wrap: balance; }
