@@ -19,7 +19,7 @@ public sealed class AccessAuthenticationHandler(
     IOptions<AccessOptions> access, IAccessKeySource keySource)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    public const string Scheme = "CloudflareAccess";
+    public const string SchemeName = "CloudflareAccess";
     private const string HeaderName = "Cf-Access-Jwt-Assertion";
     private const string CookieName = "CF_Authorization";
 
@@ -76,8 +76,8 @@ public sealed class AccessAuthenticationHandler(
             return AuthenticateResult.Fail("not permitted");
         }
 
-        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, email), new Claim(ClaimTypes.Email, email)], Scheme);
-        return AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme));
+        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, email), new Claim(ClaimTypes.Email, email)], SchemeName);
+        return AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName));
     }
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)

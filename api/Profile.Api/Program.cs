@@ -46,9 +46,9 @@ builder.Services.AddScoped<Profile.Api.Seo.PageRenderer>();
 builder.Services.Configure<Profile.Api.Admin.Access.AccessOptions>(builder.Configuration.GetSection("CloudflareAccess"));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Profile.Api.Admin.Access.IAccessKeySource, Profile.Api.Admin.Access.CloudflareAccessKeySource>();
-builder.Services.AddAuthentication(Profile.Api.Admin.Access.AccessAuthenticationHandler.Scheme)
+builder.Services.AddAuthentication(Profile.Api.Admin.Access.AccessAuthenticationHandler.SchemeName)
     .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Profile.Api.Admin.Access.AccessAuthenticationHandler>(
-        Profile.Api.Admin.Access.AccessAuthenticationHandler.Scheme, _ => { });
+        Profile.Api.Admin.Access.AccessAuthenticationHandler.SchemeName, _ => { });
 builder.Services.AddAuthorization(o => o.AddPolicy("admin", p => p.RequireAuthenticatedUser()));
 builder.Services.AddSingleton<Profile.Api.Admin.Access.SameOriginFilter>();
 
