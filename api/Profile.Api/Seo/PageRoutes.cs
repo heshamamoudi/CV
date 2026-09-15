@@ -50,7 +50,12 @@ public static class PageRoutes
         if (kind == PageKind.Project)
         {
             project = await content.ProjectAsync(lang, slug!, ct);
-            if (project is null) return await NotFoundAsync(lang, content, renderer, ct);
+            if (project is null)
+            {
+                if (await content.CurrentSlugAsync(slug!, ct) is { } current)
+                    return Results.Redirect($"/{lang}/projects/{current}{http.Request.QueryString}", permanent: true);
+                return await NotFoundAsync(lang, content, renderer, ct);
+            }
         }
 
         /* ONE URL PER PAGE. Routing matches case-insensitively and tolerates a
