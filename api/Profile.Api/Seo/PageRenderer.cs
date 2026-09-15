@@ -23,7 +23,7 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
     };
 
-    public string Render(PageKind kind, string lang, HomeData? home, ProjectDto? project, string path)
+    public string Render(PageKind kind, string lang, HomeData? home, ProjectDto? project, string path, SeoOverrides seo)
     {
         var head = new StringBuilder();
         var body = new StringBuilder();
@@ -38,6 +38,8 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
             PageKind.Project => ($"{project!.Title} — {name}", project.Summary),
             _ => ($"{s("notFound.title")} — {name}", ""),
         };
+        title = seo.Title ?? title;
+        description = seo.Description ?? description;
 
         head.Append("<title>").Append(E(title)).Append("</title>");
         if (description.Length > 0)
@@ -67,6 +69,13 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
             head.Append("<meta property=\"og:locale\" content=\"").Append(lang == Lang.Ar ? "ar_SA" : "en_US").Append("\">");
             head.Append("<meta property=\"og:locale:alternate\" content=\"").Append(lang == Lang.Ar ? "en_US" : "ar_SA").Append("\">");
             head.Append("<meta name=\"twitter:card\" content=\"summary_large_image\">");
+            if (seo.ShareImageUrl is { } image)
+            {
+                head.Append("<meta property=\"og:image\" content=\"").Append(E(image)).Append("\">");
+                head.Append("<meta name=\"twitter:image\" content=\"").Append(E(image)).Append("\">");
+            }
+            if (seo.SearchConsoleToken is { } verification)
+                head.Append("<meta name=\"google-site-verification\" content=\"").Append(E(verification)).Append("\">");
             head.Append("<script type=\"application/ld+json\">").Append(StructuredData(kind, lang, home!, project, path)).Append("</script>");
         }
 

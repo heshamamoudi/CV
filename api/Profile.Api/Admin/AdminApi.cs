@@ -18,6 +18,7 @@ public static class AdminApi
         MediaAdmin.Map(admin, app);
         CvAdmin.Map(admin, app);
         CompletenessAdmin.Map(admin);
+        SeoAdmin.Map(admin);
         AdminShell.Map(app);
 
         return admin;

@@ -40,6 +40,7 @@ builder.Services.AddSingleton(new Profile.Api.Seo.SiteOptions(
     builder.Configuration.GetValue("Site:Indexable", true)));
 builder.Services.AddSingleton<Profile.Api.Seo.PageTemplate>();
 builder.Services.AddScoped<Profile.Api.Seo.PageRenderer>();
+builder.Services.AddScoped<Profile.Api.Seo.SeoService>();
 
 /* Admin identity comes only from Cloudflare Access, verified here on every
    admin request - never trusted merely because Access sits in front. No default

@@ -19,14 +19,14 @@ public static class PageRoutes
         // stops UseStaticFiles from serving them.
         const string L = "{lang:regex(^(en|ar)$)}";
 
-        app.MapGet("/" + L, (string lang, HttpContext http, ContentService c, PageRenderer r, CancellationToken ct) =>
-            PageAsync(PageKind.Home, lang, null, http, c, r, ct));
-        app.MapGet("/" + L + "/journey", (string lang, HttpContext http, ContentService c, PageRenderer r, CancellationToken ct) =>
-            PageAsync(PageKind.Journey, lang, null, http, c, r, ct));
-        app.MapGet("/" + L + "/projects", (string lang, HttpContext http, ContentService c, PageRenderer r, CancellationToken ct) =>
-            PageAsync(PageKind.Projects, lang, null, http, c, r, ct));
-        app.MapGet("/" + L + "/projects/{slug}", (string lang, string slug, HttpContext http, ContentService c, PageRenderer r, CancellationToken ct) =>
-            PageAsync(PageKind.Project, lang, slug, http, c, r, ct));
+        app.MapGet("/" + L, (string lang, HttpContext http, ContentService c, PageRenderer r, SeoService s, CancellationToken ct) =>
+            PageAsync(PageKind.Home, lang, null, http, c, r, s, ct));
+        app.MapGet("/" + L + "/journey", (string lang, HttpContext http, ContentService c, PageRenderer r, SeoService s, CancellationToken ct) =>
+            PageAsync(PageKind.Journey, lang, null, http, c, r, s, ct));
+        app.MapGet("/" + L + "/projects", (string lang, HttpContext http, ContentService c, PageRenderer r, SeoService s, CancellationToken ct) =>
+            PageAsync(PageKind.Projects, lang, null, http, c, r, s, ct));
+        app.MapGet("/" + L + "/projects/{slug}", (string lang, string slug, HttpContext http, ContentService c, PageRenderer r, SeoService s, CancellationToken ct) =>
+            PageAsync(PageKind.Project, lang, slug, http, c, r, s, ct));
 
         // Anything else without a file extension (MapFallback's default pattern is
         // {*path:nonfile}, so /assets/*.js still reaches the static files): a real 404 page.
@@ -39,7 +39,7 @@ public static class PageRoutes
     }
 
     private static async Task<IResult> PageAsync(PageKind kind, string lang, string? slug, HttpContext http,
-        ContentService content, PageRenderer renderer, CancellationToken ct)
+        ContentService content, PageRenderer renderer, SeoService seo, CancellationToken ct)
     {
         if (!Lang.IsSupported(lang)) return await NotFoundAsync(Lang.En, content, renderer, ct);
 
@@ -73,14 +73,15 @@ public static class PageRoutes
         if (!string.Equals(http.Request.Path.Value, canonical, StringComparison.Ordinal))
             return Results.Redirect(canonical + http.Request.QueryString, permanent: true);
 
-        var html = renderer.Render(kind, lang, home, project, canonical);
+        var overrides = await seo.ForPageAsync(kind, lang, home, project, ct);
+        var html = renderer.Render(kind, lang, home, project, canonical, overrides);
         return Results.Content(html, "text/html; charset=utf-8");
     }
 
     internal static async Task<IResult> NotFoundAsync(string lang, ContentService content, PageRenderer renderer, CancellationToken ct)
     {
         var home = await content.HomeAsync(lang, ct);
-        var html = renderer.Render(PageKind.NotFound, lang, home, null, "/" + lang);
+        var html = renderer.Render(PageKind.NotFound, lang, home, null, "/" + lang, SeoOverrides.None);
         return Results.Content(html, "text/html; charset=utf-8", statusCode: StatusCodes.Status404NotFound);
     }
 
