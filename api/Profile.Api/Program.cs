@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 /* ------------------------------------------------------------- healthcheck --
  * The runtime image has no curl or wget, so the container's health probe is
  * this binary. The branch must run before any host is built, or every probe
@@ -24,8 +26,11 @@ string Required(string key, string envName) =>
         ? v
         : throw new InvalidOperationException($"{envName} is not set.");
 
-_ = Required("ConnectionStrings:DefaultConnection", "ConnectionStrings__DefaultConnection");
+var connectionString = Required("ConnectionStrings:DefaultConnection", "ConnectionStrings__DefaultConnection");
 _ = Required("Site:BaseUrl", "Site__BaseUrl");
+
+builder.Services.AddDbContext<Profile.Api.Data.ProfileContext>(o => o.UseNpgsql(connectionString, n =>
+    n.ExecutionStrategy(d => new Profile.Api.Data.RetryingStrategy(d))));
 
 var app = builder.Build();
 
