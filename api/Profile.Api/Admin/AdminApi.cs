@@ -15,6 +15,13 @@ public static class AdminApi
         // A write with no side effect, so the same-origin rule has something to be tested against.
         admin.MapPost("/me/ping", () => Results.Ok(new { ok = true }));
 
+        ProfileAdmin.Map(admin);
+        ContentAdmin.Map(admin);
+        MediaAdmin.Map(admin, app);
+        CvAdmin.Map(admin, app);
+        CompletenessAdmin.Map(admin);
+        AdminShell.Map(app);
+
         return admin;
     }
 }

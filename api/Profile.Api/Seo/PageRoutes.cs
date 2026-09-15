@@ -72,7 +72,7 @@ public static class PageRoutes
         return Results.Content(html, "text/html; charset=utf-8");
     }
 
-    private static async Task<IResult> NotFoundAsync(string lang, ContentService content, PageRenderer renderer, CancellationToken ct)
+    internal static async Task<IResult> NotFoundAsync(string lang, ContentService content, PageRenderer renderer, CancellationToken ct)
     {
         var home = await content.HomeAsync(lang, ct);
         var html = renderer.Render(PageKind.NotFound, lang, home, null, "/" + lang);
