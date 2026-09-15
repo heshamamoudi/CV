@@ -42,15 +42,19 @@ builder.Services.AddSingleton<Profile.Api.Seo.PageTemplate>();
 builder.Services.AddScoped<Profile.Api.Seo.PageRenderer>();
 
 /* Admin identity comes only from Cloudflare Access, verified here on every
-   request - never trusted merely because Access sits in front. */
+   admin request - never trusted merely because Access sits in front. No default
+   scheme: public requests never touch token validation, so a junk header on a
+   public page costs nothing; the "admin" policy names the scheme itself. */
 builder.Services.Configure<Profile.Api.Admin.Access.AccessOptions>(builder.Configuration.GetSection("CloudflareAccess"));
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<Profile.Api.Admin.Access.IAccessKeySource, Profile.Api.Admin.Access.CloudflareAccessKeySource>();
-builder.Services.AddAuthentication(Profile.Api.Admin.Access.AccessAuthenticationHandler.SchemeName)
+builder.Services.AddAuthentication()
     .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, Profile.Api.Admin.Access.AccessAuthenticationHandler>(
         Profile.Api.Admin.Access.AccessAuthenticationHandler.SchemeName, _ => { });
-builder.Services.AddAuthorization(o => o.AddPolicy("admin", p => p.RequireAuthenticatedUser()));
-builder.Services.AddSingleton<Profile.Api.Admin.Access.SameOriginFilter>();
+builder.Services.AddAuthorization(o => o.AddPolicy("admin", p => p
+    .AddAuthenticationSchemes(Profile.Api.Admin.Access.AccessAuthenticationHandler.SchemeName)
+    .RequireAuthenticatedUser()));
 
 builder.WebHost.ConfigureKestrel(k => k.AddServerHeader = false);
 
@@ -69,6 +73,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<Profile.Api.Admin.Access.SameOriginMiddleware>();
 
 /* HLT-1: healthy means "can actually serve", and every page needs the database.
    Bounded at 2 s: the container probe gives up at 3 s, and the retrying strategy

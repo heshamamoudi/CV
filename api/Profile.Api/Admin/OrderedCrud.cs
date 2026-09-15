@@ -55,10 +55,10 @@ public static class OrderedCrud
         });
 
         // The whole order at once: a partial list would leave positions ambiguous.
-        group.MapPut(path + "/order", async (ProfileContext db, int[] ids) =>
+        group.MapPut(path + "/order", async (ProfileContext db, int[]? ids) =>
         {
-            var all = await db.Set<TEntity>().ToListAsync();
-            if (ids.Length != all.Count || ids.Distinct().Count() != ids.Length || !all.All(e => ids.Contains(e.Id)))
+            var all = await query(db).ToListAsync();
+            if (ids is null || ids.Length != all.Count || ids.Distinct().Count() != ids.Length || !all.All(e => ids.Contains(e.Id)))
                 return new Problems().Add("ids", "must list every item exactly once").Result();
 
             foreach (var entity in all) entity.SortOrder = Array.IndexOf(ids, entity.Id);

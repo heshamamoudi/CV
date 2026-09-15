@@ -65,7 +65,7 @@ public static partial class ContentAdmin
                 if (e.Slug is null || e.Slug.Length > 80 || !SlugPattern().IsMatch(e.Slug)) p.Add("slug", "lower-case letters, digits and single hyphens");
                 else if (await db.Projects.AnyAsync(x => x.Slug == e.Slug && (existing == null || x.Id != existing.Id))) p.Add("slug", "already used by another project");
                 if (e.Technologies is null) p.Add("technologies", "required");
-                else if (e.Technologies.Count > 30 || e.Technologies.Any(t => string.IsNullOrWhiteSpace(t) || t.Length > 40)) p.Add("technologies", "up to 30 names of at most 40 characters");
+                else if (e.Technologies.Count > 30 || e.Technologies.Any(t => string.IsNullOrWhiteSpace(t) || t.Length > 40 || Problems.HasControl(t, false))) p.Add("technologies", "up to 30 names of at most 40 characters");
                 await ProfileAdmin.MediaExists(db, p, "coverMediaId", e.CoverMediaId);
                 return p;
             },
@@ -101,7 +101,7 @@ public static partial class ContentAdmin
             (_, e, _) =>
             {
                 var p = new Problems().Text("category", e.Category, 100);
-                if (string.IsNullOrWhiteSpace(e.Name) || e.Name.Length > 60) p.Add("name", "1 to 60 characters");
+                p.Line("name", e.Name, 60);
                 return Task.FromResult(p);
             },
             (_, e, t) => { t.Name = e.Name.Trim(); t.Category = e.Category; return Task.CompletedTask; },
@@ -112,7 +112,7 @@ public static partial class ContentAdmin
             (_, e, _) =>
             {
                 var p = new Problems().Text("title", e.Title, 200);
-                if (string.IsNullOrWhiteSpace(e.Issuer) || e.Issuer.Length > 100) p.Add("issuer", "1 to 100 characters");
+                p.Line("issuer", e.Issuer, 100);
                 return Task.FromResult(p);
             },
             (_, e, c) => { c.Title = e.Title; c.Issuer = e.Issuer.Trim(); c.IssuedOn = e.IssuedOn; return Task.CompletedTask; },

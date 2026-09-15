@@ -1,5 +1,5 @@
-# Base images pinned by digest (a tag can be moved under you). The .NET digests
-# are the ones inviteQr runs in production; node was resolved on 2026-09-15.
+# Base images pinned by digest (a tag can be moved under you). The build-stage
+# digests were resolved on 2026-09-15; the runtime base is explained below.
 
 FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS web
 WORKDIR /web

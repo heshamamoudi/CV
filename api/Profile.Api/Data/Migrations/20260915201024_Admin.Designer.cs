@@ -12,7 +12,7 @@ using Profile.Api.Data;
 namespace Profile.Api.Data.Migrations
 {
     [DbContext(typeof(ProfileContext))]
-    [Migration("20260915194837_Admin")]
+    [Migration("20260915201024_Admin")]
     partial class Admin
     {
         /// <inheritdoc />
@@ -192,6 +192,8 @@ namespace Profile.Api.Data.Migrations
 
                     b.HasKey("Key");
 
+                    b.HasIndex("ShareMediaId");
+
                     b.ToTable("PageSeo");
                 });
 
@@ -225,6 +227,10 @@ namespace Profile.Api.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HeroMediaId");
+
+                    b.HasIndex("PortraitMediaId");
 
                     b.ToTable("Profiles");
                 });
@@ -262,6 +268,8 @@ namespace Profile.Api.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CoverMediaId");
+
                     b.HasIndex("Slug")
                         .IsUnique();
 
@@ -277,6 +285,8 @@ namespace Profile.Api.Data.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("OldSlug");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectSlugRedirects");
                 });
@@ -569,6 +579,11 @@ namespace Profile.Api.Data.Migrations
 
             modelBuilder.Entity("Profile.Api.Data.PageSeo", b =>
                 {
+                    b.HasOne("Profile.Api.Data.Media", null)
+                        .WithMany()
+                        .HasForeignKey("ShareMediaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.OwnsOne("Profile.Api.Data.LocalizedText", "Description", b1 =>
                         {
                             b1.Property<string>("PageSeoKey")
@@ -620,6 +635,16 @@ namespace Profile.Api.Data.Migrations
 
             modelBuilder.Entity("Profile.Api.Data.ProfileRecord", b =>
                 {
+                    b.HasOne("Profile.Api.Data.Media", null)
+                        .WithMany()
+                        .HasForeignKey("HeroMediaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Profile.Api.Data.Media", null)
+                        .WithMany()
+                        .HasForeignKey("PortraitMediaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.OwnsOne("Profile.Api.Data.LocalizedText", "About", b1 =>
                         {
                             b1.Property<int>("ProfileRecordId")
@@ -839,6 +864,11 @@ namespace Profile.Api.Data.Migrations
 
             modelBuilder.Entity("Profile.Api.Data.Project", b =>
                 {
+                    b.HasOne("Profile.Api.Data.Media", null)
+                        .WithMany()
+                        .HasForeignKey("CoverMediaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.OwnsOne("Profile.Api.Data.LocalizedText", "Body", b1 =>
                         {
                             b1.Property<int>("ProjectId")
@@ -909,6 +939,15 @@ namespace Profile.Api.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Title")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Profile.Api.Data.ProjectSlugRedirect", b =>
+                {
+                    b.HasOne("Profile.Api.Data.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

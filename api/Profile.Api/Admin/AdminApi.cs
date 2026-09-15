@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Profile.Api.Admin.Access;
 
 namespace Profile.Api.Admin;
 
@@ -8,8 +7,7 @@ public static class AdminApi
     public static RouteGroupBuilder MapAdmin(this WebApplication app)
     {
         var admin = app.MapGroup("/api/admin")
-            .RequireAuthorization("admin")
-            .AddEndpointFilter<SameOriginFilter>();
+            .RequireAuthorization("admin");
 
         admin.MapGet("/me", (ClaimsPrincipal user) => Results.Ok(new { email = user.FindFirstValue(ClaimTypes.Email) }));
         // A write with no side effect, so the same-origin rule has something to be tested against.

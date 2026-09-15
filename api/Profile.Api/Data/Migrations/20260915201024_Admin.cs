@@ -63,22 +63,6 @@ namespace Profile.Api.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PageSeo",
-                columns: table => new
-                {
-                    Key = table.Column<string>(type: "text", nullable: false),
-                    Title_En = table.Column<string>(type: "text", nullable: false),
-                    Title_Ar = table.Column<string>(type: "text", nullable: false),
-                    Description_En = table.Column<string>(type: "text", nullable: false),
-                    Description_Ar = table.Column<string>(type: "text", nullable: false),
-                    ShareMediaId = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PageSeo", x => x.Key);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ProjectSlugRedirects",
                 columns: table => new
                 {
@@ -88,6 +72,12 @@ namespace Profile.Api.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProjectSlugRedirects", x => x.OldSlug);
+                    table.ForeignKey(
+                        name: "FK_ProjectSlugRedirects_Projects_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,16 +119,99 @@ namespace Profile.Api.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PageSeo",
+                columns: table => new
+                {
+                    Key = table.Column<string>(type: "text", nullable: false),
+                    Title_En = table.Column<string>(type: "text", nullable: false),
+                    Title_Ar = table.Column<string>(type: "text", nullable: false),
+                    Description_En = table.Column<string>(type: "text", nullable: false),
+                    Description_Ar = table.Column<string>(type: "text", nullable: false),
+                    ShareMediaId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PageSeo", x => x.Key);
+                    table.ForeignKey(
+                        name: "FK_PageSeo_Media_ShareMediaId",
+                        column: x => x.ShareMediaId,
+                        principalTable: "Media",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_CoverMediaId",
+                table: "Projects",
+                column: "CoverMediaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Profiles_HeroMediaId",
+                table: "Profiles",
+                column: "HeroMediaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Profiles_PortraitMediaId",
+                table: "Profiles",
+                column: "PortraitMediaId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_MediaRenditions_MediaId_Width",
                 table: "MediaRenditions",
                 columns: new[] { "MediaId", "Width" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PageSeo_ShareMediaId",
+                table: "PageSeo",
+                column: "ShareMediaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectSlugRedirects_ProjectId",
+                table: "ProjectSlugRedirects",
+                column: "ProjectId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Profiles_Media_HeroMediaId",
+                table: "Profiles",
+                column: "HeroMediaId",
+                principalTable: "Media",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Profiles_Media_PortraitMediaId",
+                table: "Profiles",
+                column: "PortraitMediaId",
+                principalTable: "Media",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Projects_Media_CoverMediaId",
+                table: "Projects",
+                column: "CoverMediaId",
+                principalTable: "Media",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Profiles_Media_HeroMediaId",
+                table: "Profiles");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Profiles_Media_PortraitMediaId",
+                table: "Profiles");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Projects_Media_CoverMediaId",
+                table: "Projects");
+
             migrationBuilder.DropTable(
                 name: "CvFiles");
 
@@ -156,6 +229,18 @@ namespace Profile.Api.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Media");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Projects_CoverMediaId",
+                table: "Projects");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Profiles_HeroMediaId",
+                table: "Profiles");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Profiles_PortraitMediaId",
+                table: "Profiles");
 
             migrationBuilder.DropColumn(
                 name: "CoverMediaId",

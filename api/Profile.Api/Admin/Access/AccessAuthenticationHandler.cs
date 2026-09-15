@@ -29,43 +29,37 @@ public sealed class AccessAuthenticationHandler(
         if (string.IsNullOrWhiteSpace(token)) Request.Cookies.TryGetValue(CookieName, out token);
         if (string.IsNullOrWhiteSpace(token)) return AuthenticateResult.NoResult();
 
-        IReadOnlyCollection<SecurityKey> keys;
-        try
-        {
-            keys = await keySource.GetKeysAsync(Context.RequestAborted);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "could not fetch Cloudflare Access signing keys");
-            return AuthenticateResult.Fail("cannot verify the token right now");
-        }
-
         var a = access.Value;
-        var parameters = new TokenValidationParameters
+        ClaimsPrincipal? principal = null;
+        foreach (var refresh in new[] { false, true })
         {
-            ValidateIssuer = true,
-            ValidIssuer = $"https://{a.TeamDomain}",
-            ValidateAudience = true,
-            ValidAudience = a.Audience,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKeys = keys,
-            ValidateLifetime = true,
-            RequireExpirationTime = true,
-            RequireSignedTokens = true,
-            ClockSkew = TimeSpan.FromSeconds(30),
-            ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
-        };
+            IReadOnlyCollection<SecurityKey> keys;
+            try
+            {
+                keys = await keySource.GetKeysAsync(refresh, Context.RequestAborted);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "could not fetch Cloudflare Access signing keys");
+                return AuthenticateResult.Fail("cannot verify the token right now");
+            }
 
-        ClaimsPrincipal principal;
-        try
-        {
-            principal = new JwtSecurityTokenHandler { MapInboundClaims = false }.ValidateToken(token, parameters, out _);
+            try
+            {
+                principal = new JwtSecurityTokenHandler { MapInboundClaims = false }.ValidateToken(token, Parameters(a, keys), out _);
+                break;
+            }
+            // Signed by a key not in the set: Cloudflare may have rotated. Refetch once (the source throttles).
+            catch (SecurityTokenSignatureKeyNotFoundException) when (!refresh)
+            {
+            }
+            catch (Exception ex) // fail closed on anything the validator throws
+            {
+                Logger.LogWarning("rejected an Access token: {Reason}", ex.GetType().Name);
+                return AuthenticateResult.Fail("invalid Access token");
+            }
         }
-        catch (Exception ex) // fail closed on anything the validator throws
-        {
-            Logger.LogWarning("rejected an Access token: {Reason}", ex.GetType().Name);
-            return AuthenticateResult.Fail("invalid Access token");
-        }
+        if (principal is null) return AuthenticateResult.Fail("invalid Access token");
 
         var email = principal.FindFirst("email")?.Value;
         if (string.IsNullOrWhiteSpace(email)) return AuthenticateResult.Fail("token carries no email");
@@ -79,6 +73,22 @@ public sealed class AccessAuthenticationHandler(
         var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, email), new Claim(ClaimTypes.Email, email)], SchemeName);
         return AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName));
     }
+
+    private static TokenValidationParameters Parameters(AccessOptions a, IReadOnlyCollection<SecurityKey> keys) =>
+        new()
+        {
+            ValidateIssuer = true,
+            ValidIssuer = $"https://{a.TeamDomain}",
+            ValidateAudience = true,
+            ValidAudience = a.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKeys = keys,
+            ValidateLifetime = true,
+            RequireExpirationTime = true,
+            RequireSignedTokens = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+            ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+        };
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {

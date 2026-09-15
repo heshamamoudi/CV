@@ -28,6 +28,8 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
             Text(e, x => x.Name); Text(e, x => x.Headline); Text(e, x => x.Eyebrow);
             Text(e, x => x.HeroTitle); Text(e, x => x.HeroSubtitle); Text(e, x => x.Summary);
             Text(e, x => x.Location); Text(e, x => x.About); Text(e, x => x.Quote);
+            ImageReference(e, x => x.HeroMediaId);
+            ImageReference(e, x => x.PortraitMediaId);
         });
 
         b.Entity<JourneyEntry>(e =>
@@ -41,6 +43,7 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
         {
             Text(e, x => x.Title); Text(e, x => x.Summary); Text(e, x => x.Body);
             e.HasIndex(x => x.Slug).IsUnique();
+            ImageReference(e, x => x.CoverMediaId);
             // A plain text column: portable across Postgres and the in-memory test provider.
             e.Property(x => x.Technologies)
                 .HasConversion(
@@ -64,10 +67,26 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
         });
         b.Entity<MediaRendition>(e => e.HasIndex(x => new { x.MediaId, x.Width }).IsUnique());
         b.Entity<CvFile>(e => e.HasKey(x => x.Lang));
-        b.Entity<PageSeo>(e => { e.HasKey(x => x.Key); Text(e, x => x.Title); Text(e, x => x.Description); });
+        b.Entity<PageSeo>(e =>
+        {
+            e.HasKey(x => x.Key); Text(e, x => x.Title); Text(e, x => x.Description);
+            ImageReference(e, x => x.ShareMediaId);
+        });
         b.Entity<SiteSettings>(e => e.Property(x => x.Id).ValueGeneratedNever());
-        b.Entity<ProjectSlugRedirect>(e => e.HasKey(x => x.OldSlug));
+        b.Entity<ProjectSlugRedirect>(e =>
+        {
+            e.HasKey(x => x.OldSlug);
+            e.HasOne<Project>().WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
+        });
     }
+
+    /// <summary>
+    /// An optional image. The admin API refuses to delete an image still in use;
+    /// the key makes the database agree, and a delete that races an edit clears
+    /// the reference rather than leaving it pointing at nothing.
+    /// </summary>
+    private static void ImageReference<T>(EntityTypeBuilder<T> e, Expression<Func<T, object?>> key) where T : class =>
+        e.HasOne<Media>().WithMany().HasForeignKey(key).OnDelete(DeleteBehavior.SetNull);
 
     /// <summary>A required owned pair of columns: {Nav}_En, {Nav}_Ar.</summary>
     private static void Text<T>(EntityTypeBuilder<T> e, Expression<Func<T, LocalizedText?>> nav) where T : class

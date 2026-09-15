@@ -56,6 +56,6 @@ public static class AccessTokens
 
 public sealed class FakeKeySource : IAccessKeySource
 {
-    public Task<IReadOnlyCollection<SecurityKey>> GetKeysAsync(CancellationToken ct) =>
+    public Task<IReadOnlyCollection<SecurityKey>> GetKeysAsync(bool refresh, CancellationToken ct) =>
         Task.FromResult<IReadOnlyCollection<SecurityKey>>([AccessTokens.Key]);
 }
