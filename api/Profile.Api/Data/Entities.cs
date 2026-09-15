@@ -17,10 +17,12 @@ public sealed class ProfileRecord
     public string Email { get; set; } = "";
     public string LinkedInUrl { get; set; } = "";
     public string GitHubUrl { get; set; } = "";
+    public Guid? HeroMediaId { get; set; }
+    public Guid? PortraitMediaId { get; set; }
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
-public sealed class JourneyEntry
+public sealed class JourneyEntry : IOrdered
 {
     public int Id { get; set; }
     public LocalizedText Title { get; set; } = new();
@@ -50,7 +52,7 @@ public sealed class Highlight
     public bool Has(string lang) => !string.IsNullOrWhiteSpace(For(lang));
 }
 
-public sealed class Project
+public sealed class Project : IOrdered
 {
     public int Id { get; set; }
     public string Slug { get; set; } = "";
@@ -58,6 +60,7 @@ public sealed class Project
     public LocalizedText Summary { get; set; } = new();
     public LocalizedText Body { get; set; } = new();
     public List<string> Technologies { get; set; } = [];
+    public Guid? CoverMediaId { get; set; }
     public bool Featured { get; set; }
     public int SortOrder { get; set; }
     public bool Visible { get; set; } = true;
@@ -66,7 +69,7 @@ public sealed class Project
     public bool IsComplete(string lang) => Title.Has(lang) && Summary.Has(lang);
 }
 
-public sealed class Technology
+public sealed class Technology : IOrdered
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";
@@ -74,7 +77,7 @@ public sealed class Technology
     public int SortOrder { get; set; }
 }
 
-public sealed class Certificate
+public sealed class Certificate : IOrdered
 {
     public int Id { get; set; }
     public LocalizedText Title { get; set; } = new();
@@ -83,7 +86,7 @@ public sealed class Certificate
     public int SortOrder { get; set; }
 }
 
-public sealed class Education
+public sealed class Education : IOrdered
 {
     public int Id { get; set; }
     public LocalizedText Degree { get; set; } = new();
@@ -91,7 +94,7 @@ public sealed class Education
     public int SortOrder { get; set; }
 }
 
-public sealed class SpokenLanguage
+public sealed class SpokenLanguage : IOrdered
 {
     public int Id { get; set; }
     public LocalizedText Name { get; set; } = new();

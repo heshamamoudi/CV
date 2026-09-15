@@ -14,6 +14,12 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
     public DbSet<Certificate> Certificates => Set<Certificate>();
     public DbSet<Education> Education => Set<Education>();
     public DbSet<SpokenLanguage> SpokenLanguages => Set<SpokenLanguage>();
+    public DbSet<Media> Media => Set<Media>();
+    public DbSet<MediaRendition> MediaRenditions => Set<MediaRendition>();
+    public DbSet<CvFile> CvFiles => Set<CvFile>();
+    public DbSet<PageSeo> PageSeo => Set<PageSeo>();
+    public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
+    public DbSet<ProjectSlugRedirect> ProjectSlugRedirects => Set<ProjectSlugRedirect>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -50,6 +56,17 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
         b.Entity<Certificate>(e => Text(e, x => x.Title));
         b.Entity<Education>(e => { Text(e, x => x.Degree); Text(e, x => x.Institution); });
         b.Entity<SpokenLanguage>(e => { Text(e, x => x.Name); Text(e, x => x.Level); });
+
+        b.Entity<Media>(e =>
+        {
+            Text(e, x => x.Alt);
+            e.HasMany(x => x.Renditions).WithOne().HasForeignKey(r => r.MediaId).OnDelete(DeleteBehavior.Cascade);
+        });
+        b.Entity<MediaRendition>(e => e.HasIndex(x => new { x.MediaId, x.Width }).IsUnique());
+        b.Entity<CvFile>(e => e.HasKey(x => x.Lang));
+        b.Entity<PageSeo>(e => { e.HasKey(x => x.Key); Text(e, x => x.Title); Text(e, x => x.Description); });
+        b.Entity<SiteSettings>(e => e.Property(x => x.Id).ValueGeneratedNever());
+        b.Entity<ProjectSlugRedirect>(e => e.HasKey(x => x.OldSlug));
     }
 
     /// <summary>A required owned pair of columns: {Nav}_En, {Nav}_Ar.</summary>
