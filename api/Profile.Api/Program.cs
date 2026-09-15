@@ -43,6 +43,7 @@ app.UseStaticFiles();
 
 app.MapGet("/health", () => Results.Text("ok"));
 Profile.Api.Content.PublicApi.MapPublicApi(app);
+Profile.Api.Seo.Discovery.MapDiscovery(app);
 Profile.Api.Seo.PageRoutes.MapPages(app);
 
 /* Migrate and seed before serving. Retried: on a cold start the app and Postgres
