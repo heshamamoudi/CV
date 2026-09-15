@@ -46,6 +46,23 @@ public class ContentServiceTests
     }
 
     [Fact]
+    public async Task A_role_with_an_untranslated_highlight_is_left_out_of_arabic_only()
+    {
+        await using var db = await SeededDbAsync();
+        var role = await db.JourneyEntries.Include(j => j.Highlights).FirstAsync(j => j.Title.En == "Web Developer");
+        role.Highlights[0].Ar = "";
+        await db.SaveChangesAsync();
+
+        var service = new ContentService(db);
+        var en = await service.HomeAsync("en");
+        var ar = await service.HomeAsync("ar");
+
+        Assert.Contains(en!.Journey, j => j.Title == "Web Developer");
+        Assert.DoesNotContain(ar!.Journey, j => j.Title == "مطور ويب");
+        Assert.Equal(en.Journey.Count - 1, ar.Journey.Count); // only that one is gone
+    }
+
+    [Fact]
     public async Task The_featured_project_falls_back_to_the_first_visible_one()
     {
         await using var db = await SeededDbAsync();

@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -101,6 +102,103 @@ public class PageTests
 
         Assert.Equal(HttpStatusCode.MovedPermanently, reply.StatusCode);
         Assert.Equal("https://heshamamoudi.com/en/projects?x=1", reply.Headers.Location!.OriginalString);
+    }
+
+    [Theory]
+    [InlineData("/en/Journey", "/en/journey")]
+    [InlineData("/en/journey/", "/en/journey")]
+    [InlineData("/en/", "/en")]
+    [InlineData("/ar/PROJECTS?utm=x", "/ar/projects?utm=x")]
+    public async Task Any_other_spelling_of_a_page_redirects_permanently_to_its_one_url(string path, string expected)
+    {
+        var reply = await (await ClientAsync()).GetAsync(path);
+
+        Assert.Equal(HttpStatusCode.MovedPermanently, reply.StatusCode);
+        Assert.Equal(expected, reply.Headers.Location!.OriginalString);
+    }
+
+    [Fact]
+    public async Task An_upper_case_language_is_not_a_language()
+    {
+        var reply = await (await ClientAsync()).GetAsync("/EN");
+        Assert.Equal(HttpStatusCode.NotFound, reply.StatusCode);
+    }
+
+    [Fact]
+    public async Task A_refused_language_is_not_chosen()
+    {
+        var client = await ClientAsync();
+        var request = new HttpRequestMessage(HttpMethod.Get, "/");
+        request.Headers.TryAddWithoutValidation("Accept-Language", "ar;q=0");
+
+        var reply = await client.SendAsync(request);
+
+        Assert.Equal("/en", reply.Headers.Location!.OriginalString);
+    }
+
+    [Fact]
+    public async Task Head_values_are_escaped()
+    {
+        var app = TestApp.Create(s => InMemoryDb.Use(s, "head-" + Guid.NewGuid()));
+        await InMemoryDb.SeededAsync(app.Services);
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<Profile.Api.Data.ProfileContext>();
+            db.Profiles.First().Headline.En = "A <b>\"q\"</b>";
+            db.SaveChanges();
+        }
+
+        var html = await app.CreateClient().GetStringAsync("/en");
+        var head = html[..html.IndexOf("</head>", StringComparison.Ordinal)];
+
+        Assert.Contains("<title>Hesham Amoudi — A &lt;b&gt;&quot;q&quot;&lt;/b&gt;</title>", head);
+        Assert.Contains("content=\"Hesham Amoudi — A &lt;b&gt;&quot;q&quot;&lt;/b&gt;\"", head);
+        Assert.DoesNotContain("<b>", head);
+    }
+
+    [Fact]
+    public async Task A_link_that_is_not_http_is_never_rendered()
+    {
+        var app = TestApp.Create(s => InMemoryDb.Use(s, "href-" + Guid.NewGuid()));
+        await InMemoryDb.SeededAsync(app.Services);
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<Profile.Api.Data.ProfileContext>();
+            db.Profiles.First().LinkedInUrl = "javascript:alert(1)";
+            db.SaveChanges();
+        }
+
+        var html = await app.CreateClient().GetStringAsync("/en");
+
+        Assert.DoesNotContain("javascript:", html);
+        Assert.Contains("href=\"https://github.com/heshamamoudi\"", html); // the safe link is still there
+    }
+
+    [Fact]
+    public async Task Every_page_carries_the_security_headers_and_no_server_banner()
+    {
+        var reply = await (await ClientAsync()).GetAsync("/en");
+
+        Assert.Equal("nosniff", reply.Headers.GetValues("X-Content-Type-Options").Single());
+        Assert.Equal("DENY", reply.Headers.GetValues("X-Frame-Options").Single());
+        Assert.Contains("frame-ancestors 'none'", reply.Headers.GetValues("Content-Security-Policy").Single());
+        Assert.False(reply.Headers.Contains("X-Robots-Tag")); // indexable by default
+    }
+
+    [Fact]
+    public async Task A_non_indexable_deploy_tells_crawlers_to_stay_out()
+    {
+        var app = TestApp.Create(s => InMemoryDb.Use(s, "noindex-" + Guid.NewGuid()))
+            .WithWebHostBuilder(b => b.UseSetting("Site:Indexable", "false"));
+        await InMemoryDb.SeededAsync(app.Services);
+        var client = app.CreateClient();
+
+        var page = await client.GetAsync("/en");
+        var robots = await client.GetStringAsync("/robots.txt");
+
+        Assert.Equal("noindex, nofollow", page.Headers.GetValues("X-Robots-Tag").Single());
+        Assert.Contains("Disallow: /\n", robots);
+        Assert.DoesNotContain("Sitemap:", robots);
     }
 
     [Fact]

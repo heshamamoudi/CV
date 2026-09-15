@@ -32,14 +32,26 @@ var baseUrl = Required("Site:BaseUrl", "Site__BaseUrl");
 builder.Services.AddDbContext<Profile.Api.Data.ProfileContext>(o => o.UseNpgsql(connectionString, n =>
     n.ExecutionStrategy(d => new Profile.Api.Data.RetryingStrategy(d))));
 builder.Services.AddScoped<Profile.Api.Content.ContentService>();
-builder.Services.AddSingleton(new Profile.Api.Seo.SiteOptions(baseUrl.TrimEnd('/')));
+builder.Services.AddSingleton(new Profile.Api.Seo.SiteOptions(
+    baseUrl.TrimEnd('/'),
+    builder.Configuration.GetValue("Site:Indexable", true)));
 builder.Services.AddSingleton<Profile.Api.Seo.PageTemplate>();
 builder.Services.AddScoped<Profile.Api.Seo.PageRenderer>();
+builder.WebHost.ConfigureKestrel(k => k.AddServerHeader = false);
 
 var app = builder.Build();
 
+app.UseMiddleware<Profile.Api.Seo.ResponseHeadersMiddleware>();
 app.UseMiddleware<Profile.Api.Seo.CanonicalHostMiddleware>();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    // Vite puts a content hash in every /assets file name, so they never change.
+    OnPrepareResponse = c =>
+    {
+        if (c.Context.Request.Path.StartsWithSegments("/assets"))
+            c.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+    },
+});
 
 app.MapGet("/health", () => Results.Text("ok"));
 Profile.Api.Content.PublicApi.MapPublicApi(app);

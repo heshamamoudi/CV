@@ -38,7 +38,7 @@ public sealed class ContentService(ProfileContext db)
                 profile.Name.For(lang), profile.Headline.For(lang), profile.Eyebrow.For(lang),
                 profile.HeroTitle.For(lang), profile.HeroSubtitle.For(lang), profile.Summary.For(lang),
                 profile.Location.For(lang), profile.About.For(lang), profile.Quote.For(lang),
-                profile.Email, profile.LinkedInUrl, profile.GitHubUrl),
+                profile.Email, SafeHttpUrl(profile.LinkedInUrl), SafeHttpUrl(profile.GitHubUrl)),
             journeyRows.Where(j => j.IsComplete(lang)).Select(j => new JourneyDto(
                 j.Id, j.Title.For(lang), j.Organisation.For(lang), j.Summary.For(lang),
                 j.Highlights.OrderBy(h => h.SortOrder).Select(h => h.For(lang)).ToList(),
@@ -70,6 +70,17 @@ public sealed class ContentService(ProfileContext db)
         var rows = await db.Projects.AsNoTracking().Where(p => p.Visible).OrderBy(p => p.SortOrder).ToListAsync(ct);
         return rows.Select(p => (p.Slug, p.IsComplete(Lang.En), p.IsComplete(Lang.Ar), p.UpdatedAt)).ToList();
     }
+
+    /// <summary>
+    /// A link a visitor can click is http or https, or it is nothing. HTML
+    /// encoding cannot stop "javascript:alert(1)" - it contains nothing to
+    /// encode - and React renders it too. Harmless while only the seed writes
+    /// these; stored XSS the moment admin makes them editable.
+    /// </summary>
+    internal static string SafeHttpUrl(string value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
+            ? value
+            : "";
 
     private static ProjectDto Map(Project p, string lang) => new(
         p.Slug, p.Title.For(lang), p.Summary.For(lang), p.Body.For(lang), p.Technologies, p.Featured,

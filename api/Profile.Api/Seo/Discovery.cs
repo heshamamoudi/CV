@@ -12,13 +12,17 @@ public static class Discovery
     public static void MapDiscovery(this WebApplication app)
     {
         app.MapGet("/robots.txt", (SiteOptions site) => Results.Text(
-            $"User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/admin\nSitemap: {site.Absolute("/sitemap.xml")}\n",
+            site.Indexable
+                ? $"User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/admin\nSitemap: {site.Absolute("/sitemap.xml")}\n"
+                : "User-agent: *\nDisallow: /\n",
             "text/plain; charset=utf-8"));
 
         app.MapGet("/sitemap.xml", async (SiteOptions site, ContentService content, CancellationToken ct) =>
         {
             var home = await content.HomeAsync(Lang.En, ct);
-            var lastmod = (home?.UpdatedAt ?? DateTimeOffset.UtcNow).ToString("yyyy-MM-dd");
+            // No content yet means every listed page would answer 503.
+            if (home is null) return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+            var lastmod = home.UpdatedAt.ToString("yyyy-MM-dd");
             var urlset = new XElement(Sm + "urlset", new XAttribute(XNamespace.Xmlns + "xhtml", Xhtml));
 
             foreach (var suffix in new[] { "", "/journey", "/projects" })

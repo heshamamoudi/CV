@@ -131,15 +131,16 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         b.Append("</section>");
 
         b.Append("<section id=\"contact\"><h2>").Append(E(s("section.contact"))).Append("</h2><address>")
-         .Append("<a href=\"mailto:").Append(E(p.Email)).Append("\">").Append(E(p.Email)).Append("</a> ")
-         .Append("<a href=\"").Append(E(p.LinkedInUrl)).Append("\" rel=\"me\">LinkedIn</a> ")
-         .Append("<a href=\"").Append(E(p.GitHubUrl)).Append("\" rel=\"me\">GitHub</a> ")
-         .Append(E(p.Location)).Append("</address></section>");
+         .Append("<a href=\"mailto:").Append(E(p.Email)).Append("\">").Append(E(p.Email)).Append("</a> ");
+        // Empty when the stored value was not an http(s) URL (ContentService.SafeHttpUrl).
+        if (p.LinkedInUrl.Length > 0) b.Append("<a href=\"").Append(E(p.LinkedInUrl)).Append("\" rel=\"me\">LinkedIn</a> ");
+        if (p.GitHubUrl.Length > 0) b.Append("<a href=\"").Append(E(p.GitHubUrl)).Append("\" rel=\"me\">GitHub</a> ");
+        b.Append(E(p.Location)).Append("</address></section>");
     }
 
     private static void Journey(StringBuilder b, HomeData home, Func<string, string> s)
     {
-        b.Append("<ol>");
+        b.Append("<ol class=\"journey\">");
         foreach (var j in home.Journey)
         {
             b.Append("<li><article><h3>").Append(E(j.Title)).Append("</h3><p>").Append(E(j.Organisation)).Append("</p>")
@@ -190,7 +191,7 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
             ["description"] = home.Profile.Summary,
             ["email"] = "mailto:" + home.Profile.Email,
             ["url"] = site.Absolute($"/{lang}"),
-            ["sameAs"] = new[] { home.Profile.LinkedInUrl, home.Profile.GitHubUrl },
+            ["sameAs"] = new[] { home.Profile.LinkedInUrl, home.Profile.GitHubUrl }.Where(u => u.Length > 0).ToArray(),
             ["knowsAbout"] = home.Technologies.SelectMany(g => g.Items).ToArray(),
             ["worksFor"] = home.Journey.FirstOrDefault(j => j.End is null) is { } current
                 ? new Dictionary<string, object?> { ["@type"] = "Organization", ["name"] = current.Organisation }

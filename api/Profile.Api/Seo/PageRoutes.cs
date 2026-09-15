@@ -53,7 +53,22 @@ public static class PageRoutes
             if (project is null) return await NotFoundAsync(lang, content, renderer, ct);
         }
 
-        var html = renderer.Render(kind, lang, home, project, http.Request.Path.Value!.TrimEnd('/'));
+        /* ONE URL PER PAGE. Routing matches case-insensitively and tolerates a
+           trailing slash, so /en/Journey and /en/journey/ both reached here - and
+           each declared itself canonical, which search engines treat as duplicate
+           content. The canonical path comes from what the page IS, and any other
+           spelling is sent there permanently. */
+        var canonical = kind switch
+        {
+            PageKind.Journey => $"/{lang}/journey",
+            PageKind.Projects => $"/{lang}/projects",
+            PageKind.Project => $"/{lang}/projects/{project!.Slug}",
+            _ => $"/{lang}",
+        };
+        if (!string.Equals(http.Request.Path.Value, canonical, StringComparison.Ordinal))
+            return Results.Redirect(canonical + http.Request.QueryString, permanent: true);
+
+        var html = renderer.Render(kind, lang, home, project, canonical);
         return Results.Content(html, "text/html; charset=utf-8");
     }
 
@@ -69,7 +84,8 @@ public static class PageRoutes
         if (string.IsNullOrWhiteSpace(header)) return Lang.En;
         var best = header.Split(',')
             .Select(part => StringWithQualityHeaderValue.TryParse(part.Trim(), out var v) ? v : null)
-            .Where(v => v is not null)
+            // q=0 means "not acceptable", not "least preferred".
+            .Where(v => v is not null && (v.Quality ?? 1.0) > 0)
             .OrderByDescending(v => v!.Quality ?? 1.0)
             .FirstOrDefault();
         return best?.Value.StartsWith("ar", StringComparison.OrdinalIgnoreCase) == true ? Lang.Ar : Lang.En;
