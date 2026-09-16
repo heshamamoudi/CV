@@ -1,0 +1,37 @@
+.cv-row {
+  margin-block: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+.cv-row > h2 {
+  margin-block: 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.cv-file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin-block: 0.25rem 0.75rem;
+}
+
+.cv-file > span {
+  color: var(--muted);
+}
+
+.cv-warning {
+  color: var(--muted);
+  margin-block: 0.25rem 0.75rem;
+}
+
+.cv-picked {
+  color: var(--ok);
+  margin-block: 0.25rem 0.75rem;
+}
+
+.admin-cv input[type='file'] {
+  padding: 0.375rem;
+}
