@@ -6,7 +6,9 @@ export function readEmbedded(): PageData | null {
   return el?.textContent ? (JSON.parse(el.textContent) as PageData) : null;
 }
 
-const embedded = typeof document !== 'undefined' ? readEmbedded() : null;
+// The admin shell page carries no content, so the public caches ignore it.
+const page = typeof document !== 'undefined' ? readEmbedded() : null;
+const embedded = page && page.kind !== 'admin' ? page : null;
 const homeCache = new Map<Lang, HomeData>();
 if (embedded?.home) homeCache.set(embedded.lang, embedded.home);
 

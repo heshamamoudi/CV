@@ -26,6 +26,7 @@ export interface HomeData {
   updatedAt: string;
 }
 export interface PageData {
-  kind: 'home' | 'journey' | 'projects' | 'project' | 'notfound';
+  // 'admin' is the signed-in admin shell: it carries no content, only its kind.
+  kind: 'home' | 'journey' | 'projects' | 'project' | 'notfound' | 'admin';
   lang: Lang; path: string; home: HomeData | null; project: ProjectDto | null;
 }
