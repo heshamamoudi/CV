@@ -1,0 +1,47 @@
+/* The four short lists: a tab strip, then one editable row per entry. */
+
+.admin-list-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block: 1rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--line);
+}
+
+.admin-list-tabs a[aria-current='page'] {
+  color: var(--fg);
+  text-decoration-thickness: 2px;
+}
+
+.admin-list-row {
+  display: grid;
+  gap: 0.25rem;
+}
+
+/* The page-level save bar sticks to the bottom; a row's belongs to the row. */
+.admin-list-row .admin-savebar,
+.admin-list-new .admin-savebar {
+  position: static;
+  margin-block-start: 0.75rem;
+}
+
+.admin-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-list-new {
+  margin-block-start: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--panel);
+}
+
+.admin-list-new > h2 {
+  margin-block: 0 0.5rem;
+  font-size: 1rem;
+}
