@@ -3,6 +3,14 @@ import { Link, Route, Routes } from 'react-router';
 import { onUnauthorized } from './api';
 import { Shell } from './components/Shell';
 import { useAdminLang } from './useAdminLang';
+import { DashboardScreen } from './screens/DashboardScreen';
+import { ProfileScreen } from './screens/ProfileScreen';
+import { JourneyScreen } from './screens/JourneyScreen';
+import { ProjectsScreen } from './screens/ProjectsScreen';
+import { ListsScreen } from './screens/ListsScreen';
+import { MediaScreen } from './screens/MediaScreen';
+import { CvScreen } from './screens/CvScreen';
+import { SeoScreen } from './screens/SeoScreen';
 import './admin.css';
 
 class Boundary extends Component<{ children: ReactNode; message: string }, { failed: boolean }> {
@@ -20,16 +28,6 @@ class Boundary extends Component<{ children: ReactNode; message: string }, { fai
       </p>
     );
   }
-}
-
-function Placeholder({ title }: { title: string }) {
-  const { t } = useAdminLang();
-  return (
-    <section>
-      <h1>{title}</h1>
-      <p>{t('state.loading')}</p>
-    </section>
-  );
 }
 
 function NotFound() {
@@ -65,14 +63,14 @@ export default function AdminApp() {
     <Shell>
       <Boundary message={t('error.generic')}>
         <Routes>
-          <Route path="/admin" element={<Placeholder title={t('nav.dashboard')} />} />
-          <Route path="/admin/profile" element={<Placeholder title={t('nav.profile')} />} />
-          <Route path="/admin/journey" element={<Placeholder title={t('nav.journey')} />} />
-          <Route path="/admin/projects" element={<Placeholder title={t('nav.projects')} />} />
-          <Route path="/admin/lists" element={<Placeholder title={t('nav.lists')} />} />
-          <Route path="/admin/media" element={<Placeholder title={t('nav.media')} />} />
-          <Route path="/admin/cv" element={<Placeholder title={t('nav.cv')} />} />
-          <Route path="/admin/seo" element={<Placeholder title={t('nav.seo')} />} />
+          <Route path="/admin" element={<DashboardScreen />} />
+          <Route path="/admin/profile" element={<ProfileScreen />} />
+          <Route path="/admin/journey" element={<JourneyScreen />} />
+          <Route path="/admin/projects" element={<ProjectsScreen />} />
+          <Route path="/admin/lists" element={<ListsScreen />} />
+          <Route path="/admin/media" element={<MediaScreen />} />
+          <Route path="/admin/cv" element={<CvScreen />} />
+          <Route path="/admin/seo" element={<SeoScreen />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Boundary>

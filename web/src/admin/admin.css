@@ -155,3 +155,15 @@
   border-radius: 0.375rem;
   background: #0b1016;
 }
+
+.admin-field { margin-block: 0.75rem; }
+.admin-hint { display: block; color: var(--muted); font-size: 0.8125rem; }
+.admin-localized > legend { color: var(--fg); padding-inline: 0.25rem; }
+.admin-toggle { display: flex; align-items: center; gap: 0.5rem; margin-block: 0.75rem; }
+.admin-toggle label { margin: 0; }
+.admin-confirm { display: inline-flex; align-items: center; gap: 0.5rem; }
+.admin-orderable { list-style: none; margin: 0; padding: 0; }
+.admin-orderable > li { display: flex; gap: 0.75rem; padding-block: 0.5rem; border-block-end: 1px solid var(--line); }
+.admin-orderable-controls { display: flex; flex-direction: column; gap: 0.25rem; }
+.admin-orderable-controls button { padding: 0.125rem 0.5rem; }
+.admin-orderable-body { flex: 1; min-inline-size: 0; }
