@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import { ApiError, api } from '../api';
 import { Toggle, TextInput } from '../components/Field';
@@ -77,7 +77,7 @@ const labels = {
   },
 };
 
-const fill = (template: string, name: string) => template.replace('{name}', name);
+const fill = (template: string, name: string) => template.replace('{name}', () => name);
 
 const blank = (): ProjectItem => ({
   id: 0,
@@ -132,10 +132,14 @@ export function ProjectsScreen() {
   }, [load]);
 
   // A link from the dashboard ("the Arabic summary is missing") opens that project.
+  const opened = useRef<string | null>(null);
   useEffect(() => {
-    if (!items || requested === null) return;
+    if (!items || requested === null || opened.current === requested) return;
     const id = Number(requested);
-    if (items.some(project => project.id === id)) setSelectedId(id);
+    if (!items.some(project => project.id === id)) return;
+    // Once. Otherwise every later list change would reclaim the editor from whatever is open.
+    opened.current = requested;
+    setSelectedId(id);
   }, [items, requested]);
 
   const selected = useMemo(
@@ -160,7 +164,11 @@ export function ProjectsScreen() {
     setSaved(false);
   };
 
+  /** Switching away from an edited project loses it just as leaving the page would. */
+  const mayLeaveEditor = () => !editor.dirty || window.confirm(t('guard.leave'));
+
   const open = (project: ProjectItem) => {
+    if (!mayLeaveEditor()) return;
     setDraft(null);
     setSelectedId(project.id);
     setSaveError(null);
@@ -168,6 +176,7 @@ export function ProjectsScreen() {
   };
 
   const create = () => {
+    if (!mayLeaveEditor()) return;
     setSelectedId(null);
     setSaveError(null);
     setSaved(false);

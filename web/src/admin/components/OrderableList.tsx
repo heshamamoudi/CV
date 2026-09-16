@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useAdminLang } from '../useAdminLang';
 
 export interface OrderableListProps<T> {
@@ -24,10 +24,25 @@ function moved(ids: number[], from: number, to: number): number[] {
 export function OrderableList<T>({ items, id, label, renderItem, onReorder }: OrderableListProps<T>) {
   const { t } = useAdminLang();
   const dragging = useRef<number | null>(null);
+  const justMoved = useRef<{ id: number; direction: 'up' | 'down' } | null>(null);
   const ids = items.map(id);
 
-  const move = (from: number, to: number) => {
+  // React moves the row's node, which drops focus to the body. Put it back on
+  // the button that did the moving, so a keyboard can move an item twice.
+  useEffect(() => {
+    const moved = justMoved.current;
+    if (!moved) return;
+    justMoved.current = null;
+    const row = items.find(item => id(item) === moved.id);
+    if (!row) return;
+    const name = `${moved.direction === 'up' ? t('action.up') : t('action.down')}: ${label(row)}`;
+    const button = document.querySelector<HTMLButtonElement>(`button[aria-label="${CSS.escape(name)}"]`);
+    button?.focus();
+  });
+
+  const move = (from: number, to: number, byKeyboard = false) => {
     if (to < 0 || to >= items.length || from === to) return;
+    if (byKeyboard) justMoved.current = { id: ids[from], direction: to < from ? 'up' : 'down' };
     onReorder(moved(ids, from, to));
   };
 
@@ -36,10 +51,6 @@ export function OrderableList<T>({ items, id, label, renderItem, onReorder }: Or
       {items.map((item, index) => (
         <li
           key={id(item)}
-          draggable
-          onDragStart={() => {
-            dragging.current = index;
-          }}
           onDragOver={event => event.preventDefault()}
           onDrop={event => {
             event.preventDefault();
@@ -47,15 +58,21 @@ export function OrderableList<T>({ items, id, label, renderItem, onReorder }: Or
             dragging.current = null;
           }}
         >
-          <div className="admin-orderable-controls">
-            <button type="button" aria-label={`${t('action.up')}: ${label(item)}`} disabled={index === 0} onClick={() => move(index, index - 1)}>
+          <div
+            className="admin-orderable-controls"
+            draggable
+            onDragStart={() => {
+              dragging.current = index;
+            }}
+          >
+            <button type="button" aria-label={`${t('action.up')}: ${label(item)}`} disabled={index === 0} onClick={() => move(index, index - 1, true)}>
               ↑
             </button>
             <button
               type="button"
               aria-label={`${t('action.down')}: ${label(item)}`}
               disabled={index === items.length - 1}
-              onClick={() => move(index, index + 1)}
+              onClick={() => move(index, index + 1, true)}
             >
               ↓
             </button>

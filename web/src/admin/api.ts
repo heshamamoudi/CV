@@ -37,13 +37,23 @@ export async function api<T>(path: string, init: Init = {}): Promise<T> {
   // Never set Content-Type for FormData: only the browser knows the boundary.
   if (hasBody && !init.form) headers['Content-Type'] = 'application/json';
 
-  const reply = await fetch(path, {
-    method,
-    credentials: 'same-origin',
-    signal: init.signal,
-    headers,
-    body: init.form ?? (hasBody ? JSON.stringify(init.body) : undefined),
-  });
+  let reply: Response;
+  try {
+    reply = await fetch(path, {
+      method,
+      credentials: 'same-origin',
+      signal: init.signal,
+      headers,
+      body: init.form ?? (hasBody ? JSON.stringify(init.body) : undefined),
+    });
+  } catch (failure) {
+    // Same-origin fetch only fails like this when the network is gone or the
+    // request was redirected away - which is what an expired Access session
+    // looks like from here.
+    const cancelled = init.signal?.aborted || (failure instanceof Error && failure.name === 'AbortError');
+    if (!cancelled && path.startsWith('/api/admin')) for (const listener of [...expiredListeners]) listener();
+    throw new ApiError(0, failure instanceof Error ? failure.message : 'The server could not be reached.');
+  }
 
   const text = await reply.text();
   let parsed: unknown;

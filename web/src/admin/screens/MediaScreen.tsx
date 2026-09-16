@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react';
 import { api, ApiError } from '../api';
-import { fieldErrors } from '../useEditor';
+import { fieldErrors, useUnsavedGuard } from '../useEditor';
 import { useScreenText } from '../useScreenText';
 import { Confirm } from '../components/Confirm';
 import { LocalizedField } from '../components/LocalizedField';
@@ -126,6 +126,8 @@ export function MediaScreen() {
 
   // Uploads run one after another: resizing three renditions of several large
   // photos at once is how a tab runs out of memory.
+  useUnsavedGuard(Object.keys(drafts).length > 0, t('guard.leave'));
+
   const queue = useRef<Promise<void>>(Promise.resolve());
   const keys = useRef(0);
 
@@ -327,7 +329,7 @@ export function MediaScreen() {
                   {state.busy ? t('state.saving') : t('action.save')}
                 </button>
                 <Confirm
-                  question={s('deleteQuestion').replace('{name}', item.fileName)}
+                  question={s('deleteQuestion').replace('{name}', () => item.fileName)}
                   triggerLabel={t('action.delete')}
                   onConfirm={() => void remove(item)}
                 />

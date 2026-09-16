@@ -176,13 +176,18 @@ export function JourneyScreen() {
     setListMessage(undefined);
   };
 
+  /** Switching away from an edited entry loses it just as leaving the page would. */
+  const mayLeaveEditor = () => !editor.dirty || window.confirm(t('guard.leave'));
+
   const openEntry = (id: number) => {
+    if (!mayLeaveEditor()) return;
     forget();
     setDraft(null);
     setParams({ id: String(id) });
   };
 
   const startNew = () => {
+    if (!mayLeaveEditor()) return;
     forget();
     setParams({});
     setDraft(blank());
@@ -289,7 +294,7 @@ export function JourneyScreen() {
                 {halfWritten(entry) ? <span className="admin-journey-partial">{s('oneLanguage')}</span> : null}
               </p>
               <Confirm
-                question={s('deleteQuestion').replace('{name}', nameOf(entry))}
+                question={s('deleteQuestion').replace('{name}', () => nameOf(entry))}
                 triggerLabel={`${t('action.delete')}: ${nameOf(entry)}`}
                 onConfirm={() => remove(entry)}
               />

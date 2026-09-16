@@ -303,7 +303,7 @@ function ListRow<TRow extends OrderedRow>({ listKey, def, row, onSaved, onDelete
           onSave={save}
           onReset={editor.reset}
         />
-        <Confirm question={s('deleteRow').replace('{name}', named)} triggerLabel={t('action.delete')} onConfirm={remove} />
+        <Confirm question={s('deleteRow').replace('{name}', () => named)} triggerLabel={t('action.delete')} onConfirm={remove} />
       </div>
     </div>
   );

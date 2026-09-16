@@ -91,15 +91,15 @@ afterEach(() => {
 
 describe('every admin screen inside the real shell', () => {
   it.each([
-    ['/admin', 'Dashboard'],
-    ['/admin/profile', 'Profile'],
-    ['/admin/journey', 'Journey'],
-    ['/admin/projects', 'Projects'],
-    ['/admin/lists', 'Lists'],
-    ['/admin/media', 'Media'],
-    ['/admin/cv', 'CV'],
-    ['/admin/seo', 'SEO'],
-  ])('%s opens with its own content and no failure', async (path, nav) => {
+    ['/admin', 'Dashboard', /Lead Application Development/],
+    ['/admin/profile', 'Profile', /هشام العمودي/],
+    ['/admin/journey', 'Journey', /ALTANFEETHI/],
+    ['/admin/projects', 'Projects', /safety-management-system/],
+    ['/admin/lists', 'Lists', /C#/],
+    ['/admin/media', 'Media', /hero\.webp/],
+    ['/admin/cv', 'CV', /cv\.pdf/],
+    ['/admin/seo', 'SEO', /180/],
+  ])('%s shows what the server sent, with nothing broken', async (path, nav, content) => {
     serveEverything();
 
     render(
@@ -108,12 +108,16 @@ describe('every admin screen inside the real shell', () => {
       </MemoryRouter>,
     );
 
-    // The shell is there, the screen is the current page, and nothing shouted.
+    // The shell is there, this screen is the current page, its own data is on
+    // screen, and nothing anywhere said it failed.
     expect(await screen.findByText('owner@example.com')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: nav })).toHaveAttribute('aria-current', 'page');
+    await waitFor(() =>
+      expect(screen.queryAllByText(content).length + screen.queryAllByDisplayValue(content).length).toBeGreaterThan(0),
+    );
     await waitFor(() => expect(screen.queryByText(/Loading…/)).not.toBeInTheDocument());
-    expect(screen.queryByText(/Something went wrong/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/sign in again/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByText(/could not be loaded|Something went wrong|sign in again/i)).not.toBeInTheDocument();
   });
 
   it('shows every screen in Arabic without falling back to English labels', async () => {
@@ -128,6 +132,9 @@ describe('every admin screen inside the real shell', () => {
 
     expect(await screen.findByRole('link', { name: 'المسيرة' })).toHaveAttribute('aria-current', 'page');
     expect(document.documentElement.dir).toBe('rtl');
+    // The screen speaks Arabic too, not just the shell around it.
+    expect(screen.getByRole('main').textContent ?? '').toMatch(/[\u0600-\u06FF]/);
+    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
     expect(screen.queryByText(/Something went wrong/)).not.toBeInTheDocument();
   });
 });

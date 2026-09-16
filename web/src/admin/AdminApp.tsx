@@ -1,5 +1,5 @@
 import { Component, useEffect, useState, type ReactNode } from 'react';
-import { Link, Route, Routes } from 'react-router';
+import { Link, Route, Routes, useLocation } from 'react-router';
 import { onUnauthorized } from './api';
 import { Shell } from './components/Shell';
 import { useAdminLang } from './useAdminLang';
@@ -44,6 +44,7 @@ function NotFound() {
 
 export default function AdminApp() {
   const { t } = useAdminLang();
+  const { pathname } = useLocation();
   const [expired, setExpired] = useState(false);
 
   // Any screen's 401 means the same thing, and it is said once, here.
@@ -61,7 +62,7 @@ export default function AdminApp() {
 
   return (
     <Shell>
-      <Boundary message={t('error.generic')}>
+      <Boundary key={pathname} message={t('error.generic')}>
         <Routes>
           <Route path="/admin" element={<DashboardScreen />} />
           <Route path="/admin/profile" element={<ProfileScreen />} />
