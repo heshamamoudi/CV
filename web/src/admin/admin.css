@@ -1,11 +1,23 @@
 /* The working surface. Same dark ground as the site, none of its ceremony. */
 .admin {
+  --bg: #0b1016;
+  --fg: #e8edf2;
+  --muted: #9aa7b4;
+  --accent: #8fc7ff;
   --panel: #111923;
   --line: #1f2c3a;
   --danger: #ff8f8f;
   --ok: #7fd6a2;
   min-block-size: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  color-scheme: dark;
+  line-height: 1.6;
 }
+
+.admin a { color: var(--accent); }
+.admin p, .admin li { color: var(--muted); }
+.admin h1, .admin h2, .admin h3 { color: var(--fg); }
 
 .admin-header {
   display: flex;

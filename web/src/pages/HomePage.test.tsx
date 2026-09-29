@@ -1,48 +1,126 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
-import { HomePage } from './HomePage';
-import type { HomeData } from '../types';
+import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
+import { HomePage } from "./HomePage";
+import type { HomeData } from "../types";
+
+vi.mock("../components/Sculpture", () => ({ Sculpture: () => null }));
 
 const home: HomeData = {
-  lang: 'ar',
+  lang: "ar",
   profile: {
-    name: 'هشام العمودي', headline: 'قائد تطوير التطبيقات', eyebrow: 'e', heroTitle: 'h', heroSubtitle: 's',
-    summary: 'ملخص', location: 'الرياض', about: 'نبذة', quote: 'q',
-    email: 'a@b.c', linkedInUrl: 'https://l', gitHubUrl: 'https://g',
+    name: "هشام العمودي",
+    headline: "قائد تطوير التطبيقات",
+    eyebrow: "e",
+    heroTitle: "h",
+    heroSubtitle: "s",
+    summary: "ملخص",
+    location: "الرياض",
+    about: "نبذة",
+    quote: "q",
+    email: "a@b.c",
+    linkedInUrl: "https://l",
+    gitHubUrl: "https://g",
   },
-  journey: [{ id: 1, title: 'قائد تطوير التطبيقات', organisation: 'شركة التنفيذي', summary: '', highlights: ['قيادة'], start: '2025-07', end: null, kind: 'main', seniority: 5 }],
+  journey: [
+    {
+      id: 1,
+      title: "قائد تطوير التطبيقات",
+      organisation: "شركة التنفيذي",
+      summary: "",
+      highlights: ["قيادة"],
+      start: "2025-07",
+      end: null,
+      kind: "main",
+      seniority: 5,
+    },
+  ],
   featuredProject: null,
   projects: [],
-  technologies: [{ category: 'قواعد البيانات', items: ['PostgreSQL'] }],
-  certificates: [{ title: 'مطور JavaScript متكامل', issuer: 'Udacity', issuedOn: '2022-09' }],
-  education: [{ degree: 'بكالوريوس تقنية المعلومات', institution: 'جامعة الملك عبدالعزيز' }],
-  languages: [{ name: 'العربية', level: 'اللغة الأم' }],
-  updatedAt: '2026-09-15T00:00:00Z',
+  technologies: [{ category: "قواعد البيانات", items: ["PostgreSQL"] }],
+  certificates: [
+    { title: "مطور JavaScript متكامل", issuer: "Udacity", issuedOn: "2022-09" },
+  ],
+  education: [
+    {
+      degree: "بكالوريوس تقنية المعلومات",
+      institution: "جامعة الملك عبدالعزيز",
+    },
+  ],
+  languages: [{ name: "العربية", level: "اللغة الأم" }],
+  updatedAt: "2026-09-15T00:00:00Z",
 };
 
-describe('HomePage', () => {
-  it('renders the name as the only h1, the journey and the technologies', () => {
-    render(<MemoryRouter><HomePage home={home} /></MemoryRouter>);
+describe("HomePage", () => {
+  it("navigates between chapters while keeping profile, journey and technology content reachable", () => {
+    render(
+      <MemoryRouter initialEntries={["/ar"]}>
+        <HomePage home={home} />
+      </MemoryRouter>,
+    );
 
-    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('هشام العمودي');
-    expect(screen.getByText('شركة التنفيذي')).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("هشام");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "العمودي",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "03 المسيرة" }));
+    expect(
+      screen.getByRole("heading", { name: "قائد تطوير التطبيقات" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/حتى الآن/)).toBeInTheDocument();
-    expect(screen.getByText('PostgreSQL')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "04 نبذة" }));
+    fireEvent.click(screen.getByRole("button", { name: "التقنيات" }));
+    expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
   });
 
-  it('keeps the certificates, education and languages the server rendered', () => {
-    render(<MemoryRouter><HomePage home={home} /></MemoryRouter>);
+  it("keeps the certificates, education and languages the server rendered", () => {
+    render(
+      <MemoryRouter initialEntries={["/ar#about"]}>
+        <HomePage home={home} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "الخلفية" }));
 
-    expect(screen.getByText('مطور JavaScript متكامل — Udacity')).toBeInTheDocument();
-    expect(screen.getByText('بكالوريوس تقنية المعلومات — جامعة الملك عبدالعزيز')).toBeInTheDocument();
-    expect(screen.getByText('العربية — اللغة الأم')).toBeInTheDocument();
+    expect(
+      screen.getByText("مطور JavaScript متكامل — Udacity"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("بكالوريوس تقنية المعلومات — جامعة الملك عبدالعزيز"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("العربية — اللغة الأم")).toBeInTheDocument();
   });
 
-  it('does not render a link the server blanked', () => {
-    render(<MemoryRouter><HomePage home={{ ...home, profile: { ...home.profile, linkedInUrl: '' } }} /></MemoryRouter>);
+  it("does not render a link the server blanked", () => {
+    render(
+      <MemoryRouter initialEntries={["/ar#contact"]}>
+        <HomePage
+          home={{ ...home, profile: { ...home.profile, linkedInUrl: "" } }}
+        />
+      </MemoryRouter>,
+    );
 
-    expect(screen.queryByText('LinkedIn')).not.toBeInTheDocument();
-    expect(screen.getByText('GitHub')).toBeInTheDocument(); // not vacuous
+    expect(
+      screen.queryByRole("link", { name: /LinkedIn/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /GitHub/ })).toBeInTheDocument();
+  });
+
+  it("supports keyboard chapter navigation and pauses motion", () => {
+    render(
+      <MemoryRouter initialEntries={["/ar"]}>
+        <HomePage home={home} />
+      </MemoryRouter>,
+    );
+    fireEvent.keyDown(window, { key: "End" });
+    expect(screen.getByRole("link", { name: /a@b.c/ })).toHaveAttribute(
+      "href",
+      "mailto:a@b.c",
+    );
+    fireEvent.click(screen.getByRole("button", { name: /إيقاف الحركة/ }));
+    expect(
+      screen.getByRole("button", { name: /تشغيل الحركة/ }),
+    ).toHaveAttribute("aria-pressed", "true");
+    fireEvent.keyDown(window, { key: "Home" });
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("هشام");
   });
 });

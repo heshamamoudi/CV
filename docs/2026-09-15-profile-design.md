@@ -1,5 +1,10 @@
 # heshamamoudi.com — design
 
+**Public visual design superseded 2026-09-30:** see
+`2026-09-30-immersive-design.md` for the implemented chapter-based experience.
+The buildings / skyline direction below is historical. The backend and admin
+architecture remains applicable.
+
 Status: **agreed in conversation 2026-09-15, awaiting review of this document.**
 Owner: Hesham Amoudi. Replaces the existing Create React App + Firebase CV in this repository.
 
