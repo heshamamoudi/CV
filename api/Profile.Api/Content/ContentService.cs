@@ -23,6 +23,7 @@ public sealed class ContentService(ProfileContext db)
         var certificates = await db.Certificates.AsNoTracking().OrderBy(c => c.SortOrder).ToListAsync(ct);
         var education = await db.Education.AsNoTracking().OrderBy(e => e.SortOrder).ToListAsync(ct);
         var languages = await db.SpokenLanguages.AsNoTracking().OrderBy(l => l.SortOrder).ToListAsync(ct);
+        var hasCv = await db.CvFiles.AsNoTracking().AnyAsync(c => c.Lang == "en" || c.Lang == "ar", ct);
 
         var shownProjects = projectRows.Where(p => p.IsComplete(lang)).ToList();
         var images = await ImagesAsync(
@@ -60,7 +61,9 @@ public sealed class ContentService(ProfileContext db)
                 .Select(e => new EducationDto(e.Degree.For(lang), e.Institution.For(lang))).ToList(),
             languages.Where(l => l.Name.Has(lang) && l.Level.Has(lang))
                 .Select(l => new LanguageDto(l.Name.For(lang), l.Level.For(lang))).ToList(),
-            updated);
+            updated,
+            hasCv,
+            profile.Name.En);
     }
 
     public async Task<ProjectDto?> ProjectAsync(string lang, string slug, CancellationToken ct = default)

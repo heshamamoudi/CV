@@ -11,7 +11,7 @@ import type { ProfileEdit } from '../types';
 const labels = {
   en: {
     title: 'Profile & hero',
-    lead: 'The person the site is about, and the first screen a visitor sees.',
+    lead: 'Edit the introduction, perspective and contact chapters. Save to publish both languages.',
     who: 'Who you are',
     hero: 'The first screen',
     story: 'The longer story',
@@ -31,13 +31,17 @@ const labels = {
     gitHub: 'GitHub',
     heroImage: 'Hero image',
     portrait: 'Portrait',
-    eyebrowHint: 'The small line above the hero title.',
-    emailHint: 'Where the contact form sends its messages.',
+    eyebrowHint: 'The small line at the top of every home chapter, beside your location.',
+    titleHint: 'The introduction line above your large name. Keep it short for mobile.',
+    nameHint: 'Your large introduction title, header identity and opening animation.',
+    storyHint: 'Shown in The person → Perspective. Technologies, certificates and education are managed in Lists.',
+    picturesHint: 'The portrait appears in Perspective. The hero image is the default link-sharing image; the opening uses the 3D sculpture.',
+    emailHint: 'The address opened by the contact chapter’s email links.',
     urlHint: 'A full address, starting with https://. Leave empty to hide the link.',
   },
   ar: {
     title: 'الملف الشخصي والواجهة',
-    lead: 'صاحب الموقع، وأول شاشة يراها الزائر.',
+    lead: 'حرّر فصول المقدمة والرؤية والتواصل. انشر المحتوى باللغتين بالضغط على حفظ.',
     who: 'من أنت',
     hero: 'الشاشة الأولى',
     story: 'التفاصيل',
@@ -57,8 +61,12 @@ const labels = {
     gitHub: 'غيت هَب',
     heroImage: 'صورة الواجهة',
     portrait: 'الصورة الشخصية',
-    eyebrowHint: 'السطر الصغير فوق عنوان الواجهة.',
-    emailHint: 'العنوان الذي ترسل إليه رسائل نموذج التواصل.',
+    eyebrowHint: 'السطر الصغير أعلى فصول الصفحة الرئيسية، بجانب موقعك.',
+    titleHint: 'السطر التعريفي فوق اسمك الكبير. اجعله مختصراً ليناسب الهاتف.',
+    nameHint: 'اسمك الكبير في المقدمة، وهوية رأس الصفحة، وحركة الافتتاح.',
+    storyHint: 'تظهر في نبذة ← الرؤية. تُدار التقنيات والشهادات والتعليم من القوائم.',
+    picturesHint: 'تظهر الصورة الشخصية في الرؤية. صورة الواجهة هي الصورة الافتراضية عند مشاركة الرابط؛ الافتتاح يستخدم المجسّم ثلاثي الأبعاد.',
+    emailHint: 'العنوان الذي تفتحه روابط البريد في فصل التواصل.',
     urlHint: 'عنوان كامل يبدأ بـ https://. اتركه فارغاً لإخفاء الرابط.',
   },
 };
@@ -154,6 +162,7 @@ export function ProfileScreen() {
       <p className="admin-hint">{s('lead')}</p>
 
       <h2>{s('who')}</h2>
+      <p className="admin-hint">{s('nameHint')}</p>
       <LocalizedField
         name="name"
         label={s('name')}
@@ -195,6 +204,7 @@ export function ProfileScreen() {
         value={value.heroTitle}
         onChange={next => editor.set({ heroTitle: next })}
         error={error}
+        hint={s('titleHint')}
         maxLength={limits.heroTitle}
       />
       <LocalizedField
@@ -209,6 +219,7 @@ export function ProfileScreen() {
       />
 
       <h2>{s('story')}</h2>
+      <p className="admin-hint">{s('storyHint')}</p>
       <LocalizedField
         name="summary"
         label={s('summary')}
@@ -275,6 +286,7 @@ export function ProfileScreen() {
       </div>
 
       <h2>{s('pictures')}</h2>
+      <p className="admin-hint">{s('picturesHint')}</p>
       <div className="admin-grid">
         <MediaPicker label={s('heroImage')} value={value.heroMediaId} onChange={id => editor.set({ heroMediaId: id })} />
         <MediaPicker label={s('portrait')} value={value.portraitMediaId} onChange={id => editor.set({ portraitMediaId: id })} />

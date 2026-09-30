@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 /* ------------------------------------------------------------- healthcheck --
  * The runtime image has no curl or wget, so the container's health probe is
@@ -34,6 +35,23 @@ _ = Required("CloudflareAccess:AllowedEmails", "CloudflareAccess__AllowedEmails"
 
 builder.Services.AddDbContext<Profile.Api.Data.ProfileContext>(o => o.UseNpgsql(connectionString, n =>
     n.ExecutionStrategy(d => new Profile.Api.Data.RetryingStrategy(d))));
+builder.Services.AddHostedService<Profile.Api.Content.ContactMessageRetentionService>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("contact", _ => RateLimitPartition.GetFixedWindowLimiter("site-contact", _ => new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = 10,
+        Window = TimeSpan.FromMinutes(1),
+        QueueLimit = 0,
+        AutoReplenishment = true,
+    }));
+    options.OnRejected = (context, _) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.Headers.RetryAfter = "60";
+        return ValueTask.CompletedTask;
+    };
+});
 builder.Services.AddScoped<Profile.Api.Content.ContentService>();
 builder.Services.AddSingleton(new Profile.Api.Seo.SiteOptions(
     baseUrl.TrimEnd('/'),
@@ -74,6 +92,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.UseMiddleware<Profile.Api.Admin.Access.SameOriginMiddleware>();
 
 /* HLT-1: healthy means "can actually serve", and every page needs the database.

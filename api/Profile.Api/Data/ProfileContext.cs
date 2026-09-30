@@ -20,6 +20,8 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
     public DbSet<PageSeo> PageSeo => Set<PageSeo>();
     public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
     public DbSet<ProjectSlugRedirect> ProjectSlugRedirects => Set<ProjectSlugRedirect>();
+    public DbSet<ContentRevision> ContentRevisions => Set<ContentRevision>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -67,12 +69,25 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
         });
         b.Entity<MediaRendition>(e => e.HasIndex(x => new { x.MediaId, x.Width }).IsUnique());
         b.Entity<CvFile>(e => e.HasKey(x => x.Lang));
+        b.Entity<ContentRevision>(e => e.HasKey(x => x.Key));
         b.Entity<PageSeo>(e =>
         {
             e.HasKey(x => x.Key); Text(e, x => x.Title); Text(e, x => x.Description);
             ImageReference(e, x => x.ShareMediaId);
         });
         b.Entity<SiteSettings>(e => e.Property(x => x.Id).ValueGeneratedNever());
+        b.Entity<ContactMessage>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.RequestId).IsUnique();
+            e.HasIndex(x => x.ReceivedAt);
+            e.Property(x => x.Name).HasMaxLength(120).IsRequired();
+            e.Property(x => x.Email).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Subject).HasMaxLength(160).IsRequired();
+            e.Property(x => x.Body).HasMaxLength(4000).IsRequired();
+            e.Property(x => x.Lang).HasMaxLength(2).IsRequired();
+            e.Property(x => x.Status).HasMaxLength(16).IsRequired();
+        });
         b.Entity<ProjectSlugRedirect>(e =>
         {
             e.HasKey(x => x.OldSlug);

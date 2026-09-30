@@ -51,6 +51,16 @@ const home: HomeData = {
 };
 
 describe("HomePage", () => {
+  it('renders the profile fields edited in admin and exposes only an available CV', () => {
+    const { rerender } = render(<MemoryRouter initialEntries={['/ar']}><HomePage home={home} /></MemoryRouter>);
+    expect(screen.getByText(home.profile.eyebrow)).toBeInTheDocument();
+    expect(screen.getByText(home.profile.heroTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '05 لنتحدث' }));
+    expect(screen.queryByRole('link', { name: /تحميل السيرة/ })).not.toBeInTheDocument();
+    rerender(<MemoryRouter initialEntries={['/ar']}><HomePage home={{ ...home, hasCv: true }} /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: /تحميل السيرة/ })).toHaveAttribute('href', '/ar/cv');
+  });
+
   it("navigates between chapters while keeping profile, journey and technology content reachable", () => {
     render(
       <MemoryRouter initialEntries={["/ar"]}>

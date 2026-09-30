@@ -7,6 +7,23 @@ namespace Profile.Api.Tests;
 
 public class CvTests
 {
+    [Fact]
+    public async Task Public_cv_availability_tracks_upload_fallback_and_deletion()
+    {
+        var (app, admin) = await AdminTestApp.CreateAsync();
+        var visitor = app.CreateClient();
+        var empty = await visitor.GetFromJsonAsync<JsonObject>("/api/public/en/home");
+        Assert.False(empty!["hasCv"]!.GetValue<bool>());
+        await admin.PutAsync("/api/admin/cv/en", File(CvFixtures.Pdf(300)));
+        foreach (var lang in new[] { "en", "ar" })
+        {
+            var uploaded = await visitor.GetFromJsonAsync<JsonObject>($"/api/public/{lang}/home");
+            Assert.True(uploaded!["hasCv"]!.GetValue<bool>());
+        }
+        await admin.DeleteAsync("/api/admin/cv/en");
+        var deleted = await visitor.GetFromJsonAsync<JsonObject>("/api/public/ar/home");
+        Assert.False(deleted!["hasCv"]!.GetValue<bool>());
+    }
     private static MultipartFormDataContent File(byte[] bytes)
     {
         var part = new ByteArrayContent(bytes);

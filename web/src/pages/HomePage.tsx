@@ -9,6 +9,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router";
 import type { HomeData } from "../types";
 import { useStrings } from "../i18n/useStrings";
+import { ContactForm } from "../components/ContactForm";
 
 const Sculpture = lazy(() =>
   import("../components/Sculpture").then((m) => ({ default: m.Sculpture })),
@@ -31,7 +32,7 @@ export function HomePage({ home }: { home: HomeData }) {
       typeof matchMedia === "function" &&
       matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
-  const [projectIndex, setProjectIndex] = useState(0),
+  const [projectIndex, setProjectIndex] = useState(() => Math.max(0, home.projects.findIndex(item => item.slug === home.featuredProject?.slug))),
     [roleIndex, setRoleIndex] = useState(0),
     [aboutTab, setAboutTab] = useState(0);
   const project =
@@ -74,6 +75,7 @@ export function HomePage({ home }: { home: HomeData }) {
       touchCanUp = false,
       touchCanDown = false;
     const canScroll = (target: EventTarget | null, delta: number) => {
+      if (target instanceof Element && target.closest("[data-contact-form]")) return true;
       let region =
         target instanceof Element
           ? target.closest<HTMLElement>("[data-scroll-region]")
@@ -147,6 +149,7 @@ export function HomePage({ home }: { home: HomeData }) {
     };
     const end = (e: TouchEvent) => {
       if (document.querySelector("[data-splash]")) return;
+      if (e.target instanceof Element && e.target.closest("[data-contact-form]")) return;
       const dy = touchY - e.changedTouches[0].clientY,
         dx = touchX - e.changedTouches[0].clientX;
       if (
@@ -184,7 +187,7 @@ export function HomePage({ home }: { home: HomeData }) {
           <div className="sculpture placeholder-sculpture" aria-hidden="true" />
         }
       >
-        <Sculpture chapter={chapter} paused={paused} rtl={ar} />
+        <Sculpture chapter={chapter} paused={paused} rtl={ar} journey={home.journey} technologies={home.technologies} />
       </Suspense>
       <div className="chapter-watermark" aria-hidden="true">
         {["CREATE", "SOLVE", "EVOLVE", "CONNECT", "HELLO"][chapter]}
@@ -192,25 +195,20 @@ export function HomePage({ home }: { home: HomeData }) {
       <div className="scene-meta">
         <span className="eyebrow">
           <i />
-          {copy(
-            "Independent thinking. Lasting impact.",
-            "فكر مستقل. أثر يبقى.",
-          )}
+          {p.eyebrow}
         </span>
         <span className="location-label">{p.location}</span>
       </div>
       <section
         className="chapter-panel"
+        data-scroll-region={chapter === 4 ? "" : undefined}
         key={chapter}
         aria-label={labels[chapter]}
       >
         {chapter === 0 && (
           <div className="intro-content">
             <p className="section-kicker">
-              {copy(
-                "Developer. Systems thinker. Team leader.",
-                "مطور. مصمم أنظمة. قائد فريق.",
-              )}
+              {p.heroTitle}
             </p>
             <h1 className="hero-name">
               <span>{name[0]}</span>
@@ -382,8 +380,9 @@ export function HomePage({ home }: { home: HomeData }) {
             <div className="about-body" data-scroll-region key={aboutTab}>
               {aboutTab === 0 && (
                 <>
+                  {p.portrait && <img className="profile-portrait" src={p.portrait.src} srcSet={p.portrait.srcSet} sizes="120px" width={p.portrait.width} height={p.portrait.height} alt={p.portrait.alt} loading="lazy" />}
                   <p className="about-lead">{p.about}</p>
-                  <blockquote>“{p.quote}”</blockquote>
+                  {p.quote && <blockquote>“{p.quote}”</blockquote>}
                   <p className="profile-summary">{p.summary}</p>
                 </>
               )}
@@ -407,6 +406,7 @@ export function HomePage({ home }: { home: HomeData }) {
                   {home.certificates.map((c) => (
                     <p key={c.title}>
                       {c.title} — {c.issuer}
+                      {c.issuedOn && <time className="credential-date" dateTime={c.issuedOn}>{c.issuedOn}</time>}
                     </p>
                   ))}
                   <h3>{t("section.education")}</h3>
@@ -428,42 +428,25 @@ export function HomePage({ home }: { home: HomeData }) {
         )}
         {chapter === 4 && (
           <div className="contact-content">
-            <p className="section-kicker">04 / {t("section.contact")}</p>
-            <h2 className="contact-title">
-              {copy("Great things", "الأشياء الرائعة")}
-              <br />
-              {copy("start with", "تبدأ بـ")}
-              <br />
-              <a href={`mailto:${p.email}`}>
-                {copy("hello.", "مرحباً.")}
-                <span aria-hidden="true">↗</span>
-              </a>
-            </h2>
-            <div className="contact-bottom">
-              <a className="contact-email" href={`mailto:${p.email}`}>
-                {p.email}
-              </a>
-              <div className="social-links">
-                {p.linkedInUrl && (
-                  <a
-                    href={p.linkedInUrl}
-                    rel="me noopener noreferrer"
-                    target="_blank"
-                  >
-                    LinkedIn ↗
-                  </a>
-                )}
-                {p.gitHubUrl && (
-                  <a
-                    href={p.gitHubUrl}
-                    rel="me noopener noreferrer"
-                    target="_blank"
-                  >
-                    GitHub ↗
-                  </a>
-                )}
+            <div className="contact-intro">
+              <p className="section-kicker">04 / {t("section.contact")}</p>
+              <div className="contact-art-space" aria-hidden="true"><span>04 — 05</span></div>
+              <h2 className="contact-title">
+                {copy("Let’s start", "لنتحدث")}
+                <br />
+                <em>{copy("a conversation.", "عن فكرتك.")}</em>
+              </h2>
+              <p className="contact-lead">{copy("Have a project or an idea in mind? Send a note and I’ll get back to you.", "هل لديك مشروع أو فكرة؟ أرسل رسالة وسأعود إليك.")}</p>
+              <div className="contact-bottom">
+                <a className="contact-email" href={`mailto:${p.email}`}>{p.email}</a>
+                <div className="social-links">
+                  {home.hasCv && <a href={`/${home.lang}/cv`}>{t("hero.cv")} ↓</a>}
+                  {p.linkedInUrl && <a href={p.linkedInUrl} rel="me noopener noreferrer" target="_blank">LinkedIn ↗</a>}
+                  {p.gitHubUrl && <a href={p.gitHubUrl} rel="me noopener noreferrer" target="_blank">GitHub ↗</a>}
+                </div>
               </div>
             </div>
+            <ContactForm lang={home.lang} />
           </div>
         )}
       </section>

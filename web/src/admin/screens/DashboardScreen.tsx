@@ -183,6 +183,18 @@ export function DashboardScreen() {
         {s('publicLead')} <a href="/en">{s('publicEn')}</a> · <a href="/ar">{s('publicAr')}</a>
       </p>
 
+      <div className="admin-chapters">
+        {[
+          { n: '01', title: lang === 'ar' ? 'المقدمة' : 'Introduction', text: lang === 'ar' ? 'الاسم والعنوان والنص التعريفي والموقع.' : 'Your name, opening line, introduction and location.', edit: '/admin/profile', view: '', action: lang === 'ar' ? 'تحرير المقدمة' : 'Edit introduction' },
+          { n: '03', title: lang === 'ar' ? 'المسيرة المهنية' : 'Career journey', text: lang === 'ar' ? 'الخبرات والتواريخ والإنجازات. سنوات المجسّم تتبع الخبرات المنشورة.' : 'Roles, dates and achievements. Sculpture milestones follow published career dates.', edit: '/admin/journey', view: '#journey', action: lang === 'ar' ? 'تحرير الخبرات' : 'Edit experience' },
+          { n: '04', title: lang === 'ar' ? 'نبذة وخلفية' : 'Perspective & background', text: lang === 'ar' ? 'التقنيات والشهادات والتعليم واللغات، في تبويبات فصل نبذة.' : 'Technologies, certificates, education and languages, inside The person chapter.', edit: '/admin/lists', view: '#about', action: lang === 'ar' ? 'تحرير الخلفية' : 'Edit background' },
+          { n: '05', title: lang === 'ar' ? 'التواصل والسيرة الذاتية' : 'Contact & CV', text: lang === 'ar' ? 'راجع الرسائل الواردة، وأدر روابط التواصل والسيرة الذاتية.' : 'Read contact form messages. Email and social links are managed in Profile; manage the CV separately.', edit: '/admin/messages', cv: '/admin/cv', view: '#contact', action: lang === 'ar' ? 'فتح البريد الوارد' : 'Open inbox' },
+        ].map(card => <article className="admin-chapter-card" key={card.n}>
+          <span>{card.n} / 05</span><h3>{card.title}</h3><p>{card.text}</p>
+          <div><Link to={card.edit}>{card.action}</Link>{'cv' in card ? <Link to={card.cv!}>{lang === 'ar' ? 'إدارة السيرة الذاتية' : 'Manage CV'}</Link> : null}<a href={`/${lang}${card.view}`} target="_blank" rel="noopener noreferrer">{lang === 'ar' ? 'عرض الفصل ↗' : 'View chapter ↗'}</a></div>
+        </article>)}
+      </div>
+
       {failure ? (
         <p className="admin-dash-failed">
           <span className="admin-error" role="alert">

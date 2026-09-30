@@ -52,7 +52,7 @@
   padding-inline-start: 0.625rem;
   border: 1px solid var(--line);
   border-radius: 1rem;
-  background: #16212d;
+  background: var(--button);
 }
 
 .projects-chips button {

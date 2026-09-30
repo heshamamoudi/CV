@@ -16,7 +16,7 @@ function WithHome({ kind, render }: { kind: PageData['kind']; render: (home: Hom
   const home = useHome(safe);
   usePageTitle(home ? pageTitle(isLang(lang) ? kind : 'notfound', safe, home, null) : null);
   if (!isLang(lang)) return <Layout lang="en"><NotFoundPage lang="en" /></Layout>;
-  return <Layout lang={safe}>{home ? render(home) : null}</Layout>;
+  return <Layout lang={safe} name={home?.profile.name}>{home ? render(home) : null}</Layout>;
 }
 
 function ProjectRoute() {
@@ -26,7 +26,7 @@ function ProjectRoute() {
   const home = useHome(safe);
   usePageTitle(home && project !== undefined ? pageTitle(project ? 'project' : 'notfound', safe, home, project) : null);
   return (
-    <Layout lang={safe}>
+    <Layout lang={safe} name={home?.profile.name}>
       {project === undefined ? null : project ? <ProjectPage project={project} /> : <NotFoundPage lang={safe} />}
     </Layout>
   );
@@ -38,7 +38,7 @@ function NotFoundRoute() {
   const lang: Lang = isLang(first) ? first : 'en';
   const home = useHome(lang);
   usePageTitle(home ? pageTitle('notfound', lang, home, null) : null);
-  return <Layout lang={lang}><NotFoundPage lang={lang} /></Layout>;
+  return <Layout lang={lang} name={home?.profile.name}><NotFoundPage lang={lang} /></Layout>;
 }
 
 export function App() {

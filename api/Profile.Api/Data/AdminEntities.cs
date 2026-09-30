@@ -1,5 +1,12 @@
 namespace Profile.Api.Data;
 
+/// <summary>Applied editorial updates. They never run again after an owner's subsequent edits.</summary>
+public sealed class ContentRevision
+{
+    public string Key { get; set; } = "";
+    public DateTimeOffset AppliedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
 /// <summary>Content with an explicit position the owner controls.</summary>
 public interface IOrdered
 {
@@ -56,6 +63,20 @@ public sealed class SiteSettings
     public string SearchConsoleToken { get; set; } = "";
     public string NotificationEmail { get; set; } = "";
     public int MessageRetentionDays { get; set; } = 180;
+}
+
+/// <summary>A message submitted through the public contact form.</summary>
+public sealed class ContactMessage
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RequestId { get; set; }
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string Subject { get; set; } = "";
+    public string Body { get; set; } = "";
+    public string Lang { get; set; } = "en";
+    public string Status { get; set; } = "new";
+    public DateTimeOffset ReceivedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
 /// <summary>A project's previous slug, so old links 301 to the current one.</summary>

@@ -1,17 +1,12 @@
 import { useEffect } from 'react';
-import strings from './i18n/strings.json';
 import type { HomeData, Lang, PageData, ProjectDto } from './types';
 
-/** Mirrors PageRenderer.Render's titles exactly. */
+/** Public routes share the portfolio's single site title. */
 export function pageTitle(kind: PageData['kind'], lang: Lang, home: HomeData | null, project: ProjectDto | null): string {
-  const name = home?.profile.name ?? '';
-  switch (kind) {
-    case 'home': return `${name} — ${home?.profile.headline ?? ''}`;
-    case 'journey': return `${strings[lang]['page.journey']} — ${name}`;
-    case 'projects': return `${strings[lang]['page.projects']} — ${name}`;
-    case 'project': return `${project?.title ?? ''} — ${name}`;
-    default: return `${strings[lang]['notFound.title']} — ${name}`;
-  }
+  void kind;
+  void lang;
+  void project;
+  return home?.siteTitle || 'Hesham Amoudi';
 }
 
 /** Keeps the tab title right on client-side navigation. */

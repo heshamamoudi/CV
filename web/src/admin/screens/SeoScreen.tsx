@@ -16,11 +16,11 @@ const labels = {
     home: 'Home page',
     journey: 'Journey page',
     projects: 'Projects page',
-    pageTitle: 'Page title',
+    pageTitle: 'Link-sharing title',
     pageDescription: 'Page description',
     shareImage: 'Share image',
     emptyNote: 'Leave these empty and the page uses its own text.',
-    titleHint: 'At most 70 characters.',
+    titleHint: 'At most 70 characters. This sets the title shared with links; the browser tab uses the English profile name.',
     descriptionHint: 'At most 200 characters.',
     settings: 'Analytics and settings',
     measurement: 'Google Analytics measurement id',
@@ -29,20 +29,21 @@ const labels = {
     propertyHint: 'GA4 admin → property settings, the numeric id under the property name.',
     token: 'Search Console verification token',
     tokenHint: "Search Console's HTML tag method: the content value only, not the whole tag.",
-    email: 'Where to send message notifications',
+    email: 'Notification email address',
     retention: 'Delete messages after (days)',
     retentionHint: 'Between 30 and 3650 days.',
+    messagesHint: 'Inbox messages are retained for the selected number of days (default 180). Email delivery is not configured; replies open your mail app.',
   },
   ar: {
     lead: 'ما تعرضه محركات البحث والروابط المشاركة. كل لوحة تُحفظ وحدها.',
     home: 'الصفحة الرئيسية',
     journey: 'صفحة المسيرة',
     projects: 'صفحة المشاريع',
-    pageTitle: 'عنوان الصفحة',
+    pageTitle: 'عنوان المشاركة عبر الروابط',
     pageDescription: 'وصف الصفحة',
     shareImage: 'صورة المشاركة',
     emptyNote: 'اترك الحقول فارغة لتستخدم الصفحة نصّها الخاص.',
-    titleHint: 'بحد أقصى 70 حرفاً.',
+    titleHint: 'بحد أقصى 70 حرفاً. يحدد العنوان عند مشاركة الروابط؛ ويستخدم تبويب المتصفح الاسم الإنجليزي في الملف الشخصي.',
     descriptionHint: 'بحد أقصى 200 حرف.',
     settings: 'التحليلات والإعدادات',
     measurement: 'معرّف قياس Google Analytics',
@@ -51,9 +52,10 @@ const labels = {
     propertyHint: 'إدارة GA4 ← إعدادات الخاصية، المعرّف الرقمي تحت اسم الخاصية.',
     token: 'رمز التحقق في Search Console',
     tokenHint: 'طريقة وسم HTML في Search Console: قيمة content فقط، لا الوسم كاملاً.',
-    email: 'عنوان إشعارات الرسائل',
+    email: 'عنوان بريد الإشعارات',
     retention: 'حذف الرسائل بعد (أيام)',
     retentionHint: 'بين 30 و3650 يوماً.',
+    messagesHint: 'تُحتفظ برسائل الصندوق للمدة المحددة (180 يوماً افتراضياً). إرسال الإشعارات بالبريد غير مهيأ؛ ويفتح الرد تطبيق البريد لديك.',
   },
 };
 
@@ -205,6 +207,7 @@ function SettingsPanel({ loaded, onDirty, text }: { loaded: SettingsView | null;
         error={field('searchConsoleToken')}
         onChange={searchConsoleToken => editor.set({ searchConsoleToken })}
       />
+      <p className="admin-hint">{s('messagesHint')}</p>
       <TextInput
         id="seo-notification-email"
         label={s('email')}

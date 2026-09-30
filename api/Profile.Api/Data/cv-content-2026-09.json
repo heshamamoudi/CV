@@ -1,0 +1,338 @@
+{
+  "profile": {
+    "eyebrow": {
+      "before": {
+        "en": "Enterprise applications & digital transformation",
+        "ar": "تطبيقات المؤسسات والتحول الرقمي"
+      },
+      "after": {
+        "en": "Enterprise systems. Real-world impact.",
+        "ar": "أنظمة مؤسسية. أثر في الواقع."
+      }
+    },
+    "heroTitle": {
+      "before": {
+        "en": "Technology that builds a safer, simpler future.",
+        "ar": "تقنية تبني مستقبلاً أكثر أماناً وبساطة."
+      },
+      "after": {
+        "en": "Complex operations. Clear solutions.",
+        "ar": "عمليات معقّدة. حلول واضحة."
+      }
+    },
+    "heroSubtitle": {
+      "before": {
+        "en": "I design and build secure, scalable and compliant digital solutions that make complex operations simpler.",
+        "ar": "أصمّم وأبني حلولاً رقمية آمنة وقابلة للتوسع ومتوافقة مع المعايير، تجعل العمليات المعقدة أبسط."
+      },
+      "after": {
+        "en": "I lead teams and build enterprise applications that turn complex workflows into simpler everyday operations.",
+        "ar": "أقود فرق التطوير وأبني تطبيقات مؤسسية تحوّل إجراءات العمل المعقّدة إلى عمليات يومية أبسط."
+      }
+    },
+    "summary": {
+      "before": {
+        "en": "Lead Application Development professional with 7+ years of experience in ERP systems, digital transformation and enterprise application development. Expert in .NET, Angular, Odoo, API integration and DevOps practices, with a proven ability to lead cross-functional teams, automate business processes and deliver scalable, high-performance systems aligned with business goals.",
+        "ar": "قائد في تطوير التطبيقات بخبرة تزيد عن سبع سنوات في أنظمة تخطيط موارد المؤسسات والتحول الرقمي وتطوير تطبيقات المؤسسات. متخصص في ‎.NET وAngular وOdoo وتكامل الواجهات البرمجية وممارسات DevOps، مع قدرة مثبتة على قيادة فرق متعددة التخصصات وأتمتة إجراءات الأعمال وتقديم أنظمة عالية الأداء وقابلة للتوسع تتماشى مع أهداف المنشأة."
+      },
+      "after": {
+        "en": "Application development lead at ALTANFEETHI, based in Riyadh. My work spans enterprise applications, ERP integration and digital transformation across aviation, healthcare and Hajj operations. I connect business requirements with software architecture, team leadership and delivery.",
+        "ar": "قائد تطوير التطبيقات في شركة التنفيذي، ومقرّي الرياض. أعمل على تطبيقات المؤسسات وتكامل أنظمة تخطيط الموارد والتحول الرقمي في قطاعات الطيران والرعاية الصحية وعمليات الحج. أربط احتياجات الأعمال بهندسة البرمجيات وقيادة الفرق وتسليم الحلول."
+      }
+    },
+    "about": {
+      "before": {
+        "en": "I'm a technology professional with a strong background in enterprise systems, integration and digital transformation. I enjoy solving complex problems, building efficient solutions and contributing to meaningful digital transformation.",
+        "ar": "مختص تقني بخلفية قوية في أنظمة المؤسسات والتكامل والتحول الرقمي. أستمتع بحل المشكلات المعقدة وبناء حلول فعّالة والمساهمة في تحول رقمي ذي أثر."
+      },
+      "after": {
+        "en": "I work where software meets the way an organisation runs. At Jeddah Airports, I automated more than 90 business processes and helped deliver the airport website and Safety Management System. At ALTANFEETHI, I lead development teams, shape engineering standards and design workflows that have reduced manual effort by over 30%.",
+        "ar": "أعمل عند نقطة التقاء البرمجيات بطريقة عمل المنشأة. في مطارات جدة، أتمتُّ أكثر من 90 إجراء عمل، وأسهمت في تطوير موقع المطار ونظام إدارة السلامة. وفي التنفيذي، أقود فرق التطوير وأضع معايير العمل الهندسي وأصمّم مسارات عمل خفّضت الجهد اليدوي بأكثر من 30٪."
+      }
+    },
+    "quote": {
+      "before": {
+        "en": "Better systems. A more connected tomorrow.",
+        "ar": "أنظمة أفضل، وغدٌ أكثر ترابطاً."
+      },
+      "after": {
+        "en": "Make complex systems simpler for the people who use them.",
+        "ar": "تبسيط الأنظمة المعقّدة لمن يستخدمها."
+      }
+    }
+  },
+  "journey": [
+    {
+      "title": "Lead Application Development",
+      "organisation": "ALTANFEETHI Company",
+      "start": "2025-07-01",
+      "beforeHighlights": [
+        {
+          "en": "Direct and mentor development teams, fostering continuous improvement and professional growth",
+          "ar": "قيادة فرق التطوير وتوجيهها بما يعزز التحسين المستمر والنمو المهني"
+        },
+        {
+          "en": "Establish coding standards, architectural patterns and development methodologies",
+          "ar": "وضع معايير البرمجة والأنماط المعمارية ومنهجيات التطوير"
+        },
+        {
+          "en": "Architect scalable workflows and dynamic configurations for core enterprise features, reducing manual effort by 30%+",
+          "ar": "تصميم مسارات عمل قابلة للتوسع وإعدادات ديناميكية للخصائص الأساسية، خفّضت الجهد اليدوي بأكثر من 30٪"
+        },
+        {
+          "en": "Review BRDs and translate business needs into technical specifications",
+          "ar": "مراجعة وثائق متطلبات الأعمال وتحويل الاحتياجات إلى مواصفات تقنية"
+        }
+      ],
+      "summary": {
+        "en": "Leading enterprise application delivery, from business requirements and architecture to team development and release planning.",
+        "ar": "قيادة تطوير تطبيقات المؤسسات، من متطلبات الأعمال والهندسة المعمارية إلى تطوير الفريق وتخطيط الإصدارات."
+      },
+      "highlights": [
+        {
+          "en": "Lead and mentor a cross-functional development team, with clear engineering standards and sprint plans.",
+          "ar": "قيادة فريق تطوير متعدد التخصصات وتوجيهه وفق معايير هندسية وخطط واضحة لدورات التطوير."
+        },
+        {
+          "en": "Define coding standards, architectural patterns and development methods for consistent delivery.",
+          "ar": "وضع معايير البرمجة والأنماط المعمارية وأساليب التطوير لضمان اتساق التنفيذ."
+        },
+        {
+          "en": "Design scalable workflows and dynamic configurations for core enterprise features, reducing manual effort by over 30%.",
+          "ar": "تصميم مسارات عمل قابلة للتوسع وإعدادات ديناميكية للخصائص المؤسسية الأساسية، بما خفّض الجهد اليدوي بأكثر من 30٪."
+        },
+        {
+          "en": "Translate business requirements into technical specifications and select technologies that fit the organisation’s needs.",
+          "ar": "تحويل متطلبات الأعمال إلى مواصفات تقنية واختيار التقنيات المناسبة لاحتياجات المنشأة."
+        },
+        {
+          "en": "Put user experience at the centre of application design and identify opportunities to improve existing systems.",
+          "ar": "جعل تجربة المستخدم محور تصميم التطبيقات وتحديد فرص تحسين الأنظمة القائمة."
+        }
+      ]
+    },
+    {
+      "title": "Business Application Senior Specialist",
+      "organisation": "Jeddah Airports Company",
+      "start": "2024-09-01",
+      "beforeHighlights": [
+        {
+          "en": "Automated 90+ business processes across King Abdulaziz International Airport operations",
+          "ar": "أتمتة أكثر من 90 إجراءً تشغيلياً في مطار الملك عبدالعزيز الدولي"
+        },
+        {
+          "en": "Led development of the King Abdulaziz International Airport external website",
+          "ar": "قيادة تطوير الموقع الإلكتروني الخارجي لمطار الملك عبدالعزيز الدولي"
+        },
+        {
+          "en": "Implemented a Safety Management System improving operational compliance",
+          "ar": "تطبيق نظام إدارة السلامة بما رفع مستوى الامتثال التشغيلي"
+        }
+      ],
+      "summary": {
+        "en": "Delivered digital transformation initiatives across King Abdulaziz International Airport, connecting operational needs with enterprise applications.",
+        "ar": "تنفيذ مبادرات التحول الرقمي في مطار الملك عبدالعزيز الدولي وربط الاحتياجات التشغيلية بتطبيقات المؤسسات."
+      },
+      "highlights": [
+        {
+          "en": "Automated more than 90 business processes across airport operations.",
+          "ar": "أتمتة أكثر من 90 إجراء عمل عبر عمليات المطار."
+        },
+        {
+          "en": "Led development of King Abdulaziz International Airport’s public website.",
+          "ar": "قيادة تطوير الموقع الإلكتروني العام لمطار الملك عبدالعزيز الدولي."
+        },
+        {
+          "en": "Implemented a Safety Management System to improve operational compliance.",
+          "ar": "تطبيق نظام إدارة السلامة لتحسين الامتثال التشغيلي."
+        },
+        {
+          "en": "Analysed business processes, defined system requirements and coordinated teams delivering enterprise applications.",
+          "ar": "تحليل إجراءات الأعمال وتحديد متطلبات الأنظمة وتنسيق الفرق المنفّذة لتطبيقات المؤسسات."
+        }
+      ]
+    },
+    {
+      "title": "Senior Application Engineer",
+      "organisation": "Jeddah Airports Company",
+      "start": "2023-12-01",
+      "beforeHighlights": [
+        {
+          "en": "Designed and optimised software solutions to enhance operational efficiency",
+          "ar": "تصميم الحلول البرمجية وتحسينها لرفع الكفاءة التشغيلية"
+        },
+        {
+          "en": "Integrated technologies improving functionality for airport departments",
+          "ar": "تكامل التقنيات بما حسّن أداء إدارات المطار"
+        }
+      ],
+      "summary": {
+        "en": "Built and improved applications supporting airport departments, with responsibility for requirements, integration and delivery.",
+        "ar": "بناء التطبيقات الداعمة لإدارات المطار وتحسينها، مع مسؤولية تحليل المتطلبات والتكامل والتسليم."
+      },
+      "highlights": [
+        {
+          "en": "Designed and optimised software solutions to improve operational efficiency.",
+          "ar": "تصميم الحلول البرمجية وتحسينها لرفع الكفاءة التشغيلية."
+        },
+        {
+          "en": "Integrated technologies to extend functionality across airport departments.",
+          "ar": "تكامل التقنيات لتوسيع قدرات الأنظمة في إدارات المطار."
+        },
+        {
+          "en": "Conducted business analysis and delivered technical projects within agreed timelines and budgets.",
+          "ar": "تحليل احتياجات الأعمال وتسليم المشاريع التقنية ضمن الجداول الزمنية والميزانيات المتفق عليها."
+        }
+      ]
+    },
+    {
+      "title": "Web Developer",
+      "organisation": "Jeddah Airports Company",
+      "start": "2022-11-01",
+      "beforeHighlights": [
+        {
+          "en": "Led the Digital Transformation team enhancing internal airport departments",
+          "ar": "قيادة فريق التحول الرقمي لتطوير الإدارات الداخلية في المطار"
+        },
+        {
+          "en": "Implemented DevOps solutions and best practices for web development",
+          "ar": "تطبيق حلول DevOps وأفضل الممارسات في تطوير الويب"
+        }
+      ],
+      "summary": {
+        "en": "Supported internal airport teams through web development, process improvement and DevOps practices.",
+        "ar": "دعم فرق المطار الداخلية عبر تطوير الويب وتحسين الإجراءات وممارسات DevOps."
+      },
+      "highlights": [
+        {
+          "en": "Led the Digital Transformation team on improvements for internal airport departments.",
+          "ar": "قيادة فريق التحول الرقمي لتنفيذ تحسينات للإدارات الداخلية في المطار."
+        },
+        {
+          "en": "Introduced DevOps solutions and web development practices to support application delivery.",
+          "ar": "تطبيق حلول DevOps وممارسات تطوير الويب لدعم تسليم التطبيقات."
+        },
+        {
+          "en": "Streamlined business processes and operational workflows across the airport.",
+          "ar": "تبسيط إجراءات الأعمال ومسارات التشغيل في المطار."
+        }
+      ]
+    },
+    {
+      "title": "Software Developer",
+      "organisation": "Alhalees Medical Center",
+      "start": "2022-07-01",
+      "beforeHighlights": [
+        {
+          "en": "Developed ERP systems ensuring seamless integration of business processes",
+          "ar": "تطوير أنظمة تخطيط موارد المؤسسات بتكامل سلس لإجراءات الأعمال"
+        }
+      ],
+      "summary": {
+        "en": "Developed ERP and web applications for healthcare operations.",
+        "ar": "تطوير أنظمة تخطيط الموارد وتطبيقات الويب لعمليات الرعاية الصحية."
+      },
+      "highlights": [
+        {
+          "en": "Developed ERP systems that connected business processes across the medical centre.",
+          "ar": "تطوير أنظمة تخطيط الموارد لربط إجراءات الأعمال في المركز الطبي."
+        },
+        {
+          "en": "Contributed to the design, implementation and maintenance of web applications.",
+          "ar": "المشاركة في تصميم تطبيقات الويب وتنفيذها وصيانتها."
+        }
+      ]
+    },
+    {
+      "title": "Odoo Technical Backend Consultant",
+      "organisation": "Alhalees Medical Center",
+      "start": "2021-03-01",
+      "beforeHighlights": [
+        {
+          "en": "Administered the Odoo ERP system and initiated e-commerce platforms",
+          "ar": "إدارة نظام Odoo وإطلاق منصات التجارة الإلكترونية"
+        },
+        {
+          "en": "Managed the Office 365 environment and provided technical support",
+          "ar": "إدارة بيئة Office 365 وتقديم الدعم التقني"
+        }
+      ],
+      "summary": {
+        "en": "Translated business needs into Odoo functionality while supporting the organisation’s wider technology environment.",
+        "ar": "تحويل احتياجات الأعمال إلى وظائف في Odoo، مع دعم البيئة التقنية للمنشأة."
+      },
+      "highlights": [
+        {
+          "en": "Administered Odoo ERP and helped launch e-commerce platforms.",
+          "ar": "إدارة نظام Odoo والمساهمة في إطلاق منصات التجارة الإلكترونية."
+        },
+        {
+          "en": "Managed the Office 365 environment and provided technical support.",
+          "ar": "إدارة بيئة Office 365 وتقديم الدعم التقني."
+        },
+        {
+          "en": "Analysed business logic and implemented system requirements.",
+          "ar": "تحليل منطق الأعمال وتنفيذ متطلبات الأنظمة."
+        }
+      ]
+    },
+    {
+      "title": "Software Development Department Manager",
+      "organisation": "Rakeen — Hajj season 2024",
+      "start": "2024-04-01",
+      "beforeHighlights": [
+        {
+          "en": "Led development of the Workforce, Live Feed Pilgrims, Evaluation and Violations modules",
+          "ar": "قيادة تطوير وحدات القوى العاملة والبث المباشر للحجاج والتقييم والمخالفات"
+        },
+        {
+          "en": "Ensured on-time delivery of mission-critical systems",
+          "ar": "ضمان تسليم الأنظمة الحرجة في موعدها"
+        }
+      ],
+      "summary": {
+        "en": "Led a development team delivering operational systems for the Hajj 1445 season.",
+        "ar": "قيادة فريق تطوير لتسليم الأنظمة التشغيلية لموسم حج 1445هـ."
+      },
+      "highlights": [
+        {
+          "en": "Led delivery of Workforce, Live Feed Pilgrims, Evaluation and Violations modules.",
+          "ar": "قيادة تسليم وحدات القوى العاملة والبث المباشر للحجاج والتقييم والمخالفات."
+        },
+        {
+          "en": "Managed the development team and delivered mission-critical systems on time for the Hajj season.",
+          "ar": "إدارة فريق التطوير وتسليم الأنظمة الحرجة في موعدها لموسم الحج."
+        }
+      ]
+    },
+    {
+      "title": "Software Development Team Lead",
+      "organisation": "Mashariq — Hajj season 2023",
+      "start": "2023-06-01",
+      "beforeHighlights": [
+        {
+          "en": "Led the development team for the Centers Performance Excellence programme",
+          "ar": "قيادة فريق التطوير لبرنامج التميز في أداء المراكز"
+        },
+        {
+          "en": "Launched the system and ran training workshops",
+          "ar": "إطلاق النظام وتنفيذ ورش تدريبية"
+        }
+      ],
+      "summary": {
+        "en": "Led development and rollout of the Centers Performance Excellence programme for Hajj operations.",
+        "ar": "قيادة تطوير برنامج التميز في أداء المراكز وإطلاقه لدعم عمليات الحج."
+      },
+      "highlights": [
+        {
+          "en": "Led the development team building the Centers Performance Excellence programme.",
+          "ar": "قيادة فريق التطوير لبناء برنامج التميز في أداء المراكز."
+        },
+        {
+          "en": "Launched the system and ran training workshops to support adoption.",
+          "ar": "إطلاق النظام وتنفيذ ورش تدريبية لدعم استخدامه."
+        }
+      ]
+    }
+  ]
+}

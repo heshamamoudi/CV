@@ -45,8 +45,11 @@ dates, highlights, and previous / next controls. The project index and each
 project page share the visual system. The public API remains the content source;
 no credentials, analytics figures, fabricated project outcomes, or personal data
 were added. Existing server-rendered content and SEO are preserved. The newer
-admin work on `main` was incorporated before release, and its dark color tokens
-are now explicitly scoped to `.admin` rather than inherited from the public site.
+admin work on `main` was incorporated before release. The admin now has a
+branded light shell and a private contact inbox. The contact chapter has its
+own bounded sculpture space and a form that scrolls within the fixed viewport.
+The editable content and inbox behavior are detailed in
+`2026-09-30-content-and-admin.md`.
 
 ## Verification
 

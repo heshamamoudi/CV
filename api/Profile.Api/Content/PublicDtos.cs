@@ -10,7 +10,9 @@ public sealed record HomeData(
     IReadOnlyList<CertificateDto> Certificates,
     IReadOnlyList<EducationDto> Education,
     IReadOnlyList<LanguageDto> Languages,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    bool HasCv = false,
+    string SiteTitle = "Hesham Amoudi");
 
 public sealed record ProfileDto(
     string Name, string Headline, string Eyebrow, string HeroTitle, string HeroSubtitle, string Summary,

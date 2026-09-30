@@ -26,7 +26,7 @@ const NOTHING_PICKED: CvDraft = { en: null, ar: null };
 
 const labels = {
   en: {
-    lead: 'One PDF per language. Visitors download it from the CV link on the site.',
+    lead: 'One PDF per language. Uploading a CV enables Download CV in the contact chapter. Updating profile text is separate from uploading the PDF.',
     noFile: 'No file yet',
     uploadedOn: 'Uploaded {date}',
     open: 'Open the {lang} download',
@@ -37,12 +37,12 @@ const labels = {
     tooBig: 'That file is larger than 10 MB. Save a smaller PDF and try again.',
     picked: 'Ready to upload: {name} ({size}). Press Save.',
     fallback: 'No {lang} CV yet, so visitors who ask for it are given the {other} file.',
-    none: 'No CV in either language yet, so the download link is a 404 today.',
+    none: 'No CV in either language yet. The public download link stays hidden until you upload one.',
     deleteTrigger: 'Delete the {lang} CV',
     deleteQuestion: 'Delete the {lang} CV for good? Visitors would then be given the other language.',
   },
   ar: {
-    lead: 'ملف PDF واحد لكل لغة. يُنزّله الزوّار من رابط السيرة الذاتية في الموقع.',
+    lead: 'ملف PDF واحد لكل لغة. يظهر رابط تحميل السيرة الذاتية في فصل التواصل بعد الرفع. تحديث نصوص الملف الشخصي مستقل عن رفع الملف.',
     noFile: 'لا يوجد ملف بعد',
     uploadedOn: 'رُفع في {date}',
     open: 'فتح تنزيل {lang}',
@@ -53,7 +53,7 @@ const labels = {
     tooBig: 'حجم هذا الملف أكبر من 10 ميغابايت. احفظ نسخة أصغر وحاول مرة أخرى.',
     picked: 'جاهز للرفع: {name} ({size}). اضغط حفظ.',
     fallback: 'لا توجد سيرة ذاتية بـ{lang} بعد، لذا يُعطى من يطلبها ملف {other}.',
-    none: 'لا توجد سيرة ذاتية بأي لغة بعد، لذا يعطي رابط التنزيل صفحة 404 اليوم.',
+    none: 'لا توجد سيرة ذاتية بأي لغة بعد. يبقى رابط التنزيل مخفياً حتى ترفع ملفاً.',
     deleteTrigger: 'حذف السيرة الذاتية بـ{lang}',
     deleteQuestion: 'حذف السيرة الذاتية بـ{lang} نهائياً؟ سيُعطى الزوّار عندها اللغة الأخرى.',
   },

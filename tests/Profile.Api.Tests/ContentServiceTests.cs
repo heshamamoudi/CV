@@ -6,6 +6,16 @@ namespace Profile.Api.Tests;
 
 public class ContentServiceTests
 {
+    [Fact]
+    public async Task Site_browser_title_always_uses_the_english_profile_name()
+    {
+        await using var db = await SeededDbAsync();
+        db.PageSeo.Add(new PageSeo { Key = "home", Title = LocalizedText.Of("Custom title", "") });
+        await db.SaveChangesAsync();
+        var service = new ContentService(db);
+        Assert.Equal("Hesham Amoudi", (await service.HomeAsync("en"))!.SiteTitle);
+        Assert.Equal("Hesham Amoudi", (await service.HomeAsync("ar"))!.SiteTitle);
+    }
     private static async Task<ProfileContext> SeededDbAsync()
     {
         var db = new ProfileContext(new DbContextOptionsBuilder<ProfileContext>()

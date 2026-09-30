@@ -1,0 +1,35 @@
+.admin-messages-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-block: 1.5rem; }
+.admin-message-filters { display: flex; flex-wrap: wrap; gap: .5rem; }
+.admin-message-filters button[aria-pressed='true'] { border-color: var(--accent); background: var(--fg); color: var(--panel); }
+.admin-message-count { display: inline-grid; place-items: center; min-inline-size: 1.4rem; block-size: 1.4rem; margin-inline-start: .4rem; border-radius: 50%; background: #ef5835; color: #211f1e; font-size: .75rem; }
+.admin-message-search { display: flex; gap: .5rem; flex: 1; max-inline-size: 32rem; }
+.admin-message-search input { flex: 1; min-inline-size: 9rem; }
+.admin-message-layout { display: grid; grid-template-columns: minmax(17rem, .8fr) minmax(0, 1.4fr); gap: 1rem; align-items: start; }
+.admin-message-list, .admin-message-detail { min-inline-size: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.admin-message-item { display: block; inline-size: 100%; padding: .9rem 1rem; border: 0; border-block-end: 1px solid var(--line); border-radius: 0; background: transparent; text-align: start; }
+.admin-message-item:last-child { border-block-end: 0; }
+.admin-message-item:hover, .admin-message-item.is-selected { background: #ef58351a; }
+.admin-message-item.is-new .admin-message-item-subject { color: var(--fg); font-weight: 750; }
+.admin-message-item-top, .admin-message-item-bottom { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; }
+.admin-message-item-top strong { overflow: hidden; color: var(--fg); text-overflow: ellipsis; white-space: nowrap; }
+.admin-message-item time, .admin-message-item-bottom { color: var(--muted); font-size: .75rem; }
+.admin-message-item-subject { display: block; overflow: hidden; margin-block: .25rem; color: var(--fg); text-overflow: ellipsis; white-space: nowrap; }
+.admin-message-item-bottom > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-message-status { flex: none; padding: .05rem .4rem; border-radius: 1rem; background: var(--button); color: var(--fg); }
+.admin-message-status.status-new { background: #ef58352b; }
+.admin-message-status.status-archived { opacity: .75; }
+.admin-message-detail { min-block-size: 22rem; padding: 1.25rem; }
+.admin-message-detail-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: .75rem; padding-block-end: 1rem; border-block-end: 1px solid var(--line); }
+.admin-message-detail-head h2 { margin: 0; overflow-wrap: anywhere; }
+.admin-message-detail-head p { margin: .25rem 0 0; font-size: .875rem; overflow-wrap: anywhere; }
+.admin-message-reply { display: inline-block; padding: .45rem .7rem; border: 1px solid var(--line); border-radius: .375rem; font-size: .875rem; }
+.admin-message-body { min-block-size: 8rem; padding-block: 1.25rem; color: var(--fg); white-space: pre-wrap; overflow-wrap: anywhere; }
+.admin-message-actions { display: flex; flex-wrap: wrap; gap: .5rem; padding-block-start: 1rem; border-block-start: 1px solid var(--line); }
+.admin-message-actions .admin-confirm { flex-wrap: wrap; }
+.admin-message-empty { padding: 1.5rem; border: 1px dashed var(--line); border-radius: 10px; background: var(--panel); }
+.admin-message-error { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.admin-message-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-block-start: 1rem; color: var(--muted); font-size: .875rem; }
+.admin-message-pagination > div { display: flex; align-items: center; gap: .75rem; }
+.admin-sr-only { position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 55rem) { .admin-message-layout { grid-template-columns: minmax(0, 1fr); } .admin-message-list { max-block-size: 22rem; overflow: auto; } .admin-message-detail { min-block-size: 15rem; } }
+@media (max-width: 36rem) { .admin-message-search { max-inline-size: none; } .admin-message-search button { flex: none; } .admin-message-detail { padding: 1rem; } .admin-message-item { padding: .75rem; } }

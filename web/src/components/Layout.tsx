@@ -9,12 +9,16 @@ let introShown = false;
 export function Layout({
   lang,
   children,
+  name,
 }: {
   lang: Lang;
   children: ReactNode;
+  name?: string;
 }) {
   const t = useStrings(lang),
     { pathname, hash } = useLocation();
+  const displayName = name ?? (lang === 'ar' ? 'هشام العمودي' : 'Hesham Amoudi');
+  const [firstName, ...familyName] = displayName.trim().split(/\s+/);
   const isHome = new RegExp(
     `^/${lang}(?:/(?:journey|projects(?:/[^/]+)?))?/?$`,
   ).test(pathname);
@@ -63,7 +67,7 @@ export function Layout({
           <div className="intro-orbit" aria-hidden="true" />
           <div className="scatter-identity">
             <BrandMark />
-            <span>{lang === "ar" ? "هشام العمودي" : "HESHAM AMOUDI"}</span>
+            <span>{displayName}</span>
           </div>
           <button className="intro-skip" onClick={dismiss} autoFocus>
             {lang === "ar" ? "تخطّ المقدمة ↖" : "Skip intro ↗"}
@@ -82,24 +86,12 @@ export function Layout({
             className="wordmark"
             to={`/${lang}`}
             aria-label={
-              lang === "ar" ? "هشام العمودي — الرئيسية" : "Hesham Amoudi — Home"
+              `${displayName} — ${lang === 'ar' ? 'الرئيسية' : 'Home'}`
             }
           >
             <BrandMark />
             <span className="brand-name">
-              {lang === "ar" ? (
-                <>
-                  هشام
-                  <br />
-                  العمودي
-                </>
-              ) : (
-                <>
-                  HESHAM
-                  <br />
-                  AMOUDI
-                </>
-              )}
+              {firstName}<br />{familyName.join(' ')}
             </span>
           </Link>
           <nav

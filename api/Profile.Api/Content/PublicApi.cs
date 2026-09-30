@@ -8,6 +8,9 @@ public static class PublicApi
     {
         var api = app.MapGroup("/api/public/{lang}");
 
+        app.MapPost("/api/public/contact", ContactApi.Submit)
+            .RequireRateLimiting("contact");
+
         api.MapGet("/home", async (string lang, ContentService content, CancellationToken ct) =>
             Lang.IsSupported(lang) && await content.HomeAsync(lang, ct) is { } home
                 ? Results.Ok(home)

@@ -22,6 +22,8 @@ public sealed class ResponseHeadersMiddleware(RequestDelegate next, SiteOptions 
             h["Referrer-Policy"] = "strict-origin-when-cross-origin";
             h["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
             h.ContentSecurityPolicy = ContentSecurityPolicy;
+            if (http.Request.Path.StartsWithSegments("/api/admin/messages", StringComparison.OrdinalIgnoreCase))
+                h.CacheControl = "no-store";
             if (!site.Indexable) h["X-Robots-Tag"] = "noindex, nofollow";
             return Task.CompletedTask;
         });

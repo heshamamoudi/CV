@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import type { HomeData } from "../types";
+import { sculptureLabels } from "./sculptureLabels";
+
+const noJourney: HomeData['journey'] = [];
+const noTechnologies: HomeData['technologies'] = [];
 
 /** A single persistent scene; chapter changes move the sculpture through the composition. */
 export function Sculpture({
   chapter,
   paused,
   rtl = false,
+  journey = noJourney,
+  technologies = noTechnologies,
 }: {
   chapter: number;
   paused: boolean;
   rtl?: boolean;
+  journey?: HomeData['journey'];
+  technologies?: HomeData['technologies'];
 }) {
   const host = useRef<HTMLDivElement>(null);
   const current = useRef({ chapter, paused, rtl });
@@ -152,13 +161,7 @@ export function Sculpture({
       tiles: THREE.Group[] = [];
     const colors = [0xff633b, 0xc8baf2, 0x252326, 0xeee9df];
     const tileFaces: THREE.MeshBasicMaterial[] = [];
-    const labelSets = [
-      ["</>", ".NET", "API", "C#"],
-      ["WEB", "OPS", "ERP", "API"],
-      ["2021", "2022", "2024", "2025"],
-      [".NET", "Odoo", "SQL", "Cloud"],
-      ["Hi", "↗", "أهلاً", ":)"],
-    ];
+    const labelSets = sculptureLabels(journey, technologies);
     labelSets[0].forEach((_label, i) => {
       const tile = new THREE.Group(),
         s = 0.45,
@@ -199,8 +202,8 @@ export function Sculpture({
           ctx.fillStyle = i === 2 ? "#f2eee5" : "#242225";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.font = `600 ${labels[i].length > 3 ? 60 : 76}px sans-serif`;
-          ctx.fillText(labels[i], 128, 132);
+          ctx.font = `600 ${labels[i].length > 3 ? 52 : 76}px sans-serif`;
+          ctx.fillText(labels[i], 128, 132, 222);
         }
         const texture = new THREE.CanvasTexture(canvas);
         texture.colorSpace = THREE.SRGBColorSpace;
@@ -420,7 +423,7 @@ export function Sculpture({
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, []);
+  }, [journey, technologies]);
   return (
     <div
       ref={host}

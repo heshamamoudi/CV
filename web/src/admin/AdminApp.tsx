@@ -11,6 +11,7 @@ import { ListsScreen } from './screens/ListsScreen';
 import { MediaScreen } from './screens/MediaScreen';
 import { CvScreen } from './screens/CvScreen';
 import { SeoScreen } from './screens/SeoScreen';
+import { MessagesScreen } from './screens/MessagesScreen';
 import './admin.css';
 
 class Boundary extends Component<{ children: ReactNode; message: string }, { failed: boolean }> {
@@ -72,6 +73,7 @@ export default function AdminApp() {
           <Route path="/admin/media" element={<MediaScreen />} />
           <Route path="/admin/cv" element={<CvScreen />} />
           <Route path="/admin/seo" element={<SeoScreen />} />
+          <Route path="/admin/messages" element={<MessagesScreen />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Boundary>

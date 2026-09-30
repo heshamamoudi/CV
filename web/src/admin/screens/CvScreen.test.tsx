@@ -171,12 +171,12 @@ describe('the CV screen', () => {
     expect(screen.queryByText(/404 today/)).not.toBeInTheDocument();
   });
 
-  it('says the download link is a 404 when neither language has a file', async () => {
+  it('explains that the public download is hidden when neither language has a file', async () => {
     serve(listing([]));
 
     show();
 
-    expect(await screen.findByText(/the download link is a 404 today/)).toBeInTheDocument();
+    expect(await screen.findByText(/download link stays hidden/)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Open the English download' })).not.toBeInTheDocument();
   });
 });

@@ -151,7 +151,7 @@ public class PageTests
         var html = await app.CreateClient().GetStringAsync("/en");
         var head = html[..html.IndexOf("</head>", StringComparison.Ordinal)];
 
-        Assert.Contains("<title>Hesham Amoudi — A &lt;b&gt;&quot;q&quot;&lt;/b&gt;</title>", head);
+        Assert.Contains("<title>Hesham Amoudi</title>", head);
         Assert.Contains("content=\"Hesham Amoudi — A &lt;b&gt;&quot;q&quot;&lt;/b&gt;\"", head);
         Assert.DoesNotContain("<b>", head);
     }

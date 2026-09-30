@@ -41,7 +41,7 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         title = seo.Title ?? title;
         description = seo.Description ?? description;
 
-        head.Append("<title>").Append(E(title)).Append("</title>");
+        head.Append("<title>").Append(E(home?.SiteTitle ?? "Hesham Amoudi")).Append("</title>");
         if (description.Length > 0)
             head.Append("<meta name=\"description\" content=\"").Append(E(Trim(description, 160))).Append("\">");
 
@@ -144,6 +144,7 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         // Empty when the stored value was not an http(s) URL (ContentService.SafeHttpUrl).
         if (p.LinkedInUrl.Length > 0) b.Append("<a href=\"").Append(E(p.LinkedInUrl)).Append("\" rel=\"me\">LinkedIn</a> ");
         if (p.GitHubUrl.Length > 0) b.Append("<a href=\"").Append(E(p.GitHubUrl)).Append("\" rel=\"me\">GitHub</a> ");
+        if (home.HasCv) b.Append("<a href=\"/").Append(home.Lang).Append("/cv\">").Append(E(s("hero.cv"))).Append("</a> ");
         b.Append(E(p.Location)).Append("</address></section>");
     }
 

@@ -24,6 +24,8 @@ export interface HomeData {
   education: { degree: string; institution: string }[];
   languages: { name: string; level: string }[];
   updatedAt: string;
+  hasCv?: boolean;
+  siteTitle?: string;
 }
 export interface PageData {
   // 'admin' is the signed-in admin shell: it carries no content, only its kind.

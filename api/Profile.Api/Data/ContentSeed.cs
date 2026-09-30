@@ -3,15 +3,18 @@ using Microsoft.EntityFrameworkCore;
 namespace Profile.Api.Data;
 
 /// <summary>
-/// The owner's CV (Hesham_Amoudi_2026-_CV.pdf) as starting content. Arabic is a
-/// draft for the owner to review in admin before launch. Runs only on an empty
-/// database, so edits made in admin are never overwritten.
+/// Original CV snapshot, followed by versioned editorial improvements. New records
+/// are inserted only in an empty database. Refreshes preserve owner-edited content.
 /// </summary>
 public static class ContentSeed
 {
     public static async Task EnsureAsync(ProfileContext db, CancellationToken ct = default)
     {
-        if (await db.Profiles.AnyAsync(ct)) return;
+        if (await db.Profiles.AnyAsync(ct))
+        {
+            await CvContentRefresh.ApplyAsync(db, ct);
+            return;
+        }
 
         db.Profiles.Add(new ProfileRecord
         {
@@ -132,6 +135,7 @@ public static class ContentSeed
             new SpokenLanguage { Name = T("English", "الإنجليزية"), Level = T("Proficient", "متقدم"), SortOrder = 1 });
 
         await db.SaveChangesAsync(ct);
+        await CvContentRefresh.ApplyAsync(db, ct);
     }
 
     private static LocalizedText T(string en, string ar) => LocalizedText.Of(en, ar);

@@ -67,10 +67,10 @@ describe('the SEO screen', () => {
     show();
 
     expect(await screen.findByRole('region', { name: 'Home page' })).toBeInTheDocument();
-    expect(box('Home page', 'Page title', 'English')).toHaveValue('Hesham Amoudi');
-    expect(box('Home page', 'Page title', 'Arabic')).toHaveValue('هشام عمودي');
-    expect(box('Journey page', 'Page title', 'English')).toHaveValue('');
-    expect(box('Home page', 'Page title', 'English')).toHaveAttribute('maxlength', '70');
+    expect(box('Home page', 'Link-sharing title', 'English')).toHaveValue('Hesham Amoudi');
+    expect(box('Home page', 'Link-sharing title', 'Arabic')).toHaveValue('هشام عمودي');
+    expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('');
+    expect(box('Home page', 'Link-sharing title', 'English')).toHaveAttribute('maxlength', '70');
     expect(box('Home page', 'Page description', 'English')).toHaveAttribute('maxlength', '200');
   });
 
@@ -83,7 +83,7 @@ describe('the SEO screen', () => {
     show();
     await screen.findByRole('region', { name: 'Home page' });
 
-    fireEvent.change(box('Home page', 'Page title', 'English'), { target: { value: 'Hesham Amoudi — software engineer' } });
+    fireEvent.change(box('Home page', 'Link-sharing title', 'English'), { target: { value: 'Hesham Amoudi — software engineer' } });
     fireEvent.click(region('Home page').getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(putTo(fetched, '/api/admin/seo/pages/home')).toHaveLength(1));
@@ -108,8 +108,8 @@ describe('the SEO screen', () => {
     await screen.findByRole('region', { name: 'Home page' });
 
     for (const [field, language] of [
-      ['Page title', 'English'],
-      ['Page title', 'Arabic'],
+      ['Link-sharing title', 'English'],
+      ['Link-sharing title', 'Arabic'],
       ['Page description', 'English'],
       ['Page description', 'Arabic'],
     ] as const) {
