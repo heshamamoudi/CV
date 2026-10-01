@@ -39,12 +39,17 @@ const labels = {
     featuredOnly: 'Only one project can be featured.',
     featuredMoves: 'Only one project can be featured. Saving this takes the mark from “{name}”.',
     cover: 'Cover image',
+    repositoryUrl: 'Repository URL', liveUrl: 'Live site URL',
+    linksHint: 'Optional. Public case studies show only links you provide.',
     hidden: 'Hidden',
     deleteQuestion: 'Delete the project “{name}”?',
     discardQuestion: 'Leave “{name}” without saving your changes?',
     discard: 'Discard changes',
     reorderFailed: 'The new order could not be saved, so the old order is back.',
     untitled: 'Untitled project',
+    checklist: 'Editorial checklist', checklistHint: 'These are optional for publishing. Fill them when source material is available.',
+    missingBodyEn: 'English body is missing', missingBodyAr: 'Arabic body is missing',
+    missingTechnologies: 'Technologies are missing', missingCover: 'Cover image is missing', ready: 'All editorial fields are filled.',
   },
   ar: {
     heading: 'المشاريع',
@@ -68,12 +73,17 @@ const labels = {
     featuredOnly: 'مشروع واحد فقط يمكن أن يكون مميّزاً.',
     featuredMoves: 'مشروع واحد فقط يمكن أن يكون مميّزاً. الحفظ ينقل العلامة من «{name}».',
     cover: 'صورة الغلاف',
+    repositoryUrl: 'رابط المستودع', liveUrl: 'رابط الموقع المباشر',
+    linksHint: 'اختياري. تظهر في صفحة المشروع الروابط التي تضيفها فقط.',
     hidden: 'مخفي',
     deleteQuestion: 'حذف المشروع «{name}»؟',
     discardQuestion: 'مغادرة «{name}» دون حفظ التغييرات؟',
     discard: 'تجاهل التغييرات',
     reorderFailed: 'تعذّر حفظ الترتيب الجديد، فعاد الترتيب السابق.',
     untitled: 'مشروع بلا عنوان',
+    checklist: 'قائمة المحتوى', checklistHint: 'هذه العناصر اختيارية للنشر. أضفها عندما تتوفر المواد المصدرية.',
+    missingBodyEn: 'النص الإنجليزي غير موجود', missingBodyAr: 'النص العربي غير موجود',
+    missingTechnologies: 'التقنيات غير موجودة', missingCover: 'صورة الغلاف غير موجودة', ready: 'جميع عناصر المحتوى مكتملة.',
   },
 };
 
@@ -90,6 +100,8 @@ const blank = (): ProjectItem => ({
   featured: false,
   visible: true,
   coverMediaId: null,
+  repositoryUrl: '',
+  liveUrl: '',
 });
 
 /** Exactly the shape ProjectEdit binds to - id and sortOrder are the server's business. */
@@ -102,6 +114,8 @@ const payload = (project: ProjectItem) => ({
   featured: project.featured,
   visible: project.visible,
   coverMediaId: project.coverMediaId,
+  repositoryUrl: project.repositoryUrl ?? '',
+  liveUrl: project.liveUrl ?? '',
 });
 
 export function ProjectsScreen() {
@@ -148,6 +162,12 @@ export function ProjectsScreen() {
   );
   const editor = useEditor<ProjectItem>(selected);
   const value = editor.value;
+  const missing = value ? [
+    !value.body.en.trim() && s('missingBodyEn'),
+    !value.body.ar.trim() && s('missingBodyAr'),
+    value.technologies.length === 0 && s('missingTechnologies'),
+    !value.coverMediaId && s('missingCover'),
+  ].filter((item): item is string => Boolean(item)) : [];
 
   useUnsavedGuard(editor.dirty, t('guard.leave'));
 
@@ -306,6 +326,10 @@ export function ProjectsScreen() {
       {value ? (
         <article className="projects-editor">
           <h2>{draft ? s('creating') : `${s('editing')}: ${name(value)}`}</h2>
+          <aside className="projects-checklist" aria-label={s('checklist')}>
+            <h3>{s('checklist')}</h3><p>{s('checklistHint')}</p>
+            {missing.length ? <ul>{missing.map(item => <li key={item}>{item}</li>)}</ul> : <p>{s('ready')}</p>}
+          </aside>
 
           <TextInput
             id="project-slug"
@@ -376,6 +400,9 @@ export function ProjectsScreen() {
               {error('coverMediaId')}
             </p>
           ) : null}
+
+          <TextInput id="project-repository-url" label={s('repositoryUrl')} value={value.repositoryUrl ?? ''} hint={s('linksHint')} error={error('repositoryUrl')} dir="ltr" onChange={repositoryUrl => editor.set({ repositoryUrl })} />
+          <TextInput id="project-live-url" label={s('liveUrl')} value={value.liveUrl ?? ''} error={error('liveUrl')} dir="ltr" onChange={liveUrl => editor.set({ liveUrl })} />
 
           <div className="projects-actions">
             {draft ? null : (

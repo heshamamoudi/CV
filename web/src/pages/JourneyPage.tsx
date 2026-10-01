@@ -2,15 +2,19 @@ import { useState } from "react";
 import type { HomeData } from "../types";
 import { useStrings } from "../i18n/useStrings";
 import { ArchiveFrame } from "../components/ArchiveFrame";
+import { formatMonthYear } from "../date";
 
 export function JourneyPage({ home }: { home: HomeData }) {
   const t = useStrings(home.lang),
     ar = home.lang === "ar";
   const [selected, setSelected] = useState(0);
-  const entry = home.journey[selected];
+  const [preview, setPreview] = useState<number | null>(null);
+  const active = preview ?? selected;
+  const entry = home.journey[active];
   return (
     <ArchiveFrame
       chapter={2}
+      selectedJourneyIndex={active}
       label={ar ? "المسيرة كاملة" : "THE COMPLETE JOURNEY"}
     >
       <div className="career-archive-heading">
@@ -38,8 +42,12 @@ export function JourneyPage({ home }: { home: HomeData }) {
           {home.journey.map((role, i) => (
             <button
               key={role.id}
-              className={selected === i ? "selected" : ""}
+              className={active === i ? "selected" : ""}
               onClick={() => setSelected(i)}
+              onMouseEnter={() => setPreview(i)}
+              onMouseLeave={() => setPreview(null)}
+              onFocus={() => setPreview(i)}
+              onBlur={() => setPreview(null)}
               aria-pressed={selected === i}
             >
               <span className="track-dot" />
@@ -47,6 +55,7 @@ export function JourneyPage({ home }: { home: HomeData }) {
               <span className="track-role">
                 {role.title}
                 <small>{role.organisation}</small>
+                {role.kind === "additional" && <small>{ar ? "خبرة إضافية" : "Additional experience"}</small>}
               </span>
               <b aria-hidden="true">↗</b>
             </button>
@@ -56,7 +65,7 @@ export function JourneyPage({ home }: { home: HomeData }) {
           {entry && (
             <article key={entry.id}>
               <div className="archive-counter">
-                {String(selected + 1).padStart(2, "0")}
+                {String(active + 1).padStart(2, "0")}
                 <small> / {String(home.journey.length).padStart(2, "0")}</small>
                 <span>
                   {entry.kind === "additional"
@@ -69,9 +78,9 @@ export function JourneyPage({ home }: { home: HomeData }) {
                 </span>
               </div>
               <p className="micro-label">
-                <time dateTime={entry.start}>{entry.start}</time> —{" "}
+                <time dateTime={entry.start}>{formatMonthYear(entry.start, home.lang)}</time> —{" "}
                 {entry.end ? (
-                  <time dateTime={entry.end}>{entry.end}</time>
+                  <time dateTime={entry.end}>{formatMonthYear(entry.end, home.lang)}</time>
                 ) : (
                   t("journey.present")
                 )}

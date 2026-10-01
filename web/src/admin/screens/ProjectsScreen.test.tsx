@@ -96,6 +96,18 @@ afterEach(() => {
 });
 
 describe('the projects list', () => {
+  it('shows optional editorial gaps without hiding a project or changing its draft', async () => {
+    serve();
+    show();
+    await open('Visitor Kiosk');
+    const checklist = screen.getByRole('complementary', { name: 'Editorial checklist' });
+    expect(checklist).toHaveTextContent('English body is missing');
+    expect(checklist).toHaveTextContent('Arabic body is missing');
+    expect(checklist).toHaveTextContent('Technologies are missing');
+    expect(checklist).toHaveTextContent('Cover image is missing');
+    expect(screen.getByText('visitor-kiosk')).toBeInTheDocument();
+    expect(sent('PUT')).toHaveLength(0);
+  });
   it('shows the address and the state of every project', async () => {
     serve();
     show();

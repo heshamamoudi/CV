@@ -25,9 +25,9 @@ five-lobed skills form, and a conversation outline. Labels and the surrounding
 elements change with the chapter. Pointer motion adds restrained parallax.
 
 The opening sequence runs on each full load / refresh, once per SPA lifetime.
-The mark assembles from its separate paths, an orbit traces around it, and twelve
+The mark assembles from its separate paths, and twelve
 screen panels scatter with depth and staggered timing. The underlying page enters
-in sequence. The intro is skippable and lasts at most 2.4 seconds. Reduced-motion
+in sequence. The intro is skippable and lasts at most 1.5 seconds. Reduced-motion
 visitors get a brief static opening and paused 3D; motion can also be paused with
 the persistent control. The renderer suspends work in hidden tabs and disposes
 its geometries, materials, textures, observers, and animation frame on unmount.
@@ -41,8 +41,11 @@ negative time to the open career curve otherwise produces an invalid point.
 ## Other pages and content
 
 The complete journey is an interactive career archive with selectable roles,
-dates, highlights, and previous / next controls. The project index and each
-project page share the visual system. The public API remains the content source;
+dates, highlights, and previous / next controls. Hover and keyboard focus preview
+a role; click or tap pins it. Every role has its own selected milestone on the 3D
+path, including roles that share a year. The project index and each project page
+share the visual system. Covers, technology chips, case-study paragraphs, and
+optional repository/live links appear when supplied. The public API remains the content source;
 no credentials, analytics figures, fabricated project outcomes, or personal data
 were added. Existing server-rendered content and SEO are preserved. The newer
 admin work on `main` was incorporated before release. The admin now has a

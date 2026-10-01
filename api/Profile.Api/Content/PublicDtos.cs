@@ -25,7 +25,7 @@ public sealed record JourneyDto(
 
 public sealed record ProjectDto(
     string Slug, string Title, string Summary, string Body, IReadOnlyList<string> Technologies,
-    bool Featured, bool AvailableInOtherLanguage, ImageDto? Cover);
+    bool Featured, bool AvailableInOtherLanguage, ImageDto? Cover, string RepositoryUrl = "", string LiveUrl = "");
 
 public sealed record TechGroupDto(string Category, IReadOnlyList<string> Items);
 public sealed record CertificateDto(string Title, string Issuer, string IssuedOn);

@@ -9,10 +9,12 @@ export function ArchiveFrame({
   chapter,
   children,
   label,
+  selectedJourneyIndex,
 }: {
   chapter: number;
   children: ReactNode;
   label: string;
+  selectedJourneyIndex?: number;
 }) {
   const { lang = "en" } = useParams();
   const ar = lang === "ar";
@@ -39,7 +41,7 @@ export function ArchiveFrame({
     >
       <div className="ambient-grid" aria-hidden="true" />
       <Suspense fallback={null}>
-        <Sculpture chapter={chapter} paused={paused} rtl={ar} journey={home?.journey} technologies={home?.technologies} />
+        <Sculpture chapter={chapter} paused={paused} rtl={ar} journey={home?.journey} technologies={home?.technologies} selectedJourneyIndex={selectedJourneyIndex} />
       </Suspense>
       <div className="archive-topline">
         <Link to={`/${lang}#${chapter === 2 ? "journey" : "work"}`}>

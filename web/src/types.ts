@@ -16,6 +16,7 @@ export interface ProjectDto {
   slug: string; title: string; summary: string; body: string; technologies: string[];
   featured: boolean; availableInOtherLanguage: boolean;
   cover?: ImageDto | null;
+  repositoryUrl?: string; liveUrl?: string;
 }
 export interface HomeData {
   lang: Lang; profile: ProfileDto; journey: JourneyDto[]; featuredProject: ProjectDto | null;

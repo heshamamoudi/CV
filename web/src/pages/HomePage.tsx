@@ -10,6 +10,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import type { HomeData } from "../types";
 import { useStrings } from "../i18n/useStrings";
 import { ContactForm } from "../components/ContactForm";
+import { formatMonthYear } from "../date";
 
 const Sculpture = lazy(() =>
   import("../components/Sculpture").then((m) => ({ default: m.Sculpture })),
@@ -34,10 +35,12 @@ export function HomePage({ home }: { home: HomeData }) {
   );
   const [projectIndex, setProjectIndex] = useState(() => Math.max(0, home.projects.findIndex(item => item.slug === home.featuredProject?.slug))),
     [roleIndex, setRoleIndex] = useState(0),
+    [previewRoleIndex, setPreviewRoleIndex] = useState<number | null>(null),
     [aboutTab, setAboutTab] = useState(0);
   const project =
     home.projects[Math.min(projectIndex, home.projects.length - 1)];
-  const role = home.journey[Math.min(roleIndex, home.journey.length - 1)];
+  const activeRoleIndex = previewRoleIndex ?? roleIndex;
+  const role = home.journey[Math.min(activeRoleIndex, home.journey.length - 1)];
   const labels = [
     copy("Introduction", "المقدمة"),
     copy("Selected work", "الأعمال"),
@@ -176,7 +179,6 @@ export function HomePage({ home }: { home: HomeData }) {
       delete document.documentElement.dataset.chapter;
     };
   }, [chapter]);
-  const name = p.name.split(" ");
   return (
     <div
       className={`experience chapter-${chapter}${paused ? " motion-paused" : ""}`}
@@ -187,7 +189,7 @@ export function HomePage({ home }: { home: HomeData }) {
           <div className="sculpture placeholder-sculpture" aria-hidden="true" />
         }
       >
-        <Sculpture chapter={chapter} paused={paused} rtl={ar} journey={home.journey} technologies={home.technologies} />
+        <Sculpture chapter={chapter} paused={paused} rtl={ar} journey={home.journey} technologies={home.technologies} selectedJourneyIndex={activeRoleIndex} />
       </Suspense>
       <div className="chapter-watermark" aria-hidden="true">
         {["CREATE", "SOLVE", "EVOLVE", "CONNECT", "HELLO"][chapter]}
@@ -201,40 +203,25 @@ export function HomePage({ home }: { home: HomeData }) {
       </div>
       <section
         className="chapter-panel"
-        data-scroll-region={chapter === 4 ? "" : undefined}
+        data-scroll-region
         key={chapter}
         aria-label={labels[chapter]}
       >
         {chapter === 0 && (
           <div className="intro-content">
-            <p className="section-kicker">
-              {p.heroTitle}
-            </p>
+            <p className="section-kicker intro-identity">{p.name} <span aria-hidden="true">/</span> {p.headline}</p>
             <h1 className="hero-name">
-              <span>{name[0]}</span>
-              <span>
-                {name.slice(1).join(" ")}
-                <b>.</b>
-              </span>
+              <span className="sr-only">{p.name}. </span>
+              {p.heroTitle}
             </h1>
             <div className="intro-bottom">
               <p>{p.heroSubtitle}</p>
-              <button className="round-link" onClick={() => go(1)}>
-                <span>{t("hero.explore")}</span>
-                <i aria-hidden="true">↗</i>
-              </button>
+              <div className="intro-actions">
+                <button className="round-link" onClick={() => go(1)}><span>{t("hero.explore")}</span><i aria-hidden="true">↗</i></button>
+                <button className="intro-secondary" onClick={() => go(2)}>{t("nav.journey")} <span aria-hidden="true">↗</span></button>
+              </div>
             </div>
-            <p className="role-label">
-              <span className="tiny-star" aria-hidden="true">
-                ✳
-              </span>
-              {p.headline}
-            </p>
-            <span className="object-note" aria-hidden="true">
-              {copy("IDEAS, IN MOTION", "أفكار تتحرك")}
-              <br />
-              01—05
-            </span>
+            {home.journey[0]?.highlights[0] && <p className="intro-proof"><span>{home.journey[0].organisation}</span>{home.journey[0].highlights[0]}</p>}
           </div>
         )}
         {chapter === 1 && (
@@ -274,11 +261,14 @@ export function HomePage({ home }: { home: HomeData }) {
               </div>
               {project && (
                 <article className="project-spotlight" key={project.slug}>
+                  {project.cover && <img className="project-spotlight-cover" src={project.cover.src} srcSet={project.cover.srcSet} sizes="(max-width: 700px) 80vw, 34vw" width={project.cover.width} height={project.cover.height} alt={project.cover.alt} loading="lazy" />}
                   <span className="micro-label">
                     {copy("PROJECT NOTES", "عن المشروع")} /{" "}
                     {String(projectIndex + 1).padStart(2, "0")}
                   </span>
+                  {project.featured && <span className="project-featured">{copy("Featured", "مميّز")}</span>}
                   <p>{project.summary}</p>
+                  {project.technologies.length > 0 && <div className="project-tags">{project.technologies.slice(0, 3).map(item => <span key={item}>{item}</span>)}</div>}
                   <Link
                     className="text-link"
                     to={`/${home.lang}/projects/${project.slug}`}
@@ -318,21 +308,25 @@ export function HomePage({ home }: { home: HomeData }) {
                 {home.journey.map((item, i) => (
                   <button
                     key={item.id}
-                    className={i === roleIndex ? "chosen" : ""}
+                    className={i === activeRoleIndex ? "chosen" : ""}
                     onClick={() => setRoleIndex(i)}
+                    onMouseEnter={() => setPreviewRoleIndex(i)}
+                    onMouseLeave={() => setPreviewRoleIndex(null)}
+                    onFocus={() => setPreviewRoleIndex(i)}
+                    onBlur={() => setPreviewRoleIndex(null)}
                     aria-pressed={i === roleIndex}
                   >
                     {item.start.slice(0, 4)}
-                    <span>{item.organisation}</span>
+                    <span>{item.organisation}{item.kind === "additional" ? ` · ${copy("Additional", "إضافية")}` : ""}</span>
                   </button>
                 ))}
               </div>
               {role && (
                 <article className="career-detail" key={role.id}>
                   <div className="micro-label">
-                    <time dateTime={role.start}>{role.start}</time> —{" "}
+                    <time dateTime={role.start}>{formatMonthYear(role.start, home.lang)}</time> —{" "}
                     {role.end ? (
-                      <time dateTime={role.end}>{role.end}</time>
+                      <time dateTime={role.end}>{formatMonthYear(role.end, home.lang)}</time>
                     ) : (
                       t("journey.present")
                     )}

@@ -61,6 +61,8 @@ public sealed class Project : IOrdered
     public LocalizedText Body { get; set; } = new();
     public List<string> Technologies { get; set; } = [];
     public Guid? CoverMediaId { get; set; }
+    public string RepositoryUrl { get; set; } = "";
+    public string LiveUrl { get; set; } = "";
     public bool Featured { get; set; }
     public int SortOrder { get; set; }
     public bool Visible { get; set; } = true;

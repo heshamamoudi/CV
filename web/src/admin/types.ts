@@ -47,6 +47,8 @@ export interface ProjectItem {
   featured: boolean;
   visible: boolean;
   coverMediaId: string | null;
+  repositoryUrl?: string;
+  liveUrl?: string;
 }
 
 export interface TechnologyItem {

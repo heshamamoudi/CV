@@ -10,7 +10,7 @@ public sealed record JourneyEdit(
 
 public sealed record ProjectEdit(
     string Slug, LocalizedText Title, LocalizedText Summary, LocalizedText Body, List<string> Technologies,
-    bool Featured, bool Visible, Guid? CoverMediaId);
+    bool Featured, bool Visible, Guid? CoverMediaId, string? RepositoryUrl = "", string? LiveUrl = "");
 
 public sealed record TechnologyEdit(string Name, LocalizedText Category);
 public sealed record CertificateEdit(LocalizedText Title, string Issuer, DateOnly IssuedOn);
@@ -67,6 +67,7 @@ public static partial class ContentAdmin
                 if (e.Technologies is null) p.Add("technologies", "required");
                 else if (e.Technologies.Count > 30 || e.Technologies.Any(t => string.IsNullOrWhiteSpace(t) || t.Length > 40 || Problems.HasControl(t, false))) p.Add("technologies", "up to 30 names of at most 40 characters");
                 await ProfileAdmin.MediaExists(db, p, "coverMediaId", e.CoverMediaId);
+                p.HttpUrl("repositoryUrl", e.RepositoryUrl ?? "").HttpUrl("liveUrl", e.LiveUrl ?? "");
                 return p;
             },
             async (db, e, project) =>
@@ -92,9 +93,10 @@ public static partial class ContentAdmin
                 project.Slug = e.Slug; project.Title = e.Title; project.Summary = e.Summary; project.Body = e.Body;
                 project.Technologies = e.Technologies.Select(t => t.Trim()).ToList();
                 project.Featured = e.Featured; project.Visible = e.Visible; project.CoverMediaId = e.CoverMediaId;
+                project.RepositoryUrl = e.RepositoryUrl?.Trim() ?? ""; project.LiveUrl = e.LiveUrl?.Trim() ?? "";
                 project.UpdatedAt = DateTimeOffset.UtcNow;
             },
-            p => new { p.Id, p.SortOrder, p.Slug, p.Title, p.Summary, p.Body, p.Technologies, p.Featured, p.Visible, p.CoverMediaId });
+            p => new { p.Id, p.SortOrder, p.Slug, p.Title, p.Summary, p.Body, p.Technologies, p.Featured, p.Visible, p.CoverMediaId, p.RepositoryUrl, p.LiveUrl });
 
         OrderedCrud.Map<Technology, TechnologyEdit>(admin, "/technologies",
             db => db.Technologies,

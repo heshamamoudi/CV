@@ -40,9 +40,12 @@ export function ProjectsPage({ home }: { home: HomeData }) {
             <span className="library-number">
               {String(i + 1).padStart(2, "0")}
             </span>
+            {project.cover && <img className="library-cover" src={project.cover.src} srcSet={project.cover.srcSet} sizes="(max-width: 700px) 70px, 120px" width={project.cover.width} height={project.cover.height} alt={project.cover.alt} loading="lazy" />}
             <div>
+              {project.featured && <span className="project-featured">{ar ? "مميّز" : "Featured"}</span>}
               <h2>{project.title}</h2>
               <p>{project.summary}</p>
+              {project.technologies.length > 0 && <div className="project-tags">{project.technologies.slice(0, 3).map(item => <span key={item}>{item}</span>)}</div>}
             </div>
             <span className="library-arrow" aria-hidden="true">
               ↗

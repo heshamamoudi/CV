@@ -133,4 +133,21 @@ describe("HomePage", () => {
     fireEvent.keyDown(window, { key: "Home" });
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("هشام");
   });
+
+  it('previews a career role on hover and focus, then restores the pinned role', () => {
+    const second = { ...home.journey[0], id: 2, title: 'Second role', organisation: 'Second company', start: '2023-04', highlights: ['Second highlight'] };
+    render(<MemoryRouter initialEntries={['/ar#journey']}><HomePage home={{ ...home, journey: [home.journey[0], second] }} /></MemoryRouter>);
+    const role = screen.getByRole('button', { name: /2023 Second company/ });
+    expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
+    fireEvent.mouseEnter(role);
+    expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
+    fireEvent.mouseLeave(role);
+    expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
+    fireEvent.focus(role);
+    expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
+    fireEvent.blur(role);
+    fireEvent.click(role);
+    expect(role).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
+  });
 });

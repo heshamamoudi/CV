@@ -40,7 +40,7 @@ export function Layout({
         introShown = true;
         setSplash(false);
       },
-      reduce ? 200 : 2400,
+      reduce ? 150 : 1500,
     );
     return () => clearTimeout(timer);
   }, [splash]);
@@ -64,7 +64,6 @@ export function Layout({
               <i key={i} />
             ))}
           </div>
-          <div className="intro-orbit" aria-hidden="true" />
           <div className="scatter-identity">
             <BrandMark />
             <span>{displayName}</span>

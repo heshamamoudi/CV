@@ -13,6 +13,9 @@ the content remains available when WebGL is unavailable.
 The contact chapter accepts messages into a private admin inbox. The CV-based
 editorial refresh, editable public fields, inbox workflow, retention, and title
 behavior are documented in `docs/2026-09-30-content-and-admin.md`.
+The project editor supports bilingual case studies, cover images, technologies,
+and optional repository/live links. A one-time guarded refresh adds sourced
+Selfhost and InviteQR cases while preserving owner edits.
 
 Run the tests exactly as CI does:
 

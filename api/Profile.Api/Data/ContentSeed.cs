@@ -13,6 +13,7 @@ public static class ContentSeed
         if (await db.Profiles.AnyAsync(ct))
         {
             await CvContentRefresh.ApplyAsync(db, ct);
+            await ProjectEditorialRefresh.ApplyAsync(db, ct);
             return;
         }
 
@@ -136,6 +137,7 @@ public static class ContentSeed
 
         await db.SaveChangesAsync(ct);
         await CvContentRefresh.ApplyAsync(db, ct);
+        await ProjectEditorialRefresh.ApplyAsync(db, ct);
     }
 
     private static LocalizedText T(string en, string ar) => LocalizedText.Of(en, ar);

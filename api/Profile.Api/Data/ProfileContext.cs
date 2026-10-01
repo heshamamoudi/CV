@@ -45,6 +45,8 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
         {
             Text(e, x => x.Title); Text(e, x => x.Summary); Text(e, x => x.Body);
             e.HasIndex(x => x.Slug).IsUnique();
+            e.Property(x => x.RepositoryUrl).HasMaxLength(500);
+            e.Property(x => x.LiveUrl).HasMaxLength(500);
             ImageReference(e, x => x.CoverMediaId);
             // A plain text column: portable across Postgres and the in-memory test provider.
             e.Property(x => x.Technologies)

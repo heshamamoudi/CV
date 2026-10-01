@@ -103,7 +103,7 @@ public sealed class ContentService(ProfileContext db)
 
     private static ProjectDto Map(Project p, string lang, IReadOnlyDictionary<Guid, ImageDto> images) => new(
         p.Slug, p.Title.For(lang), p.Summary.For(lang), p.Body.For(lang), p.Technologies, p.Featured,
-        p.IsComplete(Lang.Other(lang)), Image(images, p.CoverMediaId));
+        p.IsComplete(Lang.Other(lang)), Image(images, p.CoverMediaId), SafeHttpUrl(p.RepositoryUrl), SafeHttpUrl(p.LiveUrl));
 
     /// <summary>A reference to an image that is gone, or has no renditions, is no image - never a broken one.</summary>
     private static ImageDto? Image(IReadOnlyDictionary<Guid, ImageDto> images, Guid? id) =>

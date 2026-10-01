@@ -2573,3 +2573,91 @@ html.immersive body {
   .chapter-4 .contact-form { padding: 18px; }
   .chapter-4 .sculpture { top: 100px; width: 48vw; height: 15vh; }
 }
+
+/* Editorial opening: the managed headline leads, with the sculpture beside it. */
+.chapter-0 .sculpture { inset: 18vh 5vw auto auto; width: min(32vw, 460px); height: 61vh; overflow: hidden; }
+[dir="rtl"] .chapter-0 .sculpture { right: auto; left: 5vw; }
+.chapter-1 .sculpture { inset: 18vh 9vw auto auto; width: min(25vw, 350px); height: min(28vh, 250px); overflow: hidden; }
+[dir="rtl"] .chapter-1 .sculpture { right: auto; left: 9vw; }
+.chapter-2 .sculpture { inset: 52vh auto auto 5vw; width: min(29vw, 360px); height: min(30vh, 275px); overflow: hidden; }
+[dir="rtl"] .chapter-2 .sculpture { left: auto; right: 5vw; }
+.chapter-0 .intro-content { width: min(59%, 800px); }
+.chapter-0 .intro-identity { max-width: none; color: var(--muted); line-height: 1.5; }
+.intro-identity span { color: var(--accent); margin-inline: .7em; }
+.chapter-0 .hero-name {
+  width: auto; max-width: 100%; margin: 0 0 34px;
+  font-size: clamp(54px, 5.6vw, 88px); line-height: 1.04;
+  font-weight: 700; letter-spacing: -.065em; text-transform: none;
+  overflow-wrap: normal;
+}
+.chapter-0 .intro-bottom { display: block; max-width: 590px; }
+.chapter-0 .intro-bottom > p { width: auto; max-width: 55ch; font-size: clamp(13px, 1vw, 16px); line-height: 1.7; }
+.intro-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 26px; margin-top: 26px; }
+.intro-secondary { border: 0; border-bottom: 1px solid var(--line); background: none; padding: 8px 0; font-size: 12px; font-weight: 650; }
+.intro-secondary span { margin-inline-start: 18px; }
+.intro-proof { max-width: 50ch; margin: 30px 0 0; padding-inline-start: 14px; border-inline-start: 2px solid var(--accent); color: var(--muted); font-size: 11px; line-height: 1.55; }
+.intro-proof span { display: block; margin-bottom: 5px; color: var(--ink); font: 9px var(--mono); }
+[dir="rtl"] .chapter-0 .hero-name { font-size: clamp(48px, 4.9vw, 78px); line-height: 1.17; }
+
+.project-featured { display: inline-block; color: var(--accent); font: 9px var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+.project-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-block: 12px 18px; }
+.project-tags span { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px; font: 9px var(--mono); }
+.project-spotlight-cover, .library-cover, .project-story-cover { display: block; max-width: 100%; object-fit: cover; border-radius: 6px; }
+.project-spotlight-cover { width: 100%; max-height: 175px; aspect-ratio: 16 / 9; margin-bottom: 18px; }
+.library-cover { flex: none; width: 120px; height: 78px; }
+.library-row .project-tags { margin-bottom: 0; }
+.project-story-cover { width: 100%; height: auto; max-height: 400px; aspect-ratio: 16 / 9; margin: 20px 0 34px; }
+.project-body p { white-space: pre-line; line-height: 1.8; }
+.project-body p + p { margin-top: 1em; }
+.project-external-links { display: flex; flex-wrap: wrap; gap: 12px 28px; margin-block: 24px 35px; }
+.project-external-links a { border-bottom: 1px solid currentColor; padding-bottom: 6px; font-size: 13px; font-weight: 650; }
+.career-selector button:hover, .career-selector button:focus-visible { opacity: 1; color: var(--accent); }
+.career-track button:focus-visible { opacity: 1; }
+
+/* Assemble the Fold, then let its pieces move into the opening composition. */
+.refined-intro .scatter-panels i { animation-duration: .72s; animation-delay: calc(.54s + var(--d)); }
+.refined-intro .scatter-identity .brand-mark path { animation-duration: .4s, .52s; animation-delay: 0s, .48s; }
+.refined-intro .scatter-identity .brand-mark path:nth-child(2) { animation-delay: .06s, .5s; }
+.refined-intro .scatter-identity .brand-mark path:nth-child(3) { animation-delay: .12s, .52s; }
+.refined-intro .scatter-identity .brand-mark path:nth-child(1) { --mx: -42vw; --my: -38vh; }
+.refined-intro .scatter-identity .brand-mark path:nth-child(2) { --mx: 28vw; --my: 1vh; }
+.refined-intro .scatter-identity .brand-mark path:nth-child(3) { --mx: -27vw; --my: 27vh; }
+.refined-intro .scatter-identity > span { animation-duration: .35s, .3s; animation-delay: .2s, .65s; }
+.refined-intro .intro-skip { animation-delay: .75s; }
+
+@media (max-width: 900px) {
+  .chapter-0 .intro-content { width: 60%; }
+  .chapter-0 .sculpture { width: 35vw; right: 2vw; }
+  [dir="rtl"] .chapter-0 .sculpture { right: auto; left: 2vw; }
+  .chapter-0 .hero-name { font-size: clamp(43px, 6vw, 62px); }
+  .chapter-0 .intro-proof { display: none; }
+  .project-spotlight-cover { max-height: 130px; }
+}
+@media (min-width: 701px) and (max-width: 900px) and (orientation: portrait) {
+  .chapter-0 .sculpture { top: 17vh; right: 5vw; left: auto; width: 42vw; height: 24vh; }
+  [dir="rtl"] .chapter-0 .sculpture { right: auto; left: 5vw; }
+  .chapter-0 .intro-content { width: 100%; justify-content: flex-end; padding-bottom: 17vh; }
+  .chapter-0 .hero-name { max-width: 100%; }
+}
+@media (max-width: 700px) {
+  .chapter-0 .intro-content { width: 100%; justify-content: flex-start; }
+  .chapter-0 .intro-identity { max-width: 90%; font-size: 11px; }
+  .chapter-0 .hero-name, [dir="rtl"] .chapter-0 .hero-name { font-size: clamp(38px, 9vw, 54px); line-height: 1.13; }
+  .chapter-0 .intro-bottom { position: static; display: block; }
+  .chapter-0 .intro-bottom > p { max-width: 94%; font-size: 14px; }
+  .intro-actions { gap: 16px; margin-top: 18px; }
+  .intro-actions .round-link { flex-direction: row; align-items: center; }
+  .intro-actions .round-link i { width: 36px; height: 36px; }
+  .intro-secondary { font-size: 12px; }
+  .chapter-0 .sculpture { top: 53vh; left: 40%; right: auto; width: 70%; height: auto; bottom: 85px; opacity: .48; }
+  [dir="rtl"] .chapter-0 .sculpture { left: -10%; right: auto; }
+  .chapter-1 .sculpture, .chapter-2 .sculpture { top: 164px; right: 13px; left: auto; width: 120px; height: 105px; opacity: .88; }
+  [dir="rtl"] .chapter-1 .sculpture, [dir="rtl"] .chapter-2 .sculpture { right: auto; left: 13px; }
+  .chapter-1 .work-content > .chapter-title, .chapter-2 .journey-heading .chapter-title { max-width: calc(100% - 125px); }
+  .chapter-1 .chapter-panel, .chapter-2 .chapter-panel { overflow-y: auto; pointer-events: auto; overscroll-behavior: contain; }
+  .chapter-1 .work-content, .chapter-2 .journey-content { min-height: 100%; height: auto; }
+  .project-tags span { font-size: 11px; }
+  .library-cover { width: 68px; height: 58px; }
+  .library-row { gap: 12px; }
+  .project-story-cover { max-height: 240px; }
+}

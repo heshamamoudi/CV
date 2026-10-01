@@ -24,7 +24,7 @@ public class DiscoveryTests
         Assert.Contains("https://heshamamoudi.com/en", locs);
         Assert.Contains("https://heshamamoudi.com/ar", locs);
         Assert.Contains("https://heshamamoudi.com/ar/projects/safety-management-system", locs);
-        Assert.Equal(6 + 2 * 5, urls.Count); // 3 pages × 2 languages + 5 projects × 2 languages
+        Assert.Equal(6 + 2 * 7, urls.Count); // 3 pages × 2 languages + 7 projects × 2 languages
 
         var arHome = urls.Single(u => u.Element(sm + "loc")!.Value == "https://heshamamoudi.com/ar");
         Assert.Contains(arHome.Elements(xhtml + "link"),

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { HomeData } from "../types";
-import { sculptureLabels } from "./sculptureLabels";
+import { careerMilestonePoint, sculptureLabels } from "./sculptureLabels";
 
 const noJourney: HomeData['journey'] = [];
 const noTechnologies: HomeData['technologies'] = [];
@@ -14,17 +14,19 @@ export function Sculpture({
   rtl = false,
   journey = noJourney,
   technologies = noTechnologies,
+  selectedJourneyIndex = 0,
 }: {
   chapter: number;
   paused: boolean;
   rtl?: boolean;
   journey?: HomeData['journey'];
   technologies?: HomeData['technologies'];
+  selectedJourneyIndex?: number;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const current = useRef({ chapter, paused, rtl });
+  const current = useRef({ chapter, paused, rtl, selectedJourneyIndex });
   const [fallback, setFallback] = useState(false);
-  current.current = { chapter, paused, rtl };
+  current.current = { chapter, paused, rtl, selectedJourneyIndex };
   useEffect(() => {
     const el = host.current;
     if (!el) return;
@@ -236,21 +238,24 @@ export function Sculpture({
       }),
     );
     group.add(ball);
-    const milestones = Array.from({ length: 4 }, (_, i) => {
+    const milestonePoints = journey.map((_, i) => careerMilestonePoint(i, journey));
+    const milestones = Array.from({ length: journey.length }, (_, i) => {
       const m = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 20, 14),
         new THREE.MeshStandardMaterial({
-          color: i === 3 ? 0xff633b : 0xc8baf2,
+          color: 0xc8baf2,
           metalness: 0.45,
           roughness: 0.25,
           transparent: true,
           opacity: 0,
         }),
       );
-      m.position.copy(curves[2].getPointAt(0.05 + i * 0.29));
+      m.position.copy(curves[2].getPointAt(milestonePoints[i]));
       group.add(m);
       return m;
     });
+    const selectedMilestoneColor = new THREE.Color(0xff633b);
+    const idleMilestoneColor = new THREE.Color(0xc8baf2);
     let width = 1,
       positioned = false,
       needsRender = true;
@@ -259,12 +264,13 @@ export function Sculpture({
       const h = el.clientHeight;
       renderer.setSize(width, h);
       camera.aspect = width / Math.max(h, 1);
+      camera.position.z = width <= 160 ? 5.2 : width < 400 ? 8.5 : 11;
       camera.updateProjectionMatrix();
       needsRender = true;
       if (!positioned) {
         group.position.x =
-          (width < 700 ? 0 : 1.65) * (current.current.rtl ? -1 : 1);
-        group.scale.setScalar(width < 700 ? 0.76 : 1.12);
+          (current.current.chapter === 0 || width < 700 ? 0 : 1.65) * (current.current.rtl ? -1 : 1);
+        group.scale.setScalar(current.current.chapter === 0 ? 0.88 : width < 700 ? 0.76 : 1.12);
         positioned = true;
       }
     };
@@ -283,8 +289,10 @@ export function Sculpture({
     let frame = 0,
       last = performance.now(),
       t = 0,
+      travelerAt = milestonePoints[0] ?? 0.5,
       lost = false,
-      lastChapter = -1;
+      lastChapter = -1,
+      lastSelected = -1;
     const onLost = (e: Event) => {
       e.preventDefault();
       lost = true;
@@ -299,20 +307,20 @@ export function Sculpture({
       const dt = Math.max(0, Math.min((now - last) / 1000, 0.05));
       last = now;
       if (document.hidden || lost) return;
-      const { chapter: c, paused: stop, rtl: isRtl } = current.current;
-      if (stop && lastChapter === c && !needsRender) return;
+      const { chapter: c, paused: stop, rtl: isRtl, selectedJourneyIndex: selectedRole } = current.current;
+      if (stop && lastChapter === c && lastSelected === selectedRole && !needsRender) return;
       if (!stop) t += dt;
       const smooth = stop ? 1 : 1 - Math.exp(-dt * 4),
         mobile = width < 700;
       const x =
-        (mobile ? [0, 1.2, -1.2, 1.4, 0][c] : [1.65, 2.7, -2.7, 2.6, 0.7][c]) *
+        (mobile ? [0, 0, 0, 1.4, 0][c] : [0, 0, 0, 2.6, 0.7][c]) *
         (isRtl ? -1 : 1);
       const y = mobile
-        ? [0.25, 1, 1, 1.1, 0.9][c]
-        : [0.08, 0.1, 0.05, 0, 0.25][c];
+        ? [0, 0, 0, 1.1, 0.9][c]
+        : [0, 0, 0, 0, 0.25][c];
       const scale = mobile
-        ? [0.76, 0.48, 0.45, 0.47, 0.65][c]
-        : [1.12, 0.86, 0.86, 0.82, 1.05][c];
+        ? [0.88, 0.6, 0.68, 0.47, 0.65][c]
+        : [0.88, 0.72, 0.72, 0.82, 1.05][c];
       group.position.x = THREE.MathUtils.lerp(group.position.x, x, smooth);
       group.position.y = THREE.MathUtils.lerp(
         group.position.y,
@@ -376,7 +384,7 @@ export function Sculpture({
               );
         tile.position.lerp(target, smooth);
         tile.scale.lerp(
-          scaleVector.setScalar(c === 2 ? 0.57 : c === 4 ? 0.72 : 1),
+          scaleVector.setScalar(c === 2 ? 0 : c === 4 ? 0.72 : 1),
           smooth,
         );
         tile.rotation.z = THREE.MathUtils.lerp(
@@ -385,15 +393,17 @@ export function Sculpture({
           smooth,
         );
       });
-      milestones.forEach(
-        (m) =>
-          (m.material.opacity = THREE.MathUtils.lerp(
-            m.material.opacity,
-            c === 2 ? 1 : 0,
-            smooth,
-          )),
-      );
-      if (c === 2) ball.position.copy(curves[2].getPointAt((t * 0.12) % 1));
+      milestones.forEach((m, i) => {
+        const material = m.material as THREE.MeshStandardMaterial;
+        material.opacity = THREE.MathUtils.lerp(material.opacity, c === 2 ? 1 : 0, smooth);
+        material.color.lerp(i === selectedRole ? selectedMilestoneColor : idleMilestoneColor, smooth);
+        m.scale.lerp(scaleVector.setScalar(i === selectedRole ? 1.5 : 0.65), smooth);
+      });
+      if (c === 2) {
+        const target = milestonePoints[Math.max(0, Math.min(selectedRole, milestonePoints.length - 1))] ?? 0.5;
+        travelerAt = THREE.MathUtils.lerp(travelerAt, target, stop ? 1 : smooth);
+        ball.position.copy(curves[2].getPointAt(travelerAt));
+      }
       else
         ball.position.set(
           Math.sin(t * 0.3 + 1) * 2.5,
@@ -402,6 +412,7 @@ export function Sculpture({
         );
       renderer.render(scene, camera);
       needsRender = false;
+      lastSelected = selectedRole;
     };
     frame = requestAnimationFrame(animate);
     return () => {

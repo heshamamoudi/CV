@@ -1,4 +1,4 @@
-import { sculptureLabels } from './sculptureLabels';
+import { careerMilestonePoint, sculptureLabels } from './sculptureLabels';
 import type { HomeData } from '../types';
 
 it('takes milestone years only from published roles, including the earliest and latest', () => {
@@ -10,4 +10,13 @@ it('takes milestone years only from published roles, including the earliest and 
 
 it('does not invent dates or technologies when content is empty', () => {
   expect(sculptureLabels([], [])[2]).toEqual(['·', '·', '·', '·']);
+});
+
+it('positions every role chronologically, including repeated years and additional roles', () => {
+  const roles = ['2025-07', '2023-06', '2024-04', '2023-12'].map(start => ({ start })) as HomeData['journey'];
+  const points = roles.map((_, i) => careerMilestonePoint(i, roles));
+  expect(points[1]).toBeLessThan(points[3]);
+  expect(points[3]).toBeLessThan(points[2]);
+  expect(points[2]).toBeLessThan(points[0]);
+  expect(new Set(points).size).toBe(roles.length);
 });
