@@ -45,14 +45,14 @@ public class ReviewFollowUpTests
     {
         var (app, admin) = await AdminTestApp.CreateAsync();
         var project = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/projects"))!
-            .Single(p => p!["slug"]!.GetValue<string>() == "safety-management-system")!.AsObject();
+            .Single(p => p!["slug"]!.GetValue<string>() == "selfhost-platform")!.AsObject();
         project["slug"] = "sms";
         project["title"]!["ar"] = "";
         Assert.Equal(HttpStatusCode.OK, (await admin.PutAsJsonAsync($"/api/admin/projects/{project["id"]}", project)).StatusCode);
 
         var client = app.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        Assert.Equal(HttpStatusCode.MovedPermanently, (await client.GetAsync("/en/projects/safety-management-system")).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/ar/projects/safety-management-system")).StatusCode);
+        Assert.Equal(HttpStatusCode.MovedPermanently, (await client.GetAsync("/en/projects/selfhost-platform")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/ar/projects/selfhost-platform")).StatusCode);
     }
 
     [Fact]

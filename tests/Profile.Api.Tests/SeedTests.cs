@@ -30,9 +30,10 @@ public class SeedTests
         var journey = await db.JourneyEntries.Include(j => j.Highlights).ToListAsync();
         var projects = await db.Projects.ToListAsync();
 
-        // Not vacuous: the CV has eight roles (six main, two additional) and at least four projects.
+        // The public portfolio keeps the two selected case studies, each complete in both languages.
         Assert.Equal(8, journey.Count);
-        Assert.True(projects.Count >= 4);
+        Assert.Equal(new[] { "selfhost-platform", "inviteqr" }, projects.OrderBy(p => p.SortOrder).Select(p => p.Slug));
+        Assert.All(projects, project => Assert.NotNull(project.CoverMediaId));
 
         foreach (var lang in Lang.Supported)
         {

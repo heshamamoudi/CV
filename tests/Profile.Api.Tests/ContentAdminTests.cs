@@ -67,14 +67,14 @@ public class ContentAdminTests
     {
         var (app, admin) = await AdminTestApp.CreateAsync();
         var project = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/projects"))!
-            .Single(p => p!["slug"]!.GetValue<string>() == "safety-management-system")!.AsObject();
+            .Single(p => p!["slug"]!.GetValue<string>() == "selfhost-platform")!.AsObject();
         var id = project["id"]!.GetValue<int>();
 
         project["slug"] = "sms";
         Assert.Equal(HttpStatusCode.OK, (await admin.PutAsJsonAsync($"/api/admin/projects/{id}", project)).StatusCode);
 
         var client = app.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        var old = await client.GetAsync("/ar/projects/safety-management-system");
+        var old = await client.GetAsync("/ar/projects/selfhost-platform");
 
         Assert.Equal(HttpStatusCode.MovedPermanently, old.StatusCode);
         Assert.Equal("/ar/projects/sms", old.Headers.Location!.OriginalString);
@@ -104,13 +104,13 @@ public class ContentAdminTests
     {
         var (app, admin) = await AdminTestApp.CreateAsync();
         var original = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/projects"))!
-            .Single(p => p!["slug"]!.GetValue<string>() == "safety-management-system")!.AsObject();
+            .Single(p => p!["slug"]!.GetValue<string>() == "selfhost-platform")!.AsObject();
         original["slug"] = "sms";
         await admin.PutAsJsonAsync($"/api/admin/projects/{original["id"]}", original);
 
         var newcomer = new JsonObject
         {
-            ["slug"] = "safety-management-system", ["title"] = L("Newcomer", "الجديد"), ["summary"] = L("New", "جديد"),
+            ["slug"] = "selfhost-platform", ["title"] = L("Newcomer", "الجديد"), ["summary"] = L("New", "جديد"),
             ["body"] = L("", ""), ["technologies"] = new JsonArray(), ["featured"] = false, ["visible"] = true, ["coverMediaId"] = null,
         };
         var created = (await (await admin.PostAsJsonAsync("/api/admin/projects", newcomer)).Content.ReadFromJsonAsync<JsonObject>())!;
@@ -118,7 +118,7 @@ public class ContentAdminTests
         Assert.Equal(HttpStatusCode.OK, (await admin.PutAsJsonAsync($"/api/admin/projects/{created["id"]}", created)).StatusCode);
 
         var client = app.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        var old = await client.GetAsync("/en/projects/safety-management-system");
+        var old = await client.GetAsync("/en/projects/selfhost-platform");
 
         Assert.Equal(HttpStatusCode.MovedPermanently, old.StatusCode);
         Assert.Equal("/en/projects/newcomer", old.Headers.Location!.OriginalString);

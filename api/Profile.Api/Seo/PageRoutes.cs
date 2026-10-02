@@ -56,6 +56,8 @@ public static class PageRoutes
             {
                 if (await content.CurrentSlugAsync(slug, lang, ct) is { } current)
                     return Results.Redirect($"/{lang}/projects/{current}{http.Request.QueryString}", permanent: true);
+                if (LegacyProjectCleanup.Slugs.Contains(slug))
+                    return Results.Redirect($"/{lang}/projects{http.Request.QueryString}", permanent: true);
                 return await NotFoundAsync(lang, content, renderer, ct);
             }
         }

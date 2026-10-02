@@ -36,9 +36,21 @@ public class PublicApiTests
     public async Task A_project_is_served_by_slug()
     {
         var client = await ClientAsync();
-        var project = await client.GetFromJsonAsync<ProjectDto>("/api/public/ar/projects/safety-management-system");
+        var project = await client.GetFromJsonAsync<ProjectDto>("/api/public/ar/projects/selfhost-platform");
 
-        Assert.Equal("نظام إدارة السلامة", project!.Title);
+        Assert.Contains("Selfhost", project!.Title);
         Assert.True(project.AvailableInOtherLanguage);
     }
+
+    [Theory]
+    [MemberData(nameof(RetiredProjectSlugs))]
+    public async Task Retired_cv_projects_are_absent_from_the_public_api(string slug)
+    {
+        var client = await ClientAsync();
+        var reply = await client.GetAsync($"/api/public/en/projects/{slug}");
+
+        Assert.Equal(HttpStatusCode.NotFound, reply.StatusCode);
+    }
+
+    public static IEnumerable<object[]> RetiredProjectSlugs => Profile.Api.Data.LegacyProjectCleanup.Slugs.Select(slug => new object[] { slug });
 }

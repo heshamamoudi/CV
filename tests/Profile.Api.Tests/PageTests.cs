@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Profile.Api.Data;
 
 namespace Profile.Api.Tests;
 
@@ -55,10 +56,48 @@ public class PageTests
     public async Task A_project_page_exists_in_both_languages_and_links_its_twin()
     {
         var client = await ClientAsync();
-        var html = await client.GetStringAsync("/ar/projects/safety-management-system");
+        var html = await client.GetStringAsync("/ar/projects/selfhost-platform");
 
-        Assert.Contains("نظام إدارة السلامة", html);
-        Assert.Contains("hreflang=\"en\" href=\"https://heshamamoudi.com/en/projects/safety-management-system\"", html);
+        Assert.Contains("Selfhost", html);
+        Assert.Contains("hreflang=\"en\" href=\"https://heshamamoudi.com/en/projects/selfhost-platform\"", html);
+    }
+
+    [Theory]
+    [MemberData(nameof(RetiredProjectSlugs))]
+    public async Task Retired_cv_project_urls_redirect_to_the_language_projects_page(string slug)
+    {
+        var client = await ClientAsync();
+        var reply = await client.GetAsync($"/ar/projects/{slug}");
+
+        Assert.Equal(HttpStatusCode.MovedPermanently, reply.StatusCode);
+        Assert.Equal("/ar/projects", reply.Headers.Location!.OriginalString);
+    }
+
+    public static IEnumerable<object[]> RetiredProjectSlugs => LegacyProjectCleanup.Slugs.Select(slug => new object[] { slug });
+
+    [Fact]
+    public async Task A_reused_legacy_slug_resolves_to_its_active_project()
+    {
+        var app = TestApp.Create(s => InMemoryDb.Use(s, "reused-legacy-slug-" + Guid.NewGuid()));
+        await InMemoryDb.SeededAsync(app.Services);
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<Profile.Api.Data.ProfileContext>();
+            db.Projects.Add(new Profile.Api.Data.Project
+            {
+                Slug = "kaia-external-website",
+                Title = Profile.Api.Data.LocalizedText.Of("Reused project", "مشروع جديد"),
+                Summary = Profile.Api.Data.LocalizedText.Of("An active owner project.", "مشروع مملوك وفعّال."),
+                Body = Profile.Api.Data.LocalizedText.Of("", ""),
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = app.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        var reply = await client.GetAsync("/en/projects/kaia-external-website");
+
+        Assert.Equal(HttpStatusCode.OK, reply.StatusCode);
+        Assert.Contains("Reused project", await reply.Content.ReadAsStringAsync());
     }
 
     [Theory]

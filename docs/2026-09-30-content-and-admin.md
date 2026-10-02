@@ -32,16 +32,27 @@ The browser tab title is the English profile name, `Hesham Amoudi` by default,
 on every public language and route. The separate admin SEO title and description
 fields continue to control search metadata, including the social sharing title.
 
-`ProjectEditorialRefresh` applies its own one-time `ContentRevisions` marker.
-It puts the Selfhost and InviteQR case studies before the five original CV projects
-without changing the original rows' relative order. Selfhost becomes featured
-only if the owner has not already chosen a featured project. The refresh fills
-blank CV project bodies only when that language's title still matches the original
-seed. It leaves owner text, deleted records after the marker, visibility, media,
-and existing links untouched. Project URLs are optional HTTP(S) fields; the public
-detail page renders only valid saved links. The admin editorial checklist reports
-missing bilingual bodies, technologies, and cover image without changing publish
-visibility. New cases have no cover until the owner supplies images.
+`ProjectEditorialRefresh` and `LegacyProjectCleanup` use separate one-time
+`ContentRevisions` markers. The portfolio now publishes only Selfhost and InviteQR.
+The cleanup removes the five original CV placeholders (`kaia-external-website`,
+`airport-process-automation`, `safety-management-system`,
+`hajj-1445-operations-modules`, and `hajj-1444-centers-performance`) after the
+earlier editorial refresh. It leaves other owner projects, media, contact messages,
+and inbox records alone. Requests for those retired project URLs redirect to the
+matching language's projects page; an active project slug still resolves normally.
+The cleanup marker prevents later seed runs from recreating retired projects.
+
+`ProjectDemoMediaRefresh` stores the reviewed Selfhost and InviteQR UI captures as
+ordinary `Media` and `MediaRendition` rows and associates them through each
+project's persisted `CoverMediaId`. The localized image text identifies them as
+demonstration workspaces. Owners can replace or clear a cover in the project
+editor; the one-time media marker prevents a later seed run from restoring the
+original association. Renditions are embedded source assets, so no screenshot URL
+or runtime network fetch participates in publishing.
+
+Project URLs remain optional HTTP(S) fields; the public detail page renders only
+valid saved links. The admin editorial checklist reports missing bilingual bodies,
+technologies, and cover image without changing publish visibility.
 
 Selfhost copy was checked against `D:/selfhost/apps/control/README.md`,
 `D:/selfhost/docs/00-platform.md`, and `D:/selfhost/docs/08-ci-cd.md`.

@@ -22,6 +22,10 @@
     <!-- One source of UI strings for the server renderer and the React app. -->
     <EmbeddedResource Include="../../web/src/i18n/strings.json" LogicalName="strings.json" />
     <EmbeddedResource Include="Data/cv-content-2026-09.json" LogicalName="cv-content-2026-09.json" />
+    <EmbeddedResource Include="Data/DemoMedia/selfhost-640.webp" LogicalName="demo-media.selfhost-640.webp" />
+    <EmbeddedResource Include="Data/DemoMedia/selfhost-1280.webp" LogicalName="demo-media.selfhost-1280.webp" />
+    <EmbeddedResource Include="Data/DemoMedia/inviteqr-640.webp" LogicalName="demo-media.inviteqr-640.webp" />
+    <EmbeddedResource Include="Data/DemoMedia/inviteqr-1280.webp" LogicalName="demo-media.inviteqr-1280.webp" />
   </ItemGroup>
 
   <ItemGroup>

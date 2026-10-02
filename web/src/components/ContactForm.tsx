@@ -1,5 +1,6 @@
 import { useRef, useState, type FormEvent } from "react";
 import type { Lang } from "../types";
+import { BrandMark } from "./BrandMark";
 
 type ContactField = "name" | "email" | "subject" | "message";
 type ContactValues = Record<ContactField, string>;
@@ -97,7 +98,9 @@ export function ContactForm({ lang }: Props) {
 
   if (sent) return (
     <div className="contact-form contact-receipt" role="status">
-      <p>{copy(lang, "Thank you. Your message has been received.", "شكراً لك، وصلتنا رسالتك.")}</p>
+      <BrandMark />
+      <h3>{copy(lang, "Message received.", "وصلت الرسالة.")}</h3>
+      <p>{copy(lang, "Thank you for reaching out.", "شكراً لتواصلك.")}</p>
       <button type="button" onClick={() => { setSent(false); setNotice(""); }}>
         {copy(lang, "Send another message", "إرسال رسالة أخرى")} <span aria-hidden="true">↗</span>
       </button>
@@ -106,6 +109,8 @@ export function ContactForm({ lang }: Props) {
 
   return (
     <form className="contact-form" data-contact-form data-scroll-region onSubmit={submit}>
+      <h3>{copy(lang, "Send a message", "أرسل رسالة")}</h3>
+      <p className="form-caption">{copy(lang, "01 / Your details", "01 / بياناتك")}</p>
       <div className="contact-fields">
         {fields.map(({ name, en, ar, max }) => {
           const label = copy(lang, en, ar);

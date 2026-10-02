@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { HomePage } from "./HomePage";
 import type { HomeData } from "../types";
@@ -134,15 +134,15 @@ describe("HomePage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("هشام");
   });
 
-  it('previews a career role on hover and focus, then restores the pinned role', () => {
+  it('previews a career role on hover and focus, then restores the pinned role', async () => {
     const second = { ...home.journey[0], id: 2, title: 'Second role', organisation: 'Second company', start: '2023-04', highlights: ['Second highlight'] };
     render(<MemoryRouter initialEntries={['/ar#journey']}><HomePage home={{ ...home, journey: [home.journey[0], second] }} /></MemoryRouter>);
-    const role = screen.getByRole('button', { name: /2023 Second company/ });
+    const role = screen.getByRole('button', { name: /2023 Second role Second company/ });
     expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
     fireEvent.mouseEnter(role);
-    expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument());
     fireEvent.mouseLeave(role);
-    expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument());
     fireEvent.focus(role);
     expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
     fireEvent.blur(role);

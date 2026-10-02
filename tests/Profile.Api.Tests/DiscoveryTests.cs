@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Profile.Api.Data;
 
 namespace Profile.Api.Tests;
 
@@ -23,8 +24,10 @@ public class DiscoveryTests
 
         Assert.Contains("https://heshamamoudi.com/en", locs);
         Assert.Contains("https://heshamamoudi.com/ar", locs);
-        Assert.Contains("https://heshamamoudi.com/ar/projects/safety-management-system", locs);
-        Assert.Equal(6 + 2 * 7, urls.Count); // 3 pages × 2 languages + 7 projects × 2 languages
+        Assert.Contains("https://heshamamoudi.com/ar/projects/inviteqr", locs);
+        Assert.Contains("https://heshamamoudi.com/en/projects/selfhost-platform", locs);
+        Assert.DoesNotContain(locs, url => LegacyProjectCleanup.Slugs.Any(slug => url.Contains("/projects/" + slug, StringComparison.Ordinal)));
+        Assert.Equal(6 + 2 * 2, urls.Count); // 3 pages × 2 languages + 2 projects × 2 languages
 
         var arHome = urls.Single(u => u.Element(sm + "loc")!.Value == "https://heshamamoudi.com/ar");
         Assert.Contains(arHome.Elements(xhtml + "link"),

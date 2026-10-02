@@ -49,6 +49,7 @@ public static class ProjectEditorialRefresh
         }
 
         var order = projects.Count == 0 ? 0 : projects.Min(p => p.SortOrder) - 2;
+        var selfhost = projects.FirstOrDefault(p => p.Slug == "selfhost-platform");
         if (!projects.Any(p => p.Slug == "selfhost-platform"))
         {
             db.Projects.Add(new Project
@@ -67,6 +68,11 @@ public static class ProjectEditorialRefresh
                 SortOrder = order++,
                 Featured = !projects.Any(p => p.Featured),
             });
+            order++;
+        }
+        else
+        {
+            order = selfhost!.SortOrder + 1;
         }
         if (!projects.Any(p => p.Slug == "inviteqr"))
         {

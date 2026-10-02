@@ -73,9 +73,11 @@ public class MediaTests
     public async Task Anything_but_a_webp_or_jpeg_within_limits_is_refused(string why)
     {
         var (_, admin) = await AdminTestApp.CreateAsync();
+        var before = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/media"))!;
         var reply = await admin.PostAsync("/api/admin/media", Upload(("w1280", RejectedFiles[why]())));
         Assert.True(reply.StatusCode == HttpStatusCode.BadRequest, $"{why}: {(int)reply.StatusCode}");
-        Assert.Empty((await admin.GetFromJsonAsync<JsonArray>("/api/admin/media"))!);
+        var after = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/media"))!;
+        Assert.Equal(before.Select(m => m!["id"]!.GetValue<Guid>()), after.Select(m => m!["id"]!.GetValue<Guid>()));
     }
 
     [Fact]
@@ -134,7 +136,7 @@ public class MediaTests
         Assert.Equal(HttpStatusCode.NotFound, (await admin.PutAsJsonAsync($"/api/admin/media/{Guid.NewGuid()}", alt)).StatusCode);
 
         var list = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/media"))!;
-        Assert.Equal([second, first], list.Select(m => m!["id"]!.GetValue<Guid>()));
+        Assert.Equal([second, first], list.Take(2).Select(m => m!["id"]!.GetValue<Guid>()));
         var edited = list[1]!;
         Assert.Equal("الفريق", edited["alt"]!["ar"]!.GetValue<string>());
         Assert.Equal([640, 1920], edited["widths"]!.AsArray().Select(w => w!.GetValue<int>()));
@@ -157,20 +159,20 @@ public class MediaTests
             ],
         };
         db.Media.Add(media);
-        var project = await db.Projects.FirstAsync(p => p.Slug == "safety-management-system");
+        var project = await db.Projects.FirstAsync(p => p.Slug == "selfhost-platform");
         project.CoverMediaId = media.Id;
         await db.SaveChangesAsync();
 
         var service = new ContentService(db);
-        var cover = (await service.ProjectAsync("en", "safety-management-system"))!.Cover!;
+        var cover = (await service.ProjectAsync("en", "selfhost-platform"))!.Cover!;
 
         Assert.Equal($"/media/{media.Id:N}/640.jpg", cover.Src);
         Assert.Equal($"/media/{media.Id:N}/640.jpg 640w, /media/{media.Id:N}/1920.jpg 1920w", cover.SrcSet);
         Assert.Equal((1920, 1080, "Dashboard"), (cover.Width, cover.Height, cover.Alt));
-        Assert.Equal(cover, (await service.HomeAsync("en"))!.Projects.Single(p => p.Slug == "safety-management-system").Cover);
+        Assert.Equal(cover, (await service.HomeAsync("en"))!.Projects.Single(p => p.Slug == "selfhost-platform").Cover);
 
         project.CoverMediaId = Guid.NewGuid();
         await db.SaveChangesAsync();
-        Assert.Null((await service.ProjectAsync("en", "safety-management-system"))!.Cover);
+        Assert.Null((await service.ProjectAsync("en", "selfhost-platform"))!.Cover);
     }
 }

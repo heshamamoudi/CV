@@ -41,7 +41,7 @@ public class ContentServiceTests
         await using var db = await SeededDbAsync();
         var hidden = await db.JourneyEntries.FirstAsync(j => j.Title.En == "Web Developer");
         hidden.Visible = false;
-        var untranslated = await db.Projects.FirstAsync(p => p.Slug == "safety-management-system");
+        var untranslated = await db.Projects.FirstAsync(p => p.Slug == "selfhost-platform");
         untranslated.Title.Ar = "";
         await db.SaveChangesAsync();
 
@@ -50,8 +50,8 @@ public class ContentServiceTests
         var ar = await service.HomeAsync("ar");
 
         Assert.DoesNotContain(en!.Journey, j => j.Title == "Web Developer");
-        Assert.Contains(en.Projects, p => p.Slug == "safety-management-system");
-        Assert.DoesNotContain(ar!.Projects, p => p.Slug == "safety-management-system");
+        Assert.Contains(en.Projects, p => p.Slug == "selfhost-platform");
+        Assert.DoesNotContain(ar!.Projects, p => p.Slug == "selfhost-platform");
         Assert.NotEmpty(ar.Projects); // not vacuous
     }
 

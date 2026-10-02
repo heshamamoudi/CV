@@ -14,6 +14,8 @@ public static class ContentSeed
         {
             await CvContentRefresh.ApplyAsync(db, ct);
             await ProjectEditorialRefresh.ApplyAsync(db, ct);
+            await LegacyProjectCleanup.ApplyAsync(db, ct);
+            await ProjectDemoMediaRefresh.ApplyAsync(db, ct);
             return;
         }
 
@@ -89,24 +91,6 @@ public static class ContentSeed
                 ("Led the development team for the Centers Performance Excellence programme", "قيادة فريق التطوير لبرنامج التميز في أداء المراكز"),
                 ("Launched the system and ran training workshops", "إطلاق النظام وتنفيذ ورش تدريبية")));
 
-        var p = 0;
-        Project Proj(string slug, string titleEn, string titleAr, string summaryEn, string summaryAr) => new()
-        {
-            Slug = slug, Title = T(titleEn, titleAr), Summary = T(summaryEn, summaryAr), Body = T("", ""), SortOrder = p++,
-        };
-
-        db.Projects.AddRange(
-            Proj("kaia-external-website", "King Abdulaziz International Airport website", "الموقع الإلكتروني لمطار الملك عبدالعزيز الدولي",
-                "Led development of the airport's public-facing website.", "قيادة تطوير الموقع الإلكتروني الموجّه للجمهور للمطار."),
-            Proj("airport-process-automation", "Airport process automation", "أتمتة إجراءات المطار",
-                "More than 90 business processes automated across airport operations.", "أتمتة أكثر من 90 إجراءً عبر عمليات المطار."),
-            Proj("safety-management-system", "Safety Management System", "نظام إدارة السلامة",
-                "A system that improved operational safety compliance.", "نظام رفع مستوى الامتثال لمتطلبات السلامة التشغيلية."),
-            Proj("hajj-1445-operations-modules", "Hajj 1445 operations modules", "وحدات تشغيل حج 1445هـ",
-                "Workforce, live pilgrim feed, evaluation and violations modules delivered for the Hajj season.", "وحدات القوى العاملة والبث المباشر للحجاج والتقييم والمخالفات لموسم الحج."),
-            Proj("hajj-1444-centers-performance", "Centers Performance Excellence", "التميز في أداء المراكز",
-                "A performance excellence system for Hajj service centres, launched with training workshops.", "نظام للتميز في أداء مراكز خدمة الحجاج أُطلق مع ورش تدريبية."));
-
         var t = 0;
         void Tech(string categoryEn, string categoryAr, params string[] names)
         {
@@ -138,6 +122,8 @@ public static class ContentSeed
         await db.SaveChangesAsync(ct);
         await CvContentRefresh.ApplyAsync(db, ct);
         await ProjectEditorialRefresh.ApplyAsync(db, ct);
+        await LegacyProjectCleanup.ApplyAsync(db, ct);
+        await ProjectDemoMediaRefresh.ApplyAsync(db, ct);
     }
 
     private static LocalizedText T(string en, string ar) => LocalizedText.Of(en, ar);
