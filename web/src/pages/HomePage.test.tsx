@@ -1,9 +1,9 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { HomePage } from "./HomePage";
 import type { HomeData } from "../types";
 
-vi.mock("../components/Sculpture", () => ({ Sculpture: () => null }));
+vi.mock("../components/Sculpture", () => ({ Sculpture: ({ selectedJourneyIndex }: { selectedJourneyIndex: number }) => <div data-testid="sculpture" data-role-index={selectedJourneyIndex} /> }));
 
 const home: HomeData = {
   lang: "ar",
@@ -149,5 +149,69 @@ describe("HomePage", () => {
     fireEvent.click(role);
     expect(role).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
+  });
+
+  it("keeps the selected journey role aligned with the sculpture after leaving and returning", () => {
+    const journey = [
+      { ...home.journey[0], id: 1, title: "First role", organisation: "First company" },
+      { ...home.journey[0], id: 2, title: "Second role", organisation: "Second company", start: "2023-04" },
+      { ...home.journey[0], id: 3, title: "Third role", organisation: "Third company", start: "2022-04" },
+    ];
+    const { container } = render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
+    const chapters = container.querySelectorAll(".chapter-progress button");
+    expect(container.querySelector(".journey-roles")).toHaveAttribute("data-scroll-region");
+    expect(container.querySelector(".journey-detail")).toHaveAttribute("data-scroll-region");
+    fireEvent.click(screen.getByRole("button", { name: /2022 Third role Third company/ }));
+    expect(screen.getByRole("heading", { name: "Third role" })).toBeInTheDocument();
+    expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "2");
+
+    fireEvent.click(chapters[3]);
+    fireEvent.click(chapters[2]);
+    expect(screen.getByRole("heading", { name: "Third role" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /2022 Third role Third company/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "2");
+  });
+
+  it("cancels a pending hover preview when a different role is pinned", async () => {
+    const journey = [
+      { ...home.journey[0], id: 1, title: "First role", organisation: "First company" },
+      { ...home.journey[0], id: 2, title: "Second role", organisation: "Second company", start: "2023-04" },
+    ];
+    vi.useFakeTimers();
+    try {
+      render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
+      const first = screen.getByRole("button", { name: /2025 First role First company/ });
+      const second = screen.getByRole("button", { name: /2023 Second role Second company/ });
+      fireEvent.mouseEnter(second);
+      fireEvent.click(first);
+      await act(async () => { vi.advanceTimersByTime(100); });
+
+      expect(screen.getByRole("heading", { name: "First role" })).toBeInTheDocument();
+      expect(first).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "0");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels a pending preview when the journey list shrinks", async () => {
+    const journey = [
+      { ...home.journey[0], id: 1, title: "First role", organisation: "First company" },
+      { ...home.journey[0], id: 2, title: "Second role", organisation: "Second company", start: "2023-04" },
+      { ...home.journey[0], id: 3, title: "Third role", organisation: "Third company", start: "2022-04" },
+    ];
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
+      fireEvent.mouseEnter(screen.getByRole("button", { name: /2022 Third role Third company/ }));
+      rerender(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey: journey.slice(0, 2) }} /></MemoryRouter>);
+      await act(async () => { vi.advanceTimersByTime(100); });
+
+      expect(screen.queryByRole("button", { name: /Third role/ })).not.toBeInTheDocument();
+      expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "0");
+      expect(screen.getByRole("heading", { name: "First role" })).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

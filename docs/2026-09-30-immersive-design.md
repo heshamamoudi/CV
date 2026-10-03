@@ -8,30 +8,33 @@ have their own scroll regions; they do not make the document travel vertically.
 
 ## Visual identity
 
-Warm ivory, charcoal, orange, and a lavender work chapter replace the earlier
-architectural proposal. There are no buildings or skyline assets. The custom
-vector mark, **The Fold**, consists of two connected folded paths and an orange
-forward segment. Editable SVG originals live in `web/public/brand/`; the header,
-splash, and favicon share the same geometry. The name accompanies the mark in
-English or Arabic. Manrope, IBM Plex Mono, and Noto Sans Arabic are hosted locally
+The Fold Atlas design uses blue ink, petrol, midnight slate, mineral green,
+and warm graphite chapter backgrounds, with pearl text, mint controls, and
+restrained copper accents. There are no buildings or skyline assets. The custom
+HA mark uses two readable initials joined by one shared copper bridge. Light,
+dark, monochrome, and optical favicon SVGs live in `web/public/brand/` and share
+its geometry. The name accompanies the mark in English or Arabic. Manrope, IBM
+Plex Mono, and Noto Sans Arabic are hosted locally
 with their OFL licences, so fonts never require a third-party request.
 
 ## Motion
 
-`Sculpture.tsx` owns one lazy-loaded Three.js renderer. Five tube surfaces share
-vertex topology; their positions and normals interpolate between an interwoven
-intro, a connected project loop, an ascending career path with milestones, a
-five-lobed skills form, and a conversation outline. Labels and the surrounding
-elements change with the chapter. Pointer motion adds restrained parallax.
+`Sculpture.tsx` owns one lazy-loaded Three.js renderer and one continuous beveled
+ribbon mesh. It morphs into a triangular intro aperture, a work frame, a folded
+career atlas, an About frame, and a Contact fold. An orthographic camera fits
+each form to its stage, including the outgoing form during transitions. Journey
+stations sit on the continuous route; the selected role and About tab affect its
+pose. Pointer motion adds restrained parallax. Details are in
+`2026-10-03-sculpture-repair.md`.
 
 The opening sequence runs on each full load / refresh, once per SPA lifetime.
-The mark assembles from its separate paths, and twelve
-screen panels scatter with depth and staggered timing. The underlying page enters
-in sequence. The intro is skippable and lasts at most 1.5 seconds. Reduced-motion
+The HA mark appears above eight screen panels that clear with staggered timing.
+The underlying page enters in sequence. The intro is skippable and lasts at most
+1.5 seconds. Reduced-motion
 visitors get a brief static opening and paused 3D; motion can also be paused with
 the persistent control. The renderer suspends work in hidden tabs and disposes
 its geometries, materials, textures, observers, and animation frame on unmount.
-Unavailable or lost WebGL falls back to a CSS form; all navigation and content
+Unavailable or lost WebGL falls back to an SVG HA mark; all navigation and content
 remain ordinary HTML.
 
 RAF elapsed time is clamped to zero as well as a maximum. A first callback's
@@ -41,7 +44,7 @@ negative time to the open career curve otherwise produces an invalid point.
 ## Other pages and content
 
 The complete journey is an interactive career archive with selectable roles,
-dates, highlights, and previous / next controls. Hover and keyboard focus preview
+dates, and highlights. Hover and keyboard focus preview
 a role; click or tap pins it. Every role has its own selected milestone on the 3D
 path, including roles that share a year. The project index and each project page
 share the visual system. Covers, technology chips, case-study paragraphs, and

@@ -22,3 +22,16 @@ html.immersive,html.immersive body{height:100%;overflow:hidden;overscroll-behavi
 @media(max-width:700px) and (max-height:720px){.intro-stage{height:210px}.journey-stage{height:180px;min-height:180px}.contact-stage{height:160px;order:3}.contact-content .contact-form{order:2}.contact-intro{order:1}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.scatter-intro{animation:none}.scatter-panels{display:none}}
 
+@media(min-width:1051px){.work-stage{inset:-24px -82px -40px}}
+@media(min-width:701px){.work-cover{width:min(82%,720px)}}
+@media(max-width:700px){.work-stage{inset:-10px -8px -18px}.work-cover{width:84%;max-height:195px}}
+.work-caption{position:relative;z-index:6;padding:10px 8px 5px;background:rgba(10,21,32,.94)}
+/* The image sits inside the sculpture's aperture; the object remains visible. */
+.work-stage{inset:0 0 34px}
+.work-figure{width:68%;padding-bottom:34px}
+.work-cover{width:100%;max-height:330px;box-shadow:0 18px 40px #0006}
+.work-caption{position:absolute;top:100%;width:145%;background:none;padding:0;font-size:11px}
+.contact-stage{width:440px;height:245px;margin-top:18px}
+@media(min-width:1051px){.work-figure{width:56%}.work-caption{width:175%}}
+@media(min-width:701px) and (max-width:1050px) and (orientation:portrait){.contact-stage{display:block;height:170px;width:320px}.work-figure{width:62%}}
+@media(max-width:700px){.work-visual{min-height:240px}.work-stage{inset:0 0 28px}.work-figure{width:66%;padding-bottom:28px}.work-cover{width:100%;max-height:165px}.work-caption{width:150%;font-size:10px;top:100%}.contact-stage{width:100%;height:185px;margin-top:12px}}

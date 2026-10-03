@@ -1,18 +1,22 @@
-/** The Fold: two continuous paths sharing a centre, with a forward-facing open edge. */
+import { brandShapes, brandViewBox } from "./brandGeometry";
+
+/** Distinct H and A counters share one level bridge: identity, connection, clarity. */
 export function BrandMark({ className = "" }: { className?: string }) {
   return (
     <svg
       className={`brand-mark ${className}`}
-      viewBox="0 0 64 64"
-      fill="none"
+      viewBox={brandViewBox}
+      fill="currentColor"
       aria-hidden="true"
     >
-      <path d="M8 43 25.8 12H43L25.2 43H8Z" fill="currentColor" />
-      <path d="m25.2 43 8.6-15L56 43 47.4 58 25.2 43Z" fill="currentColor" />
-      <path
-        d="m33.8 28 8.6-15L56 22l-8.6 15-13.6-9Z"
-        fill="var(--brand-accent, #ef5835)"
-      />
+      <title>Hesham Amoudi HA mark</title>
+      {brandShapes.map((shape, i) => (
+        <polygon
+          key={i}
+          points={shape.points.map(([x, y]) => `${x},${y}`).join(" ")}
+          fill={shape.color === "bridge" ? "var(--brand-accent, #eea17a)" : "currentColor"}
+        />
+      ))}
     </svg>
   );
 }

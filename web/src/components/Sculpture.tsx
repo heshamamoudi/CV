@@ -1,112 +1,154 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { JourneyDto } from "../types";
+import { SECTIONS, sculptureForm, sculptureGeometry } from "./sculptureGeometry";
 
-type Props = { chapter: number; paused: boolean; rtl?: boolean; journey?: JourneyDto[]; technologies?: {category:string;items:string[]}[]; selectedJourneyIndex?: number; selectedProjectIndex?: number; aboutTab?: number };
-type Pose = { x:number; y:number; z:number; angle:number; tilt:number; open:number; scale:number };
-const rad = Math.PI / 180;
-const pose = (x:number,y:number,z:number,angle=0,tilt=0,open=30,scale=1):Pose => ({x,y,z,angle,tilt,open,scale});
+type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; aboutTab?:number };
+const ease=(t:number)=>t*t*t*(t*(t*6-15)+10);
 
-function poses(chapter:number, count:number, selected:number, project:number, tab:number, horizontalAtlas=false):Pose[] {
-  return Array.from({length:Math.max(12,count)},(_,i)=>{
-    if(i>=12&&chapter!==2)return pose(0,0,-.4,0,0,30,.001);
-    if (chapter===0) {
-      const bank=Math.floor(i/4), step=i%4;
-      const [x,y,z,a]=[[-.38,.16,0,60],[0,-.12,.16,-30],[.34,.16,-.08,30]][bank];
-      return pose(x+(step-1.5)*.06*Math.cos(a*rad),y+(step-1.5)*.06*Math.sin(a*rad),z+step*.025,a,bank===1?-11:9);
-    }
-    if (chapter===1) {
-      const frame=Math.floor(i/6), side=i%6,w=frame?1.42:1.85,h=frame?.94:1.25;
-      const [x,y,a]=[[-w/2,-h/2,0],[0,-h/2,0],[w/2,-h/2,90],[w/2,h/2,90],[0,h/2,180],[-w/2,h/2,180]][side];
-      return pose(x+(frame?.36:-.26),y+(frame?-.23:.16),(project%2===frame?.3:-.1)+(frame?.32:-.2),a,side%3===0?18:0,side%3===0?43:28,frame?.86:1);
-    }
-    if (chapter===2) {
-      const n=Math.max(1,count);
-      if(i<n){
-        if(horizontalAtlas){const x=(i-(n-1)/2)*.34,y=Math.sin(i*.72)*.06;return pose(x,y,.025*Math.cos(i*.65)+(i===selected?.20:0),i%2?10:-10,2,i===selected?64:25,i===selected?1.15:1)}
-        const rank=n-1-i,step=n===1?0:-1.85+rank*3.7/(n-1);
-        return pose(.24*Math.sin(rank*.9),step,i===selected?.23:.04,i===selected?40:70+(i%2?9:-9),2,i===selected?58:25,i===selected?1.15:1);
-      }
-      const k=i-n;return horizontalAtlas?pose(0,-.28-k*.08,-.18-k*.025,0,35,27,.7):pose((k-(11-n)/2)*.18,-2.05,-.18-k*.025,0,35,27,.7);
-    }
-    if (chapter===3){const a=i*30*rad;return pose(Math.cos(a)*1.12,Math.sin(a)*1.12,i%2?.1:-.1,i*30+90,i%2?18:-18,30+(i%3===tab?9:-3),.8)}
-    const bank=Math.floor(i/6),step=i%6,sign=bank?1:-1;
-    return pose(sign*(.12+step*.25),-.23+Math.sin(step/5*Math.PI)*.42,step*.025,sign*(15+step*4),sign*35,34,.91);
-  });
-}
-
-/** A persistent 24-facet Fold which follows a measured chapter stage. */
+/** One continuous object; only its fold, orientation and aperture change. */
 export function Sculpture(props:Props) {
-  const host=useRef<HTMLDivElement>(null), current=useRef(props);
+  const host=useRef<HTMLDivElement>(null),current=useRef(props);
   current.current=props;
   const [fallback,setFallback]=useState(false);
   useEffect(()=>{
     const el=host.current;if(!el)return;
     const anchor=el.parentElement?.querySelector<HTMLElement>("[data-scene-anchor]");
-    const place=()=>{if(!anchor)return;const r=anchor.getBoundingClientRect(),p=el.parentElement!.getBoundingClientRect();Object.assign(el.style,{left:`${r.left-p.left}px`,top:`${r.top-p.top}px`,width:`${r.width}px`,height:`${r.height}px`})};
-    place();const observer=new ResizeObserver(place);if(anchor)observer.observe(anchor);observer.observe(el.parentElement!);window.addEventListener("resize",place);
-    return()=>{observer.disconnect();window.removeEventListener("resize",place)};
-  },[props.chapter]);
+    if(!anchor){el.style.display="none";return;}
+    const place=()=>{
+      const parent=el.parentElement;if(!parent)return;
+      const r=anchor.getBoundingClientRect(),p=parent.getBoundingClientRect();
+      let left=Math.max(r.left,0),right=Math.min(r.right,innerWidth),top=Math.max(r.top,0),bottom=Math.min(r.bottom,innerHeight);
+      for(let node=anchor.parentElement;node&&node!==parent;node=node.parentElement){
+        const style=getComputedStyle(node),clipsX=/auto|scroll|hidden|clip/.test(style.overflowX),clipsY=/auto|scroll|hidden|clip/.test(style.overflowY);
+        if(clipsX||clipsY){const bounds=node.getBoundingClientRect();if(clipsX){left=Math.max(left,bounds.left);right=Math.min(right,bounds.right)}if(clipsY){top=Math.max(top,bounds.top);bottom=Math.min(bottom,bounds.bottom)}}
+      }
+      el.style.display=right>left&&bottom>top?"block":"none";el.style.transition="none";
+      el.style.clipPath=`inset(${Math.max(0,top-r.top)}px ${Math.max(0,r.right-right)}px ${Math.max(0,r.bottom-bottom)}px ${Math.max(0,left-r.left)}px)`;
+      Object.assign(el.style,{left:`${r.left-p.left}px`,top:`${r.top-p.top}px`,width:`${r.width}px`,height:`${r.height}px`});
+    };
+    let animationFrame=0;
+    const followAnimation=()=>{
+      animationFrame=0;place();let node:HTMLElement|null=anchor,animating=false;
+      while(node){if(node.getAnimations().some(a=>a.playState==="running"||a.pending)){animating=true;break;}node=node.parentElement;}
+      if(animating)animationFrame=requestAnimationFrame(followAnimation);
+    };
+    place();
+    const observer=new ResizeObserver(place);observer.observe(anchor);if(el.parentElement)observer.observe(el.parentElement);
+    const startAnimationFollow=()=>{if(!animationFrame)animationFrame=requestAnimationFrame(followAnimation)};
+    window.addEventListener("resize",place);window.addEventListener("scroll",place,true);
+    const parents:HTMLElement[]=[];for(let node:HTMLElement|null=anchor;node;node=node.parentElement)parents.push(node);
+    parents.forEach(node=>{node.addEventListener("animationstart",startAnimationFollow);node.addEventListener("transitionrun",startAnimationFollow)});
+    startAnimationFollow();
+    return()=>{observer.disconnect();cancelAnimationFrame(animationFrame);window.removeEventListener("resize",place);window.removeEventListener("scroll",place,true);parents.forEach(node=>{node.removeEventListener("animationstart",startAnimationFollow);node.removeEventListener("transitionrun",startAnimationFollow)})};
+  },[props.chapter,props.rtl,props.journey?.length]);
+
   useEffect(()=>{
     const el=host.current;if(!el)return;
     let renderer:THREE.WebGLRenderer;
     try{renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"})}catch{setFallback(true);return}
-    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.outputColorSpace=THREE.SRGBColorSpace;el.appendChild(renderer.domElement);
-    const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-3,3,3,-3,.01,100);
-    camera.position.z=14;scene.add(new THREE.AmbientLight(0xe8f6ee,2.2));
-    const key=new THREE.DirectionalLight(0xffffff,3.8);key.position.set(-3,6,9);scene.add(key);
-    const fill=new THREE.DirectionalLight(0x84bdc0,1.4);fill.position.set(5,-3,4);scene.add(fill);
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.90;el.appendChild(renderer.domElement);
+    const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-3,3,3,-3,.1,60);
+    const studio=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(studio,.04);
+    scene.environment=environment.texture;scene.environmentIntensity=.85;studio.dispose();pmrem.dispose();
+    scene.add(new THREE.HemisphereLight(0xeaf5f0,0x173139,.6));
+    const key=new THREE.DirectionalLight(0xfff2df,1.8);key.position.set(-3,5,7);scene.add(key);
+    const rim=new THREE.DirectionalLight(0xc6f7ee,1.5);rim.position.set(5,1,-3);scene.add(rim);
+    const materials=[
+      new THREE.MeshPhysicalMaterial({color:0xbfcfc5,metalness:.68,roughness:.28,clearcoat:.28,clearcoatRoughness:.34}),
+      new THREE.MeshPhysicalMaterial({color:0xb96b44,metalness:.68,roughness:.27,clearcoat:.20}),
+      new THREE.MeshStandardMaterial({color:0x244c49,metalness:.4,roughness:.37}),
+      new THREE.MeshStandardMaterial({color:0xb96b44,metalness:.68,roughness:.27}),
+    ];
     const idle=new THREE.Group(),root=new THREE.Group();scene.add(idle);idle.add(root);
-    const mats=[0xd8e5de,0x315852,0xd89169].map((color,i)=>new THREE.MeshStandardMaterial({color,metalness:.4,roughness:i===2?.38:.43,side:THREE.DoubleSide,emissive:i===2?0x2b1005:0}));
-    const shape=new THREE.Shape();shape.moveTo(-.62,-.24);shape.lineTo(.47,-.24);shape.lineTo(.62,.24);shape.lineTo(-.47,.24);shape.closePath();
-    const geometry=new THREE.ExtrudeGeometry(shape,{depth:.035,bevelEnabled:true,bevelSize:.015,bevelThickness:.012,bevelSegments:1,steps:1,curveSegments:1});geometry.translate(0,0,-.0175);
-    const leaves=Array.from({length:Math.max(12,props.journey?.length??0)},(_,i)=>{const bank=Math.floor(i/4),baseMaterial=mats[i===11?2:bank===1?1:0],flapMaterial=mats[bank===0?1:0],group=new THREE.Group(),base=new THREE.Mesh(geometry,baseMaterial),flap=new THREE.Group(),other=new THREE.Mesh(geometry,flapMaterial);base.position.y=.24;other.position.y=-.24;flap.add(other);group.add(base);group.add(flap);root.add(group);return{group,flap,base,other,baseMaterial,flapMaterial}});
-    const spineGeometry=new THREE.BufferGeometry(),spineMaterial=new THREE.LineBasicMaterial({color:0xd89169,transparent:true,opacity:.58}),spine=new THREE.LineSegments(spineGeometry,spineMaterial);scene.add(spine);
-    const traveler=new THREE.Mesh(new THREE.OctahedronGeometry(.14,0),mats[2]);scene.add(traveler);
-    const box=new THREE.Box3(),center=new THREE.Vector3(),size=new THREE.Vector3();
-    let width=1,height=1,last=performance.now(),frame=0,phase=0,prior="",transitionAt=performance.now(),travelerStarted=performance.now();
-    let from=poses(0,1,0,0,0),to=from;
-    const fromRotation=new THREE.Quaternion(),toRotation=new THREE.Quaternion();
-    const travelerFrom=new THREE.Vector3(),travelerTo=new THREE.Vector3();
+    let width=Math.max(1,el.clientWidth),height=Math.max(1,el.clientHeight);
+    let target=sculptureForm(current.current.chapter,height>width*1.15,current.current.aboutTab);
+    const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);root.add(mesh);root.quaternion.copy(target.rotation);
+    const positions=geometry.getAttribute("position") as THREE.BufferAttribute;
+    let fromPositions=new Float32Array(positions.array);
+    const fromRotation=root.quaternion.clone(),center=target.center.clone(),fromCenter=center.clone();
+    const fit=()=>Math.max(target.bounds.y,target.bounds.x/(width/height))*(current.current.chapter===1?1.10:1.26);
+    let viewHeight=fit(),fromHeight=viewHeight,toHeight=viewHeight;
+    let previous="",started=performance.now(),frame=0,last=performance.now(),phase=0,stopped=false,disposed=false;
     const resize=()=>{width=Math.max(1,el.clientWidth);height=Math.max(1,el.clientHeight);renderer.setSize(width,height,false)};
     const observer=new ResizeObserver(resize);observer.observe(el);resize();
-    const pointer=new THREE.Vector2(),move=(e:PointerEvent)=>{if(e.pointerType!=="touch")pointer.set((e.clientX/innerWidth-.5)*2,(e.clientY/innerHeight-.5)*2)};
+    const pointer=new THREE.Vector2(),softPointer=new THREE.Vector2();
+    const move=(event:PointerEvent)=>{if(event.pointerType==="touch")return;const r=el.getBoundingClientRect();pointer.set(THREE.MathUtils.clamp((event.clientX-r.left)/r.width-.5,-.5,.5),THREE.MathUtils.clamp((event.clientY-r.top)/r.height-.5,-.5,.5))};
     window.addEventListener("pointermove",move,{passive:true});
-    const lost=(e:Event)=>{e.preventDefault();setFallback(true)};renderer.domElement.addEventListener("webglcontextlost",lost);
+    const routeGeometry=new THREE.BufferGeometry(),routeMaterial=new THREE.LineBasicMaterial({color:0xb96b44,transparent:true,opacity:0});
+    const route=new THREE.Line(routeGeometry,routeMaterial);root.add(route);
+    const markerMaterial=new THREE.MeshStandardMaterial({color:0xd9956d,metalness:.6,roughness:.25,transparent:true,opacity:0});
+    const marker=new THREE.Mesh(new THREE.SphereGeometry(.072,16,10),markerMaterial);root.add(marker);
+    const stationGeometry=new THREE.SphereGeometry(.031,10,6),stationMaterial=new THREE.MeshBasicMaterial({color:0x315852,transparent:true,opacity:0});
+    const stations:THREE.Mesh[]=[];
+    let selectedAt=0,selectedTarget=0,selectedFrom=0,selectionStarted=performance.now(),previousSelection=-1,routeOpacity=0;
+    const sampleSurface=(t:number,out:THREE.Vector3)=>{
+      const index=THREE.MathUtils.clamp(t,0,1)*SECTIONS,a=Math.floor(index),b=Math.min(SECTIONS,a+1);
+      return out.lerpVectors(target.surface[a],target.surface[b],index-a);
+    };
+    const dispose=()=>{
+      if(disposed)return;disposed=true;observer.disconnect();window.removeEventListener("pointermove",move);renderer.domElement.removeEventListener("webglcontextlost",lost);
+      geometry.dispose();materials.forEach(material=>material.dispose());environment.dispose();
+      routeGeometry.dispose();routeMaterial.dispose();marker.geometry.dispose();markerMaterial.dispose();stationGeometry.dispose();stationMaterial.dispose();
+      renderer.dispose();renderer.domElement.remove();
+    };
+    const lost=(event:Event)=>{event.preventDefault();stopped=true;cancelAnimationFrame(frame);setFallback(true);dispose()};
+    renderer.domElement.addEventListener("webglcontextlost",lost);
     const update=(now:number)=>{
-      frame=requestAnimationFrame(update);const dt=Math.max(0,Math.min((now-last)/1000,.05));last=now;
-      if(document.hidden||!el.clientWidth||!el.clientHeight)return;
-      const {chapter,paused,journey,selectedJourneyIndex,selectedProjectIndex,aboutTab}=current.current;
-      const selected=Math.max(0,selectedJourneyIndex??0),count=journey?.length??1,horizontalAtlas=chapter===2&&width>height,id=`${chapter}:${count}:${selected}:${selectedProjectIndex??0}:${aboutTab??0}:${horizontalAtlas}`;
-      if(id!==prior){
-        from=leaves.map(({group,flap})=>pose(group.position.x,group.position.y,group.position.z,group.rotation.z/rad,group.rotation.y/rad,flap.rotation.x/rad,group.scale.x));
-        to=poses(chapter,count,selected,selectedProjectIndex??0,aboutTab??0,horizontalAtlas);fromRotation.copy(root.quaternion);
-        toRotation.setFromEuler(new THREE.Euler(chapter===0?12*rad:0,chapter===0?-18*rad:0,0));transitionAt=now;prior=id;
-        leaves.forEach((leaf,i)=>{leaf.base.material=chapter===2?(i===selected||![2,5,8].includes(i)?mats[0]:mats[1]):leaf.baseMaterial;leaf.other.material=chapter===2&&i===selected?mats[2]:chapter===2?mats[0]:leaf.flapMaterial});
-        if(chapter===2){travelerFrom.copy(traveler.position);const station=to[Math.min(selected,Math.max(1,count)-1)];travelerTo.set(station.x,station.y,.34);travelerStarted=now}
-        const points:number[]=[];if(chapter===2)for(let i=0;i<count-1;i++){const a=to[i],b=to[i+1],dx=b.x-a.x,dy=b.y-a.y,length=Math.max(.001,Math.hypot(dx,dy)),ox=-dy/length*.035,oy=dx/length*.035;points.push(a.x+ox,a.y+oy,.52,b.x+ox,b.y+oy,.52,a.x-ox,a.y-oy,.52,b.x-ox,b.y-oy,.52,a.x+ox,a.y+oy,.52,a.x-ox,a.y-oy,.52,b.x+ox,b.y+oy,.52,b.x-ox,b.y-oy,.52)}
-        spineGeometry.setAttribute("position",new THREE.Float32BufferAttribute(points,3));
+      if(stopped)return;frame=requestAnimationFrame(update);
+      const dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden||el.style.display==="none")return;
+      const {chapter,paused,journey,selectedJourneyIndex=0,aboutTab=0}=current.current;
+      const portrait=height>width*1.15,id=`${chapter}:${portrait}:${aboutTab}:${width}:${height}`;
+      if(previous!==id){
+        const first=previous==="";
+        fromPositions=new Float32Array(positions.array);fromRotation.copy(root.quaternion);fromCenter.copy(center);fromHeight=viewHeight;
+        // A chapter can move the object into a much narrower stage. Fit the outgoing
+        // form once in that new aspect ratio before morphing, so it never gets cropped.
+        const outgoing=new THREE.Box3(),vertex=new THREE.Vector3(),aspect=width/height;
+        for(let i=0;i<fromPositions.length;i+=3)outgoing.expandByPoint(vertex.fromArray(fromPositions,i).applyQuaternion(fromRotation));
+        fromHeight=Math.max(fromHeight,2*Math.max(Math.abs(outgoing.min.y-center.y),Math.abs(outgoing.max.y-center.y),Math.abs(outgoing.min.x-center.x)/aspect,Math.abs(outgoing.max.x-center.x)/aspect)*1.15);
+        target=sculptureForm(chapter,portrait,aboutTab);toHeight=fit();started=now;
+        if(first){fromHeight=toHeight;viewHeight=toHeight;fromCenter.copy(target.center);center.copy(target.center)}
+        previous=id;materials[3].visible=chapter===2||chapter===4;
+        if(chapter===2){
+          routeGeometry.setFromPoints(target.surface);
+          while(stations.length<(journey?.length??0)){const station=new THREE.Mesh(stationGeometry,stationMaterial);stations.push(station);root.add(station)}
+          stations.forEach((station,i)=>{station.visible=i<(journey?.length??0);sampleSurface(.06+.88*i/Math.max(1,(journey?.length??1)-1),station.position)});
+        }
       }
+      const raw=paused?1:Math.min(1,(now-started)/1150),t=ease(raw);
+      if(raw<1||positions.array[0]!==target.positions[0]){
+        for(let i=0;i<target.positions.length;i++)positions.array[i]=THREE.MathUtils.lerp(fromPositions[i],target.positions[i],t);
+        positions.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingSphere();
+      }
+      if(chapter!==2&&chapter!==4){
+        const normals=geometry.getAttribute("normal") as THREE.BufferAttribute;
+        for(let j=0;j<8;j++){
+          const end=SECTIONS*8+j,n=new THREE.Vector3(normals.getX(j)+normals.getX(end),normals.getY(j)+normals.getY(end),normals.getZ(j)+normals.getZ(end)).normalize();
+          normals.setXYZ(j,n.x,n.y,n.z);normals.setXYZ(end,n.x,n.y,n.z);
+        }
+        normals.needsUpdate=true;
+      }
+      root.quaternion.copy(fromRotation).slerp(target.rotation,t);center.lerpVectors(fromCenter,target.center,t);viewHeight=THREE.MathUtils.lerp(fromHeight,toHeight,t);
       if(!paused)phase+=dt;
-      const raw=paused?1:Math.min(1,Math.max(0,(now-transitionAt)/850)),ease=raw*raw*(3-2*raw);
-      leaves.forEach(({group,flap},i)=>{
-        const f=from[i],t=to[i],s=paused?1:Math.min(1,Math.max(0,(now-transitionAt-i*14)/750)),e=s*s*(3-2*s);
-        group.position.set(THREE.MathUtils.lerp(f.x,t.x,e),THREE.MathUtils.lerp(f.y,t.y,e),THREE.MathUtils.lerp(f.z,t.z,e));
-        group.rotation.set(0,THREE.MathUtils.lerp(f.tilt,t.tilt,e)*rad,THREE.MathUtils.lerp(f.angle,t.angle,e)*rad);
-        group.scale.setScalar(THREE.MathUtils.lerp(f.scale,t.scale,e));flap.rotation.x=THREE.MathUtils.lerp(f.open,t.open,e)*rad;
-      });
-      root.quaternion.copy(fromRotation).slerp(toRotation,ease);
-      if(!paused){idle.rotation.set(pointer.y*2*rad,THREE.MathUtils.clamp(Math.sin(phase*.42)*2*rad+pointer.x*2*rad,-4*rad,4*rad),0);root.position.y=Math.sin(phase*.6)*.025}else{idle.rotation.set(0,0,0);root.position.y=0}
-      spine.visible=chapter===2;traveler.visible=chapter===2;
-      if(chapter===2){const travel=paused?1:Math.min(1,(now-travelerStarted)/450),e=travel*travel*(3-2*travel);traveler.position.lerpVectors(travelerFrom,travelerTo,e);traveler.position.z=.58}
-      box.setFromObject(idle);if(spine.visible)box.expandByObject(spine);if(traveler.visible)box.expandByObject(traveler);box.getCenter(center);box.getSize(size);
-      const aspect=width/height,visibleHeight=Math.max(size.y,size.x/aspect,1.5)*1.25;
-      camera.left=-visibleHeight*aspect/2;camera.right=-camera.left;camera.top=visibleHeight/2;camera.bottom=-camera.top;
-      camera.position.set(center.x,center.y,center.z+14);camera.lookAt(center);camera.updateProjectionMatrix();renderer.render(scene,camera);
+      softPointer.lerp(pointer,1-Math.exp(-dt*3));
+      idle.rotation.set(paused?0:softPointer.y*.045,paused?0:Math.sin(phase*.32)*.025+softPointer.x*.065,0);idle.position.y=paused?0:Math.sin(phase*.55)*.025;
+      const selection=Math.max(0,Math.min((journey?.length??1)-1,selectedJourneyIndex));
+      if(selection!==previousSelection){selectedFrom=selectedAt;selectedTarget=.06+.88*selection/Math.max(1,(journey?.length??1)-1);selectionStarted=now;previousSelection=selection}
+      selectedAt=THREE.MathUtils.lerp(selectedFrom,selectedTarget,ease(paused?1:Math.min(1,(now-selectionStarted)/550)));
+      if(chapter===2)sampleSurface(selectedAt,marker.position);
+      const desiredOpacity=chapter===2?(raw>.65?(raw-.65)/.35:0):0;
+      routeOpacity=paused?desiredOpacity:THREE.MathUtils.damp(routeOpacity,desiredOpacity,8,dt);
+      routeMaterial.opacity=routeOpacity*.85;markerMaterial.opacity=routeOpacity;stationMaterial.opacity=routeOpacity*.85;
+      route.visible=marker.visible=routeOpacity>.005;stations.forEach((station,i)=>{station.visible=routeOpacity>.005&&i<(journey?.length??0)});
+      const aspect=width/height;camera.left=-viewHeight*aspect/2;camera.right=-camera.left;camera.top=viewHeight/2;camera.bottom=-camera.top;
+      camera.position.set(center.x,center.y,14);camera.lookAt(center.x,center.y,0);camera.updateProjectionMatrix();renderer.render(scene,camera);
     };
     frame=requestAnimationFrame(update);
-    return()=>{cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener("pointermove",move);renderer.domElement.removeEventListener("webglcontextlost",lost);geometry.dispose();spineGeometry.dispose();spineMaterial.dispose();mats.forEach(m=>m.dispose());traveler.geometry.dispose();renderer.dispose();renderer.domElement.remove()};
+    return()=>{stopped=true;cancelAnimationFrame(frame);dispose()};
   },[]);
-  return <div ref={host} className={`sculpture${fallback?" sculpture-fallback":""}`} aria-hidden="true">{fallback&&<svg viewBox="0 0 400 400" role="presentation"><path d="M60 270 170 70h110L170 270Z" fill="#d8e5de"/><path d="m170 270 55-95 115 95-55 90Z" fill="#315852"/><path d="m225 175 55-95 70 46-55 95Z" fill="#d89169"/></svg>}</div>;
+  return <div ref={host} className={`sculpture${fallback?" sculpture-fallback":""}`} aria-hidden="true">{fallback&&<svg viewBox="0 0 400 400" role="presentation"><defs><linearGradient id="fold-fallback" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#f2f3ec"/><stop offset="1" stopColor="#78958b"/></linearGradient></defs><path d="M181 53q19-31 38 0l137 238q19 34-20 34H64q-39 0-20-34ZM200 130 108 286h184Z" fill="url(#fold-fallback)" fillRule="evenodd"/><path d="m200 130 92 156-13 16-92-157Z" fill="#b96b44"/></svg>}</div>;
 }
 
