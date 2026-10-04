@@ -13,44 +13,12 @@ export function Sculpture(props:Props) {
   current.current=props;
   const [fallback,setFallback]=useState(false);
   useEffect(()=>{
-    const el=host.current;if(!el)return;
-    const anchor=el.parentElement?.querySelector<HTMLElement>("[data-scene-anchor]");
-    if(!anchor){el.style.display="none";return;}
-    const place=()=>{
-      const parent=el.parentElement;if(!parent)return;
-      const r=anchor.getBoundingClientRect(),p=parent.getBoundingClientRect();
-      let left=Math.max(r.left,0),right=Math.min(r.right,innerWidth),top=Math.max(r.top,0),bottom=Math.min(r.bottom,innerHeight);
-      for(let node=anchor.parentElement;node&&node!==parent;node=node.parentElement){
-        const style=getComputedStyle(node),clipsX=/auto|scroll|hidden|clip/.test(style.overflowX),clipsY=/auto|scroll|hidden|clip/.test(style.overflowY);
-        if(clipsX||clipsY){const bounds=node.getBoundingClientRect();if(clipsX){left=Math.max(left,bounds.left);right=Math.min(right,bounds.right)}if(clipsY){top=Math.max(top,bounds.top);bottom=Math.min(bottom,bounds.bottom)}}
-      }
-      el.style.display=right>left&&bottom>top?"block":"none";el.style.transition="none";
-      el.style.clipPath=`inset(${Math.max(0,top-r.top)}px ${Math.max(0,r.right-right)}px ${Math.max(0,r.bottom-bottom)}px ${Math.max(0,left-r.left)}px)`;
-      Object.assign(el.style,{left:`${r.left-p.left}px`,top:`${r.top-p.top}px`,width:`${r.width}px`,height:`${r.height}px`});
-    };
-    let animationFrame=0;
-    const followAnimation=()=>{
-      animationFrame=0;place();let node:HTMLElement|null=anchor,animating=false;
-      while(node){if(node.getAnimations().some(a=>a.playState==="running"||a.pending)){animating=true;break;}node=node.parentElement;}
-      if(animating)animationFrame=requestAnimationFrame(followAnimation);
-    };
-    place();
-    const observer=new ResizeObserver(place);observer.observe(anchor);if(el.parentElement)observer.observe(el.parentElement);
-    const startAnimationFollow=()=>{if(!animationFrame)animationFrame=requestAnimationFrame(followAnimation)};
-    window.addEventListener("resize",place);window.addEventListener("scroll",place,true);
-    const parents:HTMLElement[]=[];for(let node:HTMLElement|null=anchor;node;node=node.parentElement)parents.push(node);
-    parents.forEach(node=>{node.addEventListener("animationstart",startAnimationFollow);node.addEventListener("transitionrun",startAnimationFollow)});
-    startAnimationFollow();
-    return()=>{observer.disconnect();cancelAnimationFrame(animationFrame);window.removeEventListener("resize",place);window.removeEventListener("scroll",place,true);parents.forEach(node=>{node.removeEventListener("animationstart",startAnimationFollow);node.removeEventListener("transitionrun",startAnimationFollow)})};
-  },[props.chapter,props.rtl,props.journey?.length]);
-
-  useEffect(()=>{
-    const el=host.current;if(!el)return;
+    const el=host.current,parent=el?.parentElement;if(!el||!parent)return;
     let renderer:THREE.WebGLRenderer;
     try{renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"})}catch{setFallback(true);return}
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.90;el.appendChild(renderer.domElement);
-    const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-3,3,3,-3,.1,60);
+    const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-3,3,3,-3,.1,4000);
     const studio=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(studio,.04);
     scene.environment=environment.texture;scene.environmentIntensity=.85;studio.dispose();pmrem.dispose();
     scene.add(new THREE.HemisphereLight(0xeaf5f0,0x173139,.6));
@@ -62,25 +30,34 @@ export function Sculpture(props:Props) {
       new THREE.MeshStandardMaterial({color:0x244c49,metalness:.4,roughness:.37}),
       new THREE.MeshStandardMaterial({color:0xb96b44,metalness:.68,roughness:.27}),
     ];
-    const idle=new THREE.Group(),root=new THREE.Group();scene.add(idle);idle.add(root);
-    let width=Math.max(1,el.clientWidth),height=Math.max(1,el.clientHeight);
-    let target=sculptureForm(current.current.chapter,height>width*1.15,current.current.aboutTab);
-    const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);root.add(mesh);root.quaternion.copy(target.rotation);
+    const idle=new THREE.Group(),root=new THREE.Group();scene.add(root);root.add(idle);
+    let width=Math.max(1,parent.clientWidth),height=Math.max(1,parent.clientHeight);
+    const measureStage=()=>{
+      const anchor=parent.querySelector<HTMLElement>("[data-scene-anchor]");
+      if(!anchor)return null;
+      const r=anchor.getBoundingClientRect(),p=parent.getBoundingClientRect();
+      return {x:r.left-p.left,y:r.top-p.top,width:Math.max(1,r.width),height:Math.max(1,r.height),anchor};
+    };
+    let stage=measureStage();
+    if(!stage){renderer.dispose();renderer.domElement.remove();environment.dispose();materials.forEach(material=>material.dispose());return;}
+    let stageFrom={...stage},stageTarget={...stage};
+    let target=sculptureForm(current.current.chapter,stage.height>stage.width*1.15,current.current.aboutTab);
+    const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);idle.add(mesh);root.quaternion.copy(target.rotation);
     const positions=geometry.getAttribute("position") as THREE.BufferAttribute;
     let fromPositions=new Float32Array(positions.array);
     const fromRotation=root.quaternion.clone(),center=target.center.clone(),fromCenter=center.clone();
-    const fit=()=>Math.max(target.bounds.y,target.bounds.x/(width/height))*(current.current.chapter===1?1.10:1.26);
-    let viewHeight=fit(),fromHeight=viewHeight,toHeight=viewHeight;
+    const fit=()=>Math.max(target.bounds.y,target.bounds.x/(stageTarget.width/stageTarget.height))*(current.current.chapter===1?1.10:1.32);
+    let scale=stage.height/fit(),fromScale=scale,toScale=scale;
     let previous="",started=performance.now(),frame=0,last=performance.now(),phase=0,stopped=false,disposed=false;
-    const resize=()=>{width=Math.max(1,el.clientWidth);height=Math.max(1,el.clientHeight);renderer.setSize(width,height,false)};
-    const observer=new ResizeObserver(resize);observer.observe(el);resize();
+    const resize=()=>{width=Math.max(1,parent.clientWidth);height=Math.max(1,parent.clientHeight);renderer.setSize(width,height,false)};
+    const observer=new ResizeObserver(resize);observer.observe(parent);resize();
     const pointer=new THREE.Vector2(),softPointer=new THREE.Vector2();
     const move=(event:PointerEvent)=>{if(event.pointerType==="touch")return;const r=el.getBoundingClientRect();pointer.set(THREE.MathUtils.clamp((event.clientX-r.left)/r.width-.5,-.5,.5),THREE.MathUtils.clamp((event.clientY-r.top)/r.height-.5,-.5,.5))};
     window.addEventListener("pointermove",move,{passive:true});
     const routeGeometry=new THREE.BufferGeometry(),routeMaterial=new THREE.LineBasicMaterial({color:0xb96b44,transparent:true,opacity:0});
-    const route=new THREE.Line(routeGeometry,routeMaterial);root.add(route);
+    const route=new THREE.Line(routeGeometry,routeMaterial);idle.add(route);
     const markerMaterial=new THREE.MeshStandardMaterial({color:0xd9956d,metalness:.6,roughness:.25,transparent:true,opacity:0});
-    const marker=new THREE.Mesh(new THREE.SphereGeometry(.072,16,10),markerMaterial);root.add(marker);
+    const marker=new THREE.Mesh(new THREE.SphereGeometry(.072,16,10),markerMaterial);idle.add(marker);
     const stationGeometry=new THREE.SphereGeometry(.031,10,6),stationMaterial=new THREE.MeshBasicMaterial({color:0x315852,transparent:true,opacity:0});
     const stations:THREE.Mesh[]=[];
     let selectedAt=0,selectedTarget=0,selectedFrom=0,selectionStarted=performance.now(),previousSelection=-1,routeOpacity=0;
@@ -98,24 +75,21 @@ export function Sculpture(props:Props) {
     renderer.domElement.addEventListener("webglcontextlost",lost);
     const update=(now:number)=>{
       if(stopped)return;frame=requestAnimationFrame(update);
-      const dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden||el.style.display==="none")return;
+      const dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden)return;
       const {chapter,paused,journey,selectedJourneyIndex=0,aboutTab=0}=current.current;
-      const portrait=height>width*1.15,id=`${chapter}:${portrait}:${aboutTab}:${width}:${height}`;
+      const measured=measureStage();if(!measured){el.style.display="none";return;}el.style.display="block";
+      const portrait=measured.height>measured.width*1.15,id=`${chapter}:${portrait}:${aboutTab}:${Math.round(measured.width)}:${Math.round(measured.height)}`;
       if(previous!==id){
         const first=previous==="";
-        fromPositions=new Float32Array(positions.array);fromRotation.copy(root.quaternion);fromCenter.copy(center);fromHeight=viewHeight;
-        // A chapter can move the object into a much narrower stage. Fit the outgoing
-        // form once in that new aspect ratio before morphing, so it never gets cropped.
-        const outgoing=new THREE.Box3(),vertex=new THREE.Vector3(),aspect=width/height;
-        for(let i=0;i<fromPositions.length;i+=3)outgoing.expandByPoint(vertex.fromArray(fromPositions,i).applyQuaternion(fromRotation));
-        fromHeight=Math.max(fromHeight,2*Math.max(Math.abs(outgoing.min.y-center.y),Math.abs(outgoing.max.y-center.y),Math.abs(outgoing.min.x-center.x)/aspect,Math.abs(outgoing.max.x-center.x)/aspect)*1.15);
-        target=sculptureForm(chapter,portrait,aboutTab);toHeight=fit();started=now;
-        if(first){fromHeight=toHeight;viewHeight=toHeight;fromCenter.copy(target.center);center.copy(target.center)}
+        fromPositions=new Float32Array(positions.array);fromRotation.copy(root.quaternion);fromCenter.copy(center);fromScale=scale;
+        stageFrom={...stage!};stageTarget={...measured};
+        target=sculptureForm(chapter,portrait,aboutTab);toScale=stageTarget.height/fit();started=now;
+        if(first){fromScale=toScale;scale=toScale;fromCenter.copy(target.center);center.copy(target.center);stageFrom={...measured};stage={...measured}}
         previous=id;materials[3].visible=chapter===2||chapter===4;
         if(chapter===2){
           routeGeometry.setFromPoints(target.surface);
-          while(stations.length<(journey?.length??0)){const station=new THREE.Mesh(stationGeometry,stationMaterial);stations.push(station);root.add(station)}
-          stations.forEach((station,i)=>{station.visible=i<(journey?.length??0);sampleSurface(.06+.88*i/Math.max(1,(journey?.length??1)-1),station.position)});
+          while(stations.length<(journey?.length??0)){const station=new THREE.Mesh(stationGeometry,stationMaterial);stations.push(station);idle.add(station)}
+          stations.forEach((station,i)=>{station.visible=i<(journey?.length??0);sampleSurface(.94-.88*i/Math.max(1,(journey?.length??1)-1),station.position)});
         }
       }
       const raw=paused?1:Math.min(1,(now-started)/1150),t=ease(raw);
@@ -131,20 +105,37 @@ export function Sculpture(props:Props) {
         }
         normals.needsUpdate=true;
       }
-      root.quaternion.copy(fromRotation).slerp(target.rotation,t);center.lerpVectors(fromCenter,target.center,t);viewHeight=THREE.MathUtils.lerp(fromHeight,toHeight,t);
+      // Position, scale, orientation and vertices share exactly one clock and easing.
+      // A full-size canvas keeps the outgoing form visible throughout its travel.
+      stageTarget={...measured};
+      stage={...measured,x:THREE.MathUtils.lerp(stageFrom.x,stageTarget.x,t),y:THREE.MathUtils.lerp(stageFrom.y,stageTarget.y,t),width:THREE.MathUtils.lerp(stageFrom.width,stageTarget.width,t),height:THREE.MathUtils.lerp(stageFrom.height,stageTarget.height,t)};
+      root.quaternion.copy(fromRotation).slerp(target.rotation,t);center.lerpVectors(fromCenter,target.center,t);scale=THREE.MathUtils.lerp(fromScale,toScale,t);
+      root.scale.setScalar(scale);root.position.set(stage.x+stage.width/2-width/2-center.x*scale,height/2-stage.y-stage.height/2-center.y*scale,0);
       if(!paused)phase+=dt;
       softPointer.lerp(pointer,1-Math.exp(-dt*3));
       idle.rotation.set(paused?0:softPointer.y*.045,paused?0:Math.sin(phase*.32)*.025+softPointer.x*.065,0);idle.position.y=paused?0:Math.sin(phase*.55)*.025;
       const selection=Math.max(0,Math.min((journey?.length??1)-1,selectedJourneyIndex));
-      if(selection!==previousSelection){selectedFrom=selectedAt;selectedTarget=.06+.88*selection/Math.max(1,(journey?.length??1)-1);selectionStarted=now;previousSelection=selection}
+      if(selection!==previousSelection){selectedFrom=selectedAt;selectedTarget=.94-.88*selection/Math.max(1,(journey?.length??1)-1);selectionStarted=now;previousSelection=selection}
       selectedAt=THREE.MathUtils.lerp(selectedFrom,selectedTarget,ease(paused?1:Math.min(1,(now-selectionStarted)/550)));
       if(chapter===2)sampleSurface(selectedAt,marker.position);
       const desiredOpacity=chapter===2?(raw>.65?(raw-.65)/.35:0):0;
       routeOpacity=paused?desiredOpacity:THREE.MathUtils.damp(routeOpacity,desiredOpacity,8,dt);
       routeMaterial.opacity=routeOpacity*.85;markerMaterial.opacity=routeOpacity;stationMaterial.opacity=routeOpacity*.85;
       route.visible=marker.visible=routeOpacity>.005;stations.forEach((station,i)=>{station.visible=routeOpacity>.005&&i<(journey?.length??0)});
-      const aspect=width/height;camera.left=-viewHeight*aspect/2;camera.right=-camera.left;camera.top=viewHeight/2;camera.bottom=-camera.top;
-      camera.position.set(center.x,center.y,14);camera.lookAt(center.x,center.y,0);camera.updateProjectionMatrix();renderer.render(scene,camera);
+      camera.left=-width/2;camera.right=width/2;camera.top=height/2;camera.bottom=-height/2;
+      camera.position.set(0,0,2000);camera.lookAt(0,0,0);camera.updateProjectionMatrix();
+      // Clip only at the reading area's edges, never to the arriving object's box.
+      const panel=measured.anchor.closest<HTMLElement>(".chapter-panel"),parentRect=parent.getBoundingClientRect();
+      if(panel){const r=panel.getBoundingClientRect();el.style.clipPath=`inset(${Math.max(0,r.top-parentRect.top)}px 0 ${Math.max(0,parentRect.bottom-r.bottom)}px 0)`;}else el.style.clipPath="none";
+      renderer.render(scene,camera);
+      if(chapter===2){
+        const point=new THREE.Vector3();
+        measured.anchor.querySelectorAll<HTMLElement>("[data-route-station]").forEach(label=>{
+          const i=Number(label.dataset.routeStation);
+          sampleSurface(.94-.88*i/Math.max(1,(journey?.length??1)-1),point);idle.localToWorld(point);point.project(camera);
+          label.style.left=`${(point.x+1)*width/2-measured.x}px`;label.style.top=`${(1-point.y)*height/2-measured.y}px`;label.style.opacity=String(raw===1?1:0);
+        });
+      }
     };
     frame=requestAnimationFrame(update);
     return()=>{stopped=true;cancelAnimationFrame(frame);dispose()};

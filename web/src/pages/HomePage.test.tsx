@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { HomePage } from "./HomePage";
 import type { HomeData } from "../types";
@@ -134,18 +134,16 @@ describe("HomePage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("هشام");
   });
 
-  it('previews a career role on hover and focus, then restores the pinned role', async () => {
+  it('changes a career role only on click, not on hover or focus', async () => {
     const second = { ...home.journey[0], id: 2, title: 'Second role', organisation: 'Second company', start: '2023-04', highlights: ['Second highlight'] };
     render(<MemoryRouter initialEntries={['/ar#journey']}><HomePage home={{ ...home, journey: [home.journey[0], second] }} /></MemoryRouter>);
     const role = screen.getByRole('button', { name: /2023 Second role Second company/ });
     expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
     fireEvent.mouseEnter(role);
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument());
+    expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
     fireEvent.mouseLeave(role);
-    await waitFor(() => expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument());
     fireEvent.focus(role);
-    expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
-    fireEvent.blur(role);
+    expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
     fireEvent.click(role);
     expect(role).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
@@ -172,46 +170,35 @@ describe("HomePage", () => {
     expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "2");
   });
 
-  it("cancels a pending hover preview when a different role is pinned", async () => {
+  it("does not let pointer movement override the role selected by click", async () => {
     const journey = [
       { ...home.journey[0], id: 1, title: "First role", organisation: "First company" },
       { ...home.journey[0], id: 2, title: "Second role", organisation: "Second company", start: "2023-04" },
     ];
-    vi.useFakeTimers();
-    try {
-      render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
-      const first = screen.getByRole("button", { name: /2025 First role First company/ });
-      const second = screen.getByRole("button", { name: /2023 Second role Second company/ });
-      fireEvent.mouseEnter(second);
-      fireEvent.click(first);
-      await act(async () => { vi.advanceTimersByTime(100); });
+    render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
+    const first = screen.getByRole("button", { name: /2025 First role First company/ });
+    const second = screen.getByRole("button", { name: /2023 Second role Second company/ });
+    fireEvent.mouseEnter(second);
+    fireEvent.click(first);
+    fireEvent.mouseEnter(second);
 
-      expect(screen.getByRole("heading", { name: "First role" })).toBeInTheDocument();
-      expect(first).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "0");
-    } finally {
-      vi.useRealTimers();
-    }
+    expect(screen.getByRole("heading", { name: "First role" })).toBeInTheDocument();
+    expect(first).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "0");
   });
 
-  it("cancels a pending preview when the journey list shrinks", async () => {
+  it("clamps the clicked selection when the journey list shrinks", () => {
     const journey = [
       { ...home.journey[0], id: 1, title: "First role", organisation: "First company" },
       { ...home.journey[0], id: 2, title: "Second role", organisation: "Second company", start: "2023-04" },
       { ...home.journey[0], id: 3, title: "Third role", organisation: "Third company", start: "2022-04" },
     ];
-    vi.useFakeTimers();
-    try {
-      const { rerender } = render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
-      fireEvent.mouseEnter(screen.getByRole("button", { name: /2022 Third role Third company/ }));
-      rerender(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey: journey.slice(0, 2) }} /></MemoryRouter>);
-      await act(async () => { vi.advanceTimersByTime(100); });
+    const { rerender } = render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole("button", { name: /2022 Third role Third company/ }));
+    rerender(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey: journey.slice(0, 2) }} /></MemoryRouter>);
 
-      expect(screen.queryByRole("button", { name: /Third role/ })).not.toBeInTheDocument();
-      expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "0");
-      expect(screen.getByRole("heading", { name: "First role" })).toBeInTheDocument();
-    } finally {
-      vi.useRealTimers();
-    }
+    expect(screen.queryByRole("button", { name: /Third role/ })).not.toBeInTheDocument();
+    expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "1");
+    expect(screen.getByRole("heading", { name: "Second role" })).toBeInTheDocument();
   });
 });

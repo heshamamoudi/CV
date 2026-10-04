@@ -38,9 +38,11 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
     halfWidth = .23; depth = .19;
     euler = [.04, -.055, -.015];
   } else if (chapter === 2) {
-    path = Array.from({ length: SECTIONS + 1 }, (_, i) => new THREE.Vector2((i / SECTIONS - .5) * 4.8, .08 * Math.sin(i / SECTIONS * Math.PI)));
-    halfWidth = 1.03; depth = .055;
-    euler = portrait ? [.12, -.26, Math.PI / 2 - .10] : [.32, -.12, -.08];
+    // An ascending route: the original closed sheet opens into a winding ribbon.
+    // The broad bends leave room for distinct career stations and their labels.
+    path = roundedPath([[-2.65, -1.25], [-1.25, -1.25], [-.65, .05], [.75, .05], [1.35, 1.25], [2.65, 1.25]], false, .32);
+    halfWidth = .34; depth = .085;
+    euler = portrait ? [.22, -.16, .12] : [.34, -.18, -.055];
   } else if (chapter === 3) {
     path = roundedPath([[1.5, 1.65], [-1.5, 1.65], [-1.5, -1.65], [1.5, -1.65]], true, .32);
     halfWidth = .55; depth = .23;
@@ -66,14 +68,13 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
     if (chapter === 3) { z = .38 * Math.sin(t * Math.PI * 2); twist = .24 * Math.cos(t * Math.PI * 2); }
     if (chapter === 4) z = .22 * Math.cos(t * Math.PI * 2);
     if (chapter === 2) {
-      const fold = t * 4, panel = Math.min(3, Math.floor(fold)), f = fold - panel;
-      const heights = [.16, -.23, .28, -.23, .16];
-      z = THREE.MathUtils.lerp(heights[panel], heights[panel + 1], f);
+      z = .22 * Math.sin(t * Math.PI * 3);
+      twist = .10 * Math.sin(t * Math.PI * 4);
     }
     const normal = new THREE.Vector3(-across.x * Math.sin(twist), -across.y * Math.sin(twist), Math.cos(twist));
     across.multiplyScalar(Math.cos(twist)); across.z = Math.sin(twist);
     const center = new THREE.Vector3(path[i].x, path[i].y, z);
-    surface.push(center.clone().addScaledVector(normal, depth + .018).addScaledVector(across, chapter === 2 ? .23 * Math.sin(t * Math.PI * 3) : 0));
+    surface.push(center.clone().addScaledVector(normal, depth + .025));
     profile.forEach(([w, d], j) => {
       const v = center.clone().addScaledVector(across, w).addScaledVector(normal, d);
       v.toArray(positions, (i * PROFILE + j) * 3);

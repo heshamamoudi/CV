@@ -40,7 +40,7 @@ export function Layout({
         introShown = true;
         setSplash(false);
       },
-      reduce ? 150 : 1500,
+      reduce ? 150 : 1550,
     );
     return () => clearTimeout(timer);
   }, [splash]);
@@ -53,20 +53,20 @@ export function Layout({
     <>
       {splash && (
         <div
-          className="scatter-intro refined-intro"
+          className="identity-intro"
           data-splash
           role="dialog"
           aria-modal="true"
           aria-label={lang === "ar" ? "مرحباً" : "Welcome"}
         >
-          <div className="scatter-panels" aria-hidden="true">
-            {Array.from({ length: 12 }, (_, i) => (
-              <i key={i} />
-            ))}
-          </div>
-          <div className="scatter-identity">
+          <span className="intro-edition" aria-hidden="true">{lang === "ar" ? "أعمال مختارة" : "SELECTED WORK / PERSONAL PORTFOLIO"}</span>
+          <div className="intro-signature">
+            <div className="intro-emblem">
             <BrandMark />
-            <span>{displayName}</span>
+            </div>
+            <div className="intro-name"><span>{firstName}</span><span>{familyName.join(" ")}</span></div>
+            <span className="intro-rule" aria-hidden="true" />
+            <p>{lang === "ar" ? "الفكرة. الحرفة. الأثر." : "Thought. Craft. Impact."}</p>
           </div>
           <button className="intro-skip" onClick={dismiss} autoFocus>
             {lang === "ar" ? "تخطّ المقدمة ↖" : "Skip intro ↗"}
