@@ -35,7 +35,7 @@ public class SeoAdminTests
     }
 
     [Fact]
-    public async Task The_hero_image_is_the_default_share_image_and_a_page_image_overrides_it()
+    public async Task Share_images_fall_back_to_the_brand_card_and_page_or_project_images_win()
     {
         var (app, admin) = await AdminTestApp.CreateAsync();
         async Task<Guid> UploadAsync() => (await (await admin.PostAsync("/api/admin/media",
@@ -43,16 +43,28 @@ public class SeoAdminTests
         var hero = await UploadAsync();
         var share = await UploadAsync();
 
-        Assert.DoesNotContain("og:image", await app.CreateClient().GetStringAsync("/en/journey"));
+        var client = app.CreateClient();
+        foreach (var route in new[] { "/en", "/en/journey", "/en/projects" })
+        {
+            var fallbackHtml = await client.GetStringAsync(route);
+            Assert.Contains("<meta property=\"og:image\" content=\"https://heshamamoudi.com/brand/og-card.png\">", fallbackHtml);
+            Assert.Contains("<meta name=\"twitter:image\" content=\"https://heshamamoudi.com/brand/og-card.png\">", fallbackHtml);
+        }
+        Assert.Contains("https://heshamamoudi.com/brand/og-card-ar.png", await client.GetStringAsync("/ar/journey"));
 
         var profile = (await admin.GetFromJsonAsync<JsonObject>("/api/admin/profile"))!;
         profile["heroMediaId"] = hero.ToString();
         Assert.Equal(HttpStatusCode.NoContent, (await admin.PutAsJsonAsync("/api/admin/profile", profile)).StatusCode);
         Assert.Contains($"<meta property=\"og:image\" content=\"https://heshamamoudi.com/media/{hero:N}/1280.webp\">",
-            await app.CreateClient().GetStringAsync("/en/journey"));
+            await client.GetStringAsync("/en/journey"));
+
+        var project = await client.GetFromJsonAsync<JsonObject>("/api/public/en/projects/selfhost-platform");
+        var projectImage = project!["cover"]!["src"]!.GetValue<string>();
+        Assert.Contains($"<meta property=\"og:image\" content=\"https://heshamamoudi.com{projectImage}\">",
+            await client.GetStringAsync("/en/projects/selfhost-platform"));
 
         Assert.Equal(HttpStatusCode.NoContent, (await admin.PutAsJsonAsync("/api/admin/seo/pages/journey", Page(share: share))).StatusCode);
-        var html = await app.CreateClient().GetStringAsync("/en/journey");
+        var html = await client.GetStringAsync("/en/journey");
         Assert.Contains($"<meta property=\"og:image\" content=\"https://heshamamoudi.com/media/{share:N}/1280.webp\">", html);
         Assert.Contains($"<meta name=\"twitter:image\" content=\"https://heshamamoudi.com/media/{share:N}/1280.webp\">", html);
         Assert.Contains($"/media/{hero:N}/1280.webp", await app.CreateClient().GetStringAsync("/en"));

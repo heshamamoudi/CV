@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f1e9"/>
+      <stop offset="1" stop-color="#e8e3d9"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#242326" stroke-opacity=".045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect x="30" y="30" width="1140" height="570" rx="12" fill="none" stroke="#242326" stroke-opacity=".18"/>
+  <text x="80" y="98" fill="#5e5b58" font-family="monospace" font-size="17" letter-spacing="3">HESHAMAMOUDI.COM</text>
+  <g transform="translate(1000 54) scale(1.45)">
+    <path d="M7 17 19 11V69H7ZM46 11H58L38 69H25ZM58 11 81 69H67L51 28ZM19 35H38L34 46H19Z" fill="#242326"/>
+    <path d="M43 45H68L72 56H39Z" fill="#b96b44"/>
+  </g>
+  <g fill="none" stroke="#393638" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".73">
+    <path d="M128 192 206 192 226 212 261 212 281 192 333 192 359 218 441 218"/>
+    <path d="M158 227 209 227 236 254 270 254 291 233 324 233 349 258 441 258"/>
+    <path d="M108 267 185 267 209 291 252 291 274 269 314 269 341 296 441 296"/>
+    <path d="M168 309 210 309 237 336 272 336 292 316 329 316 355 344 441 344"/>
+    <path d="M122 351 186 351 213 378 255 378 277 356 315 356 340 383 441 383"/>
+    <path d="M176 394 212 394 238 420 273 420 294 401 328 401 353 427 441 427"/>
+  </g>
+  <g fill="none" stroke="#242326" stroke-width="2.5" opacity=".8">
+    <path d="M441 218v210M441 258v170M441 296v132M441 344v84M441 383v45"/>
+  </g>
+  <circle cx="441" cy="428" r="8" fill="#b96b44"/>
+  <circle cx="441" cy="428" r="17" fill="none" stroke="#b96b44" stroke-opacity=".35"/>
+  <text x="900" y="258" text-anchor="middle" fill="#242326" font-family="Tahoma, Arial, sans-serif" font-size="64" font-weight="700">هشام العمودي</text>
+  <text x="900" y="330" text-anchor="middle" fill="#393638" font-family="Tahoma, Arial, sans-serif" font-size="44">من التعقيد</text>
+  <text x="900" y="391" text-anchor="middle" fill="#b96b44" font-family="Tahoma, Arial, sans-serif" font-size="44" font-weight="600">إلى الوضوح.</text>
+  <path d="M690 426h430" stroke="#242326" stroke-opacity=".2"/>
+  <text x="900" y="474" text-anchor="middle" fill="#5e5b58" font-family="Tahoma, Arial, sans-serif" font-size="17" letter-spacing=".5">تطبيقات · أنظمة · تحوّل رقمي</text>
+  <text x="900" y="530" text-anchor="middle" fill="#5e5b58" font-family="Tahoma, Arial, sans-serif" font-size="16">من التعقيد إلى الوضوح</text>
+</svg>

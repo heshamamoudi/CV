@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f1e9"/>
+      <stop offset="1" stop-color="#e8e3d9"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#242326" stroke-opacity=".045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect x="30" y="30" width="1140" height="570" rx="12" fill="none" stroke="#242326" stroke-opacity=".18"/>
+
+  <g transform="translate(80 54) scale(1.45)">
+    <path d="M7 17 19 11V69H7ZM46 11H58L38 69H25ZM58 11 81 69H67L51 28ZM19 35H38L34 46H19Z" fill="#242326"/>
+    <path d="M43 45H68L72 56H39Z" fill="#b96b44"/>
+  </g>
+  <text x="1120" y="98" text-anchor="end" fill="#5e5b58" font-family="monospace" font-size="17" letter-spacing="3">HESHAMAMOUDI.COM</text>
+
+  <text x="80" y="258" fill="#242326" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700" letter-spacing="-2">Hesham Amoudi</text>
+  <text x="80" y="330" fill="#393638" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="400" letter-spacing="-.8">Turning complexity</text>
+  <text x="80" y="386" fill="#ef5835" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="600" letter-spacing="-.8">into clarity.</text>
+  <path d="M80 426h430" stroke="#242326" stroke-opacity=".2"/>
+  <text x="80" y="472" fill="#5e5b58" font-family="monospace" font-size="15" letter-spacing="1.7">APPLICATIONS · SYSTEMS · DIGITAL TRANSFORMATION</text>
+
+  <g fill="none" stroke="#393638" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity=".73">
+    <path d="M760 192 838 192 858 212 893 212 913 192 965 192 991 218 1073 218"/>
+    <path d="M790 227 841 227 868 254 902 254 923 233 956 233 981 258 1073 258"/>
+    <path d="M740 267 817 267 841 291 884 291 906 269 946 269 973 296 1073 296"/>
+    <path d="M800 309 842 309 869 336 904 336 924 316 961 316 987 344 1073 344"/>
+    <path d="M754 351 818 351 845 378 887 378 909 356 947 356 972 383 1073 383"/>
+    <path d="M808 394 844 394 870 420 905 420 926 401 960 401 985 427 1073 427"/>
+  </g>
+  <g fill="none" stroke="#242326" stroke-width="2.5" opacity=".8">
+    <path d="M1073 218v210M1073 258v170M1073 296v132M1073 344v84M1073 383v45"/>
+  </g>
+  <circle cx="1073" cy="428" r="8" fill="#ef5835"/>
+  <circle cx="1073" cy="428" r="17" fill="none" stroke="#ef5835" stroke-opacity=".35"/>
+  <text x="1118" y="500" text-anchor="end" fill="#5e5b58" font-family="monospace" font-size="12" letter-spacing="2">COMPLEXITY → CLARITY</text>
+</svg>

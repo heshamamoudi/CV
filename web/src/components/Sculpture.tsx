@@ -5,21 +5,25 @@ import type { JourneyDto } from "../types";
 import { SECTIONS, sculptureForm, sculptureGeometry } from "./sculptureGeometry";
 import { sectionDetails } from "./sectionDetails";
 import { CHAPTER_TRAVEL_MS } from "./useChapterTransition";
+import { INTRO_DURATION_MS, useIntro } from './IntroContext';
+import { introEase, introMorph, introTravel, sculptureIntroForm } from './sculptureIntro';
 
 type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; aboutTab?:number };
 const ease=(t:number)=>t*t*t*(t*(t*6-15)+10);
 
 /** One continuous object; only its fold, orientation and aperture change. */
 export function Sculpture(props:Props) {
+  const intro = useIntro(), introState = useRef(intro);
+  introState.current = intro;
   const host=useRef<HTMLDivElement>(null),current=useRef(props);
   current.current=props;
   const [fallback,setFallback]=useState(false);
   useEffect(()=>{
     const el=host.current,parent=el?.parentElement;if(!el||!parent)return;
     let renderer:THREE.WebGLRenderer;
-    try{renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"})}catch{setFallback(true);return}
+    try{renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:"low-power"})}catch{setFallback(true);introState.current.finish();return}
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.outputColorSpace=THREE.SRGBColorSpace;
-    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.90;el.appendChild(renderer.domElement);
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.90;renderer.domElement.setAttribute('aria-hidden','true');el.appendChild(renderer.domElement);
     const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-3,3,3,-3,.1,4000);
     const studio=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(studio,.04);
     scene.environment=environment.texture;scene.environmentIntensity=.85;studio.dispose();pmrem.dispose();
@@ -47,6 +51,22 @@ export function Sculpture(props:Props) {
     let target=sculptureForm(current.current.chapter,stage.height>stage.width*1.15,current.current.aboutTab);
     const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);idle.add(mesh);root.quaternion.copy(target.rotation);
     const positions=geometry.getAttribute("position") as THREE.BufferAttribute;
+    const woven = sculptureIntroForm();
+    let introPlaying = introState.current.active && current.current.chapter === 0 && !current.current.paused;
+    let introStarted: number | null = null;
+    let introElapsed = 0;
+    const dockCanvas = () => {
+      el.appendChild(renderer.domElement);
+      renderer.domElement.removeAttribute('style');
+      renderer.domElement.removeAttribute('data-intro-canvas');
+    };
+    if (introPlaying) {
+      // The same canvas floats above the opening, then docks inside the chapter.
+      // Its scene, GPU resources and geometry remain alive through the handoff.
+      document.body.appendChild(renderer.domElement);
+      renderer.domElement.setAttribute('data-intro-canvas','');
+      Object.assign(renderer.domElement.style,{position:'fixed',inset:'0',width:'100%',height:'100%',zIndex:'101',pointerEvents:'none'});
+    }
     let fromPositions=new Float32Array(positions.array);
     const fromRotation=root.quaternion.clone(),center=target.center.clone(),fromCenter=center.clone();
     const fit=()=>Math.max(target.bounds.y,target.bounds.x/(stageTarget.width/stageTarget.height))*(current.current.chapter===1?1.10:1.32);
@@ -74,12 +94,15 @@ export function Sculpture(props:Props) {
       routeGeometry.dispose();routeMaterial.dispose();marker.geometry.dispose();markerMaterial.dispose();stationGeometry.dispose();stationMaterial.dispose();
       renderer.dispose();renderer.domElement.remove();
     };
-    const lost=(event:Event)=>{event.preventDefault();stopped=true;cancelAnimationFrame(frame);setFallback(true);dispose()};
+    const lost=(event:Event)=>{event.preventDefault();stopped=true;cancelAnimationFrame(frame);setFallback(true);introState.current.finish();dispose()};
     renderer.domElement.addEventListener("webglcontextlost",lost);
     const update=(now:number)=>{
       if(stopped)return;frame=requestAnimationFrame(update);
       const dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden)return;
       const {chapter,paused,journey,selectedJourneyIndex=0,aboutTab=0}=current.current;
+      if(introPlaying && (!introState.current.active || paused || chapter!==0)) {
+        introPlaying=false;geometrySettled=false;details.assemble(1);dockCanvas();introState.current.finish();
+      }
       const measured=measureStage();if(!measured){el.style.display="none";return;}el.style.display="block";
       const portrait=measured.height>measured.width*1.15,id=`${chapter}:${portrait}:${aboutTab}`;
       if(previous!==id){
@@ -133,9 +156,35 @@ export function Sculpture(props:Props) {
       route.visible=marker.visible=routeOpacity>.005;stations.forEach((station,i)=>{station.visible=routeOpacity>.005&&i<(journey?.length??0)});
       camera.left=-width/2;camera.right=width/2;camera.top=height/2;camera.bottom=-height/2;
       camera.position.set(0,0,2000);camera.lookAt(0,0,0);camera.updateProjectionMatrix();
+      if (introPlaying) {
+        // Advance by rendered time, not shader-compilation stalls or a hidden tab.
+        // The complex object must actually be seen before it starts resolving.
+        if(introStarted !== null) introElapsed += dt * 1000;
+        introStarted ??= now;
+        const progress = Math.min(1,introElapsed/INTRO_DURATION_MS);
+        const morph = introMorph(progress), travel = introTravel(progress);
+        for(let i=0;i<positions.array.length;i++) positions.array[i]=THREE.MathUtils.lerp(woven.positions[i],target.positions[i],morph);
+        positions.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingSphere();
+        const isMobile=width<=700, isRtl=document.documentElement.dir==='rtl';
+        const opening=isMobile ? {x:width*.08,y:height*.35,width:width*.84,height:height*.45}
+          : {x:width*(isRtl?.035:.505),y:height*.16,width:width*.46,height:height*.66};
+        const initialScale=opening.height/Math.max(5.7,5.5/(opening.width/opening.height));
+        const introScale=THREE.MathUtils.lerp(initialScale,toScale,travel);
+        const cx=THREE.MathUtils.lerp(opening.x+opening.width/2,measured.x+measured.width/2,travel);
+        const cy=THREE.MathUtils.lerp(opening.y+opening.height/2,measured.y+measured.height/2,travel);
+        const introCenter=new THREE.Vector3().lerpVectors(woven.center,target.center,morph);
+        root.quaternion.copy(woven.rotation).slerp(target.rotation,morph);
+        root.scale.setScalar(introScale);
+        root.position.set(cx-width/2-introCenter.x*introScale,height/2-cy-introCenter.y*introScale,0);
+        idle.rotation.set(0,Math.sin(progress*Math.PI)*.12*(1-morph),0);idle.position.y=0;
+        details.show(0,1);details.assemble(introEase((progress-.20)/.52));
+        introState.current.progress(progress);
+        geometrySettled=false;
+        if(progress===1){introPlaying=false;details.assemble(1);dockCanvas();introState.current.finish();}
+      }
       // Clip only at the reading area's edges, never to the arriving object's box.
       const panel=measured.anchor.closest<HTMLElement>(".chapter-panel"),parentRect=parent.getBoundingClientRect();
-      if(panel){const r=panel.getBoundingClientRect();el.style.clipPath=`inset(${Math.max(0,r.top-parentRect.top)}px 0 ${Math.max(0,parentRect.bottom-r.bottom)}px 0)`;}else el.style.clipPath="none";
+      if(panel && !introPlaying){const r=panel.getBoundingClientRect();el.style.clipPath=`inset(${Math.max(0,r.top-parentRect.top)}px 0 ${Math.max(0,parentRect.bottom-r.bottom)}px 0)`;}else el.style.clipPath="none";
       renderer.render(scene,camera);
       if(chapter===2){
         const point=new THREE.Vector3();

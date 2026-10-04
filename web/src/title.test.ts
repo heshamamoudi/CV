@@ -54,4 +54,33 @@ describe('updatePageHead', () => {
     expect(document.head.querySelector('meta[property="og:title"]')).toBeNull();
     expect(document.head.querySelector('meta[name="twitter:image"]')).toBeNull();
   });
+
+  it('uses a same-route server page image, then falls back to the brand card when content images are absent', () => {
+    document.head.innerHTML = '<title>Old</title><link rel="canonical" href="https://test.example/en"><meta property="og:url" content="https://test.example/en/journey"><meta property="og:image" content="https://test.example/media/custom-share.webp">';
+    const withoutImages = { ...home, profile: { ...home.profile, heroImage: null } } as HomeData;
+    updatePageHead('journey', 'en', withoutImages, null, '/en/journey');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.content).toBe('https://test.example/media/custom-share.webp');
+
+    document.head.querySelector<HTMLMetaElement>('meta[property="og:url"]')!.content = 'https://test.example/en/previous';
+    updatePageHead('journey', 'en', withoutImages, null, '/en/journey');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.content).toBe('https://test.example/brand/og-card.png');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[name="twitter:image"]')?.content).toBe('https://test.example/brand/og-card.png');
+    updatePageHead('journey', 'ar', withoutImages, null, '/ar/journey');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.content).toBe('https://test.example/brand/og-card-ar.png');
+  });
+
+  it('preserves a custom SSR home title during hydration and uses route defaults after navigation', () => {
+    document.head.innerHTML = '<title>Hesham Amoudi</title><link rel="canonical" href="https://test.example/en"><meta name="description" content="Custom home capability copy"><meta property="og:url" content="https://test.example/en"><meta property="og:title" content="Hesham Amoudi"><meta property="og:description" content="Custom home capability copy">';
+    updatePageHead('home', 'en', home, null, '/en');
+    expect(document.title).toBe('Hesham Amoudi');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.content).toBe('Hesham Amoudi');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.content).toBe('Custom home capability copy');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.content).toBe('Custom home capability copy');
+
+    updatePageHead('journey', 'en', home, null, '/en/journey');
+    expect(document.title).toBe(pageTitle('journey', 'en', home, null));
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.content).toBe(pageTitle('journey', 'en', home, null));
+    expect(document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.content).toBe('Profile summary');
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.content).toBe('Profile summary');
+  });
 });

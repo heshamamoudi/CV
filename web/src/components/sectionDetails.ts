@@ -67,10 +67,23 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
     }
   });
   let activeChapter=-1;
+  const architecture = groups[0].children.map((mesh,index)=>({
+    mesh,
+    position:mesh.position.clone(),
+    rotation:mesh.quaternion.clone(),
+    scattered:new THREE.Vector3(Math.cos(index*2.399)*1.65,Math.sin(index*2.399)*1.60,Math.sin(index*1.7)*.95),
+    turn:new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(index*1.1)*1.05,Math.cos(index*.8)*.95,Math.sin(index*2.1)*1.4)),
+  }));
   let fromOpacity=groups.map(()=>0);
   const smooth=(x:number)=>{const t=THREE.MathUtils.clamp(x,0,1);return t*t*(3-2*t)};
   return {
     groups,
+    assemble(progress:number){
+      architecture.forEach(({mesh,position,rotation,scattered,turn})=>{
+        mesh.position.lerpVectors(scattered,position,progress);
+        mesh.quaternion.copy(turn).slerp(rotation,progress);
+      });
+    },
     show(chapter:number,progress:number){
       if(chapter!==activeChapter){
         fromOpacity=groups.map(group=>(group.userData.palette as THREE.MeshStandardMaterial[])[0].opacity);

@@ -61,6 +61,38 @@ afterEach(() => {
 });
 
 describe('the SEO screen', () => {
+  it('shows automatic profile text without turning it into a saved override', async () => {
+    const fetched = serve((url, init) => {
+      if (url === '/api/admin/profile') return { status: 200, body: { name: { en: 'Hesham', ar: 'هشام' }, headline: { en: 'Engineer', ar: 'مهندس' }, summary: { en: 'Building useful systems.', ar: 'بناء أنظمة مفيدة.' }, heroMediaId: null } };
+      if (url === '/api/admin/media') return { status: 200, body: [] };
+      if (url === '/api/admin/seo/pages/journey' && init.method === 'PUT') return { status: 204 };
+      return loaded(url, init);
+    });
+    show();
+    await screen.findByRole('region', { name: 'Journey page' });
+    await waitFor(() => expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('Journey — Hesham'));
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Journey page' }).querySelector('.seo-link-image img')).toHaveAttribute('src', '/brand/og-card.png'));
+    expect(box('Journey page', 'Page description', 'Arabic')).toHaveValue('بناء أنظمة مفيدة.');
+    expect(region('Journey page').getByRole('button', { name: 'Save' })).toBeDisabled();
+    fireEvent.change(box('Journey page', 'Link-sharing title', 'English'), { target: { value: 'A different journey' } });
+    expect(region('Journey page').getByRole('heading', { name: 'A different journey' })).toBeInTheDocument();
+    fireEvent.click(region('Journey page').getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(putTo(fetched, '/api/admin/seo/pages/journey')).toHaveLength(1));
+    expect(JSON.parse(String(putTo(fetched, '/api/admin/seo/pages/journey')[0][1]?.body))).toEqual({ title: { en: 'A different journey', ar: '' }, description: { en: '', ar: '' }, shareMediaId: null });
+    fireEvent.click(region('Journey page').getByRole('button', { name: 'Use automatic text — English — Link-sharing title' }));
+    expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('Journey — Hesham');
+    fireEvent.click(region('Journey page').getByRole('button', { name: 'ع' }));
+    expect(region('Journey page').getByRole('heading', { name: 'المسيرة — هشام' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Journey page' }).querySelector('.seo-link-image img')).toHaveAttribute('src', '/brand/og-card-ar.png');
+  });
+
+  it('keeps saved overrides editable when the profile preview fails', async () => {
+    serve(loaded);
+    show();
+    expect(await screen.findByText('Automatic text could not be loaded. Your saved overrides are still available.')).toBeInTheDocument();
+    expect(box('Home page', 'Link-sharing title', 'English')).toHaveValue('Hesham Amoudi');
+  });
+
   it('shows what each page currently overrides', async () => {
     serve(loaded);
 

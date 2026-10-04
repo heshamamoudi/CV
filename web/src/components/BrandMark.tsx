@@ -1,6 +1,6 @@
 import { brandShapes, brandViewBox } from "./brandGeometry";
 
-/** Distinct H and A counters share one level bridge: identity, connection, clarity. */
+/** Interlocking structural initials, cut from one architectural silhouette. */
 export function BrandMark({ className = "" }: { className?: string }) {
   return (
     <svg

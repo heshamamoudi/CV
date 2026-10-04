@@ -39,13 +39,24 @@ function upsertLink(rel: string, href: string | null, hreflang?: string) {
 
 /** Updates the route-owned metadata after React navigation, preserving SSR for direct requests. */
 export function updatePageHead(kind: PublicKind, lang: Lang, home: HomeData | null, project: ProjectDto | null, path = window.location.pathname) {
-  const title = pageTitle(kind, lang, home, project);
-  document.title = title;
   const canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
   const origin = canonical ? new URL(canonical.href, window.location.origin).origin : window.location.origin;
   const absolute = (p: string) => new URL(p, origin).href;
-  const description = kind === 'project' ? project?.summary : kind === 'notfound' ? '' : home?.profile.summary;
-  const image = (kind === 'project' ? project?.cover?.src : home?.profile.heroImage?.src) || null;
+  const canonicalUrl = absolute(path);
+  const serverPageMatches = document.head.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content === canonicalUrl;
+  const title = serverPageMatches ? document.title : pageTitle(kind, lang, home, project);
+  document.title = title;
+  const defaultDescription = kind === 'project' ? project?.summary : kind === 'notfound' ? '' : home?.profile.summary;
+  const description = serverPageMatches
+    ? document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.content || defaultDescription
+    : defaultDescription;
+  const ogDescription = serverPageMatches
+    ? document.head.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.content || description
+    : description;
+  const serverPageImage = serverPageMatches
+    ? document.head.querySelector<HTMLMetaElement>('meta[property="og:image"]')?.content
+    : null;
+  const image = serverPageImage || project?.cover?.src || home?.profile.heroImage?.src || `/brand/og-card${lang === 'ar' ? '-ar' : ''}.png`;
 
   upsertMeta('meta[name="description"]', 'name', 'description', description || null);
   upsertMeta('meta[name="robots"]', 'name', 'robots', kind === 'notfound' ? 'noindex' : null);
@@ -59,7 +70,6 @@ export function updatePageHead(kind: PublicKind, lang: Lang, home: HomeData | nu
     return;
   }
 
-  const canonicalUrl = absolute(path);
   const twinExists = kind !== 'project' || project?.availableInOtherLanguage === true;
   const twinPath = `/${lang === 'en' ? 'ar' : 'en'}${path.slice(3)}`;
   upsertLink('canonical', canonicalUrl);
@@ -67,7 +77,7 @@ export function updatePageHead(kind: PublicKind, lang: Lang, home: HomeData | nu
   upsertLink('alternate', twinExists ? absolute(twinPath) : null, lang === 'en' ? 'ar' : 'en');
   upsertLink('alternate', lang === 'en' || twinExists ? absolute(lang === 'en' ? path : twinPath) : null, 'x-default');
   upsertMeta('meta[property="og:title"]', 'property', 'og:title', title);
-  upsertMeta('meta[property="og:description"]', 'property', 'og:description', description || '');
+  upsertMeta('meta[property="og:description"]', 'property', 'og:description', ogDescription || '');
   upsertMeta('meta[property="og:url"]', 'property', 'og:url', canonicalUrl);
   upsertMeta('meta[property="og:locale"]', 'property', 'og:locale', lang === 'ar' ? 'ar_SA' : 'en_US');
   upsertMeta('meta[property="og:locale:alternate"]', 'property', 'og:locale:alternate', lang === 'ar' ? 'en_US' : 'ar_SA');

@@ -20,14 +20,14 @@ public sealed class SeoService(ProfileContext db, SiteOptions site)
         var page = key is null ? null : await db.PageSeo.AsNoTracking().FirstOrDefaultAsync(p => p.Key == key, ct);
         var token = await db.SiteSettings.AsNoTracking().Select(s => s.SearchConsoleToken).FirstOrDefaultAsync(ct);
 
-        // A page's own share image, else the project's cover, else the hero.
+        // A page's own share image, else the project's cover, then the hero and branded fallback.
         var share = page?.ShareMediaId is { } shareId ? await ShareUrlAsync(shareId, ct) : null;
-        share ??= project?.Cover?.Src ?? home.Profile.HeroImage?.Src;
+        share ??= project?.Cover?.Src ?? home.Profile.HeroImage?.Src ?? (lang == "ar" ? "/brand/og-card-ar.png" : "/brand/og-card.png");
 
         return new SeoOverrides(
             page is not null && page.Title.Has(lang) ? page.Title.For(lang) : null,
             page is not null && page.Description.Has(lang) ? page.Description.For(lang) : null,
-            share is null ? null : site.Absolute(share),
+            site.Absolute(share),
             string.IsNullOrWhiteSpace(token) ? null : token);
     }
 

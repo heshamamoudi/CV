@@ -1,9 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import type { Lang } from "../types";
 import { useStrings } from "../i18n/useStrings";
 import { otherLang, twinPath } from "../paths";
 import { BrandMark } from "./BrandMark";
+import { IntroContext } from "./IntroContext";
 
 let introShown = false;
 export function Layout({
@@ -22,8 +23,24 @@ export function Layout({
   const isHome = new RegExp(
     `^/${lang}(?:/(?:journey|projects(?:/[^/]+)?))?/?$`,
   ).test(pathname);
-  const [splash, setSplash] = useState(!introShown),
+  const entryRoute = useRef(pathname + hash);
+  const overlay = useRef<HTMLDivElement>(null);
+  const watchdog = useRef<ReturnType<typeof setTimeout>>();
+  const [splash, setSplash] = useState(() => !introShown && /^\/(en|ar)\/?$/.test(pathname) && (!hash || hash === '#intro') && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches),
     [menu, setMenu] = useState(false);
+  const dismiss = useCallback(() => {
+    introShown = true;
+    setSplash(false);
+  }, []);
+  const progress = useCallback((value: number) => {
+    // Once a real scene is rendering, let it finish even on a slower device.
+    clearTimeout(watchdog.current);
+    if (!overlay.current) return;
+    overlay.current.style.setProperty('--intro-reveal', String(Math.max(0, Math.min(1, (value - .73) / .23))));
+    overlay.current.style.setProperty('--intro-progress', String(value));
+    overlay.current.dataset.step = value < .25 ? 'complexity' : value < .72 ? 'clarity' : 'arrival';
+  }, []);
+  const intro = useMemo(() => ({ active: splash, finish: dismiss, progress }), [splash, dismiss, progress]);
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
@@ -32,43 +49,39 @@ export function Layout({
   }, [lang, isHome]);
   useEffect(() => {
     if (!splash) return;
-    const reduce = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const timer = setTimeout(
-      () => {
-        introShown = true;
-        setSplash(false);
-      },
-      reduce ? 0 : 1200,
-    );
-    return () => clearTimeout(timer);
+    // The sculpture owns the animation clock. This only releases a failed/slow WebGL load.
+    watchdog.current = setTimeout(dismiss, 6500);
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    const reduce = () => { if (media?.matches) dismiss(); };
+    media?.addEventListener('change', reduce);
+    return () => { clearTimeout(watchdog.current); media?.removeEventListener('change', reduce); };
+  }, [splash, dismiss]);
+  const hadSplash = useRef(splash);
+  useEffect(() => {
+    if(hadSplash.current && !splash) document.getElementById('main-content')?.focus({preventScroll:true});
+    hadSplash.current=splash;
   }, [splash]);
+  useEffect(() => { if (entryRoute.current !== pathname + hash) dismiss(); }, [pathname, hash, dismiss]);
   useEffect(() => setMenu(false), [pathname, hash]);
-  const dismiss = () => {
-    introShown = true;
-    setSplash(false);
-  };
   return (
-    <>
+    <IntroContext.Provider value={intro}>
       {splash && (
         <div
           className="identity-intro"
+          ref={overlay}
+          data-step="complexity"
           data-splash
           role="dialog"
           aria-modal="true"
           aria-label={lang === "ar" ? "مرحباً" : "Welcome"}
+          onKeyDown={event => {
+            if(event.key==='Escape') dismiss();
+            if(event.key==='Tab') { event.preventDefault(); overlay.current?.querySelector('button')?.focus(); }
+          }}
         >
-          <span className="intro-edition" aria-hidden="true">{lang === "ar" ? "أعمال مختارة" : "SELECTED WORK / PERSONAL PORTFOLIO"}</span>
-          <div className="intro-signature">
-            <div className="intro-emblem">
-              <svg className="intro-construction" viewBox="0 0 120 100" aria-hidden="true"><path d="M0 24H120"/><path d="M0 50H120"/><path d="M0 76H120"/></svg>
-            <BrandMark />
-            </div>
-            <div className="intro-name"><span>{firstName}</span><span>{familyName.join(" ")}</span></div>
-            <span className="intro-rule" aria-hidden="true" />
-            <p>{lang === "ar" ? "من التعقيد إلى الوضوح." : "Complexity, made clear."}</p>
-          </div>
+          <div className="intro-brand"><BrandMark /><span>{displayName}</span></div>
+          <div className="intro-statement"><p className="intro-overline">{lang === 'ar' ? 'فكرة واحدة. احتمالات متعددة.' : 'ONE IDEA. MANY POSSIBILITIES.'}</p><h2>{lang === 'ar' ? <>من التعقيد<br /><em>إلى الوضوح.</em></> : <>Complexity,<br /><em>made clear.</em></>}</h2><p className="intro-sequence"><span>01 / {lang === 'ar' ? 'فهم التعقيد' : 'UNTANGLE'}</span><span>02 / {lang === 'ar' ? 'بناء الوضوح' : 'BUILD CLARITY'}</span></p></div>
+          <div className="intro-bottom" aria-hidden="true"><span>{lang === 'ar' ? 'أنظمة مترابطة. نتائج واضحة.' : 'CONNECTED SYSTEMS. CLEAR OUTCOMES.'}</span><div className="intro-progress-track"><i /></div><span>HA / 01</span></div>
           <button className="intro-skip" onClick={dismiss} autoFocus>
             {lang === "ar" ? "تخطّ المقدمة ↖" : "Skip intro ↗"}
           </button>
@@ -136,6 +149,6 @@ export function Layout({
           </footer>
         )}
       </div>
-    </>
+    </IntroContext.Provider>
   );
 }
