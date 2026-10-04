@@ -41,7 +41,7 @@ export function Sculpture(props:Props) {
       return {x:r.left-p.left,y:r.top-p.top,width:Math.max(1,r.width),height:Math.max(1,r.height),anchor};
     };
     let stage=measureStage();
-    if(!stage){renderer.dispose();renderer.domElement.remove();environment.dispose();materials.forEach(material=>material.dispose());return;}
+    if(!stage){details.dispose();renderer.dispose();renderer.domElement.remove();environment.dispose();materials.forEach(material=>material.dispose());return;}
     let stageFrom={...stage},stageTarget={...stage};
     let target=sculptureForm(current.current.chapter,stage.height>stage.width*1.15,current.current.aboutTab);
     const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);idle.add(mesh);root.quaternion.copy(target.rotation);
