@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, useParams } from 'react-router';
 import { isLang } from './paths';
 import { useHome, useProject } from './data';
-import { pageTitle, usePageTitle } from './title';
+import { usePageTitle } from './title';
 import type { HomeData, Lang, PageData } from './types';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
@@ -10,11 +10,11 @@ import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectPage } from './pages/ProjectPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
-function WithHome({ kind, render }: { kind: PageData['kind']; render: (home: HomeData) => JSX.Element }) {
+function WithHome({ kind, render }: { kind: Exclude<PageData['kind'], 'admin' | 'project' | 'notfound'>; render: (home: HomeData) => JSX.Element }) {
   const { lang } = useParams();
   const safe: Lang = isLang(lang) ? lang : 'en';
   const home = useHome(safe);
-  usePageTitle(home ? pageTitle(isLang(lang) ? kind : 'notfound', safe, home, null) : null);
+  usePageTitle(isLang(lang) ? kind : 'notfound', safe, home);
   if (!isLang(lang)) return <Layout lang="en"><NotFoundPage lang="en" /></Layout>;
   return <Layout lang={safe} name={home?.profile.name}>{home ? render(home) : null}</Layout>;
 }
@@ -24,7 +24,7 @@ function ProjectRoute() {
   const safe: Lang = isLang(lang) ? lang : 'en';
   const project = useProject(safe, slug);
   const home = useHome(safe);
-  usePageTitle(home && project !== undefined ? pageTitle(project ? 'project' : 'notfound', safe, home, project) : null);
+  usePageTitle(project === undefined ? 'project' : project ? 'project' : 'notfound', safe, project === undefined ? null : home, project ?? null);
   return (
     <Layout lang={safe} name={home?.profile.name}>
       {project === undefined ? null : project ? <ProjectPage project={project} /> : <NotFoundPage lang={safe} />}
@@ -37,7 +37,7 @@ function NotFoundRoute() {
   const first = window.location.pathname.split('/').filter(Boolean)[0];
   const lang: Lang = isLang(first) ? first : 'en';
   const home = useHome(lang);
-  usePageTitle(home ? pageTitle('notfound', lang, home, null) : null);
+  usePageTitle('notfound', lang, home);
   return <Layout lang={lang} name={home?.profile.name}><NotFoundPage lang={lang} /></Layout>;
 }
 
