@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { JourneyDto } from "../types";
 import { SECTIONS, sculptureForm, sculptureGeometry } from "./sculptureGeometry";
+import { sectionDetails } from "./sectionDetails";
 
 type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; aboutTab?:number };
 const ease=(t:number)=>t*t*t*(t*(t*6-15)+10);
@@ -31,6 +32,7 @@ export function Sculpture(props:Props) {
       new THREE.MeshStandardMaterial({color:0xb96b44,metalness:.68,roughness:.27}),
     ];
     const idle=new THREE.Group(),root=new THREE.Group();scene.add(root);root.add(idle);
+    const details=sectionDetails(materials);details.groups.forEach(group=>idle.add(group));
     let width=Math.max(1,parent.clientWidth),height=Math.max(1,parent.clientHeight);
     const measureStage=()=>{
       const anchor=parent.querySelector<HTMLElement>("[data-scene-anchor]");
@@ -67,7 +69,7 @@ export function Sculpture(props:Props) {
     };
     const dispose=()=>{
       if(disposed)return;disposed=true;observer.disconnect();window.removeEventListener("pointermove",move);renderer.domElement.removeEventListener("webglcontextlost",lost);
-      geometry.dispose();materials.forEach(material=>material.dispose());environment.dispose();
+      geometry.dispose();details.dispose();materials.forEach(material=>material.dispose());environment.dispose();
       routeGeometry.dispose();routeMaterial.dispose();marker.geometry.dispose();markerMaterial.dispose();stationGeometry.dispose();stationMaterial.dispose();
       renderer.dispose();renderer.domElement.remove();
     };
@@ -85,7 +87,8 @@ export function Sculpture(props:Props) {
         stageFrom={...stage!};stageTarget={...measured};
         target=sculptureForm(chapter,portrait,aboutTab);toScale=stageTarget.height/fit();started=now;
         if(first){fromScale=toScale;scale=toScale;fromCenter.copy(target.center);center.copy(target.center);stageFrom={...measured};stage={...measured}}
-        previous=id;materials[3].visible=chapter===2||chapter===4;
+        previous=id;materials[3].visible=!target.closed;
+        if(first)started=now-1150;
         if(chapter===2){
           routeGeometry.setFromPoints(target.surface);
           while(stations.length<(journey?.length??0)){const station=new THREE.Mesh(stationGeometry,stationMaterial);stations.push(station);idle.add(station)}
@@ -93,11 +96,12 @@ export function Sculpture(props:Props) {
         }
       }
       const raw=paused?1:Math.min(1,(now-started)/1150),t=ease(raw);
+      details.show(chapter,t);
       if(raw<1||positions.array[0]!==target.positions[0]){
         for(let i=0;i<target.positions.length;i++)positions.array[i]=THREE.MathUtils.lerp(fromPositions[i],target.positions[i],t);
         positions.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingSphere();
       }
-      if(chapter!==2&&chapter!==4){
+      if(target.closed){
         const normals=geometry.getAttribute("normal") as THREE.BufferAttribute;
         for(let j=0;j<8;j++){
           const end=SECTIONS*8+j,n=new THREE.Vector3(normals.getX(j)+normals.getX(end),normals.getY(j)+normals.getY(end),normals.getZ(j)+normals.getZ(end)).normalize();
@@ -142,4 +146,7 @@ export function Sculpture(props:Props) {
   },[]);
   return <div ref={host} className={`sculpture${fallback?" sculpture-fallback":""}`} aria-hidden="true">{fallback&&<svg viewBox="0 0 400 400" role="presentation"><defs><linearGradient id="fold-fallback" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#f2f3ec"/><stop offset="1" stopColor="#78958b"/></linearGradient></defs><path d="M181 53q19-31 38 0l137 238q19 34-20 34H64q-39 0-20-34ZM200 130 108 286h184Z" fill="url(#fold-fallback)" fillRule="evenodd"/><path d="m200 130 92 156-13 16-92-157Z" fill="#b96b44"/></svg>}</div>;
 }
+
+
+
 

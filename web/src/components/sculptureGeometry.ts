@@ -1,9 +1,9 @@
-import * as THREE from "three";
+﻿import * as THREE from "three";
 
 /** One continuous solid sheet. Every chapter has the same vertices and connectivity. */
 export const SECTIONS = 96;
 const PROFILE = 8;
-export type SculptureForm = { positions: Float32Array; rotation: THREE.Quaternion; bounds: THREE.Vector3; center: THREE.Vector3; surface: THREE.Vector3[] };
+export type SculptureForm = { positions: Float32Array; rotation: THREE.Quaternion; bounds: THREE.Vector3; center: THREE.Vector3; surface: THREE.Vector3[]; closed: boolean };
 
 function roundedPath(points: [number, number][], closed: boolean, cut: number) {
   const path = new THREE.Path();
@@ -23,20 +23,20 @@ function roundedPath(points: [number, number][], closed: boolean, cut: number) {
   if (closed) path.closePath();
   return path.getSpacedPoints(SECTIONS);
 }
-
 export function sculptureForm(chapter: number, portrait: boolean, tab = 0): SculptureForm {
-  const closed = chapter === 0 || chapter === 1 || chapter === 3;
+  const closed = chapter === 0 || chapter === 1;
   let halfWidth = .43, depth = .19;
   let path: THREE.Vector2[];
   let euler: [number, number, number];
   if (chapter === 0) {
-    path = roundedPath([[0, 1.95], [-1.95, -1.35], [1.95, -1.35]], true, .30);
-    halfWidth = .46; depth = .23;
-    euler = [.34, -.60, -.12];
+    // A structural frame carries three connected system levels and one copper spine.
+    path = roundedPath([[1.60, 1.84], [-1.60, 1.84], [-1.60, -1.84], [1.60, -1.84]], true, .08);
+    halfWidth = .17; depth = .20;
+    euler = [.20, -.52, -.04];
   } else if (chapter === 1) {
     path = roundedPath([[2.55, 1.66], [-2.55, 1.66], [-2.55, -1.66], [2.55, -1.66]], true, .11);
     halfWidth = .23; depth = .19;
-    euler = [.04, -.055, -.015];
+    euler = [.075, -.055, -.015];
   } else if (chapter === 2) {
     // An ascending route: the original closed sheet opens into a winding ribbon.
     // The broad bends leave room for distinct career stations and their labels.
@@ -44,13 +44,15 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
     halfWidth = .34; depth = .085;
     euler = portrait ? [.22, -.16, .12] : [.34, -.18, -.055];
   } else if (chapter === 3) {
-    path = roundedPath([[1.5, 1.65], [-1.5, 1.65], [-1.5, -1.65], [1.5, -1.65]], true, .32);
-    halfWidth = .55; depth = .23;
-    euler = [.32, .42 + tab * .06, -.24];
+    // Two broad leaves meet at the spine of an open book.
+    path = Array.from({length:SECTIONS+1},(_,i)=>new THREE.Vector2((i/SECTIONS-.5)*4.6,.06*Math.sin(i/SECTIONS*Math.PI)));
+    halfWidth = 1.32; depth = .085;
+    euler = [.22, -.18 + tab * .06, -.065];
   } else {
-    path = roundedPath([[-1.95, 1.18], [-1.95, -1.25], [1.95, -1.25], [1.95, 1.18]], false, .24);
-    halfWidth = .40; depth = .22;
-    euler = [.38, -.32, -.10];
+    // An envelope outline, its V-fold, and the raised opening flap share one path.
+    path = roundedPath([[-2,1],[-2,-1.25],[2,-1.25],[2,1],[0,-.18],[-2,1],[0,2.12],[2,1]],false,.07);
+    halfWidth = .105; depth = .075;
+    euler = [.12, -.24, -.065];
   }
   const positions = new Float32Array((SECTIONS + 1) * PROFILE * 3);
   const surface: THREE.Vector3[] = [];
@@ -64,9 +66,9 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
     const tangent = after.clone().sub(before).normalize();
     const across = new THREE.Vector3(tangent.y, -tangent.x, 0);
     let z = 0, twist = 0;
-    if (chapter === 0) { z = .24 * Math.sin(t * Math.PI * 2); twist = .15 * Math.sin(t * Math.PI * 2); }
-    if (chapter === 3) { z = .38 * Math.sin(t * Math.PI * 2); twist = .24 * Math.cos(t * Math.PI * 2); }
-    if (chapter === 4) z = .22 * Math.cos(t * Math.PI * 2);
+    if (chapter === 0) z = 0;
+    if (chapter === 3) z = .55 * Math.abs(t * 2 - 1);
+    if (chapter === 4) z = .07;
     if (chapter === 2) {
       z = .22 * Math.sin(t * Math.PI * 3);
       twist = .10 * Math.sin(t * Math.PI * 4);
@@ -83,7 +85,10 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(...euler));
   const box = new THREE.Box3(), vertex = new THREE.Vector3();
   for (let i = 0; i < positions.length; i += 3) box.expandByPoint(vertex.fromArray(positions, i).applyQuaternion(rotation));
-  return { positions, rotation, bounds: box.getSize(new THREE.Vector3()), center: box.getCenter(new THREE.Vector3()), surface };
+  // Include attached architecture, laptop deck, and book cover in the fit.
+  const detailBounds: [number,number,number][] = chapter===0 ? [[-1.78,-1.96,-1.35],[1.78,1.96,.24]] : chapter===1 ? [[-2.8,-2.3,-.2],[2.8,-1.7,1.5]] : chapter===3 ? [[-2.38,-1.40,-.12],[2.38,1.42,.65]] : [];
+  for(const point of detailBounds)box.expandByPoint(vertex.set(...point).applyQuaternion(rotation));
+  return { positions, rotation, bounds: box.getSize(new THREE.Vector3()), center: box.getCenter(new THREE.Vector3()), surface, closed };
 }
 
 export function sculptureGeometry(positions: Float32Array) {
@@ -107,3 +112,7 @@ export function sculptureGeometry(positions: Float32Array) {
   geometry.setIndex(indices); geometry.computeVertexNormals();
   return geometry;
 }
+
+
+
+

@@ -1,4 +1,4 @@
-import { sculptureForm, sculptureGeometry } from "./sculptureGeometry";
+﻿import { sculptureForm, sculptureGeometry } from "./sculptureGeometry";
 
 it("keeps all five forms on one connected, identical mesh topology", () => {
   let topology: number[] | undefined;
@@ -27,12 +27,21 @@ it("keeps all five forms on one connected, identical mesh topology", () => {
     geometry.dispose();
   }
 });
-
 it("closes both ends exactly in the aperture forms", () => {
-  for (const chapter of [0, 1, 3]) {
+  for (const chapter of [0, 1]) {
     const { positions } = sculptureForm(chapter, false);
     for (let coordinate = 0; coordinate < 24; coordinate++) {
       expect(positions[coordinate]).toBeCloseTo(positions[positions.length - 24 + coordinate], 5);
     }
   }
 });
+
+
+it("keeps the open book's binding below both page edges", () => {
+  const book=sculptureForm(3,false);
+  expect(book.closed).toBe(false);
+  const middle=(book.positions.length/3/8-1)/2*8*3;
+  expect(book.positions[2]-book.positions[middle+2]).toBeGreaterThan(.45);
+  expect(book.positions[book.positions.length-24+2]-book.positions[middle+2]).toBeGreaterThan(.45);
+});
+

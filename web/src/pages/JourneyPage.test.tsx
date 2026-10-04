@@ -40,3 +40,19 @@ it('keeps the selected role stable when pointer leaves the list', async () => {
   fireEvent.mouseLeave(additional);
   await waitFor(() => expect(screen.getByRole('heading', { name: 'Additional role' })).toBeInTheDocument());
 });
+
+it('lists career stations from latest to oldest and numbers them in that order', () => {
+  const journey: HomeData['journey'] = [
+    { id: 1, title: 'Latest role', organisation: 'Company A', summary: '', highlights: [], start: '2025-07', end: null, kind: 'main', seniority: 4 },
+    { id: 2, title: 'Previous role', organisation: 'Company B', summary: '', highlights: [], start: '2024-04', end: '2025-06', kind: 'main', seniority: 3 },
+    { id: 3, title: 'Earlier role', organisation: 'Company C', summary: '', highlights: [], start: '2021-01', end: '2024-03', kind: 'main', seniority: 2 },
+  ];
+  const { container } = render(<MemoryRouter><JourneyExplorer journey={journey} lang="en" onActive={vi.fn()} /></MemoryRouter>);
+  const roles = [...container.querySelectorAll<HTMLButtonElement>('.journey-role')];
+  expect(roles.map(role => role.getAttribute('aria-label'))).toEqual([
+    '2025 Latest role Company A',
+    '2024 Previous role Company B',
+    '2021 Earlier role Company C',
+  ]);
+  expect(roles.map(role => role.querySelector('.journey-station-number')?.textContent)).toEqual(['01', '02', '03']);
+});
