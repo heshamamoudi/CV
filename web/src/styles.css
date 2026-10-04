@@ -72,3 +72,35 @@ html.immersive,html.immersive body{height:100%;overflow:hidden;overscroll-behavi
 [dir=rtl] .journey-detail{padding:0 28px 20px 0}[dir=rtl] .journey-role.active{box-shadow:inset 0 2px var(--mint)}[dir=rtl] .intro-name{letter-spacing:0;line-height:1.3}
 @media(min-width:701px) and (max-width:1050px){.journey-explorer{grid-template-columns:minmax(0,52fr) minmax(0,44fr);gap:16px 4%}.journey-detail{padding-inline-start:20px}.journey-role{flex-basis:170px}.atlas-caption{font-size:9px}.atlas-caption span:first-child{max-width:50%}}
 @media(max-width:700px){.intro-edition{font-size:8px;max-width:50%;line-height:1.8}.intro-signature{grid-template-columns:64px auto;column-gap:22px}.intro-emblem{width:64px;height:90px}.intro-emblem .brand-mark{width:64px;height:64px}.intro-name{font-size:42px}.intro-rule{margin-top:18px}.journey-explorer{display:flex;gap:16px}.journey-atlas{order:0;min-height:245px}.journey-stage{height:180px;min-height:180px}.atlas-heading{font-size:9px}.atlas-caption{font-size:9px}.atlas-station{gap:3px}.atlas-station b{width:21px;height:21px;font-size:9px}.atlas-station small{display:none}.journey-roles{order:1;min-height:136px;padding:0 0 8px}.journey-role{flex:0 0 180px;border-radius:0;padding:12px;min-height:124px}.journey-role strong{font-size:12px}.journey-role small{font-size:10px}.journey-detail{order:2;border-inline-start:0;border-top:1px solid var(--line);padding:18px 0 20px!important}.journey-detail>p.journey-detail-index{margin:0 0 20px}.journey-detail h3{font-size:30px}.journey-explorer-archive{display:flex}}
+
+/* One composed departure, travel, and arrival; anchors never translate with text. */
+.experience{transition:background-color 840ms cubic-bezier(.4,0,.2,1)}
+.experience:before{background:radial-gradient(ellipse 48% 60% at 66% 53%,#31585235,transparent 82%)}
+.chapter-panel{animation:none}
+.chapter-panel[data-phase="exiting"]{animation:composition-leave 160ms ease-in both;pointer-events:none}
+.chapter-panel[data-phase="entering"]{animation:composition-arrive 840ms linear both}
+@keyframes composition-leave{from{opacity:1}to{opacity:0}}
+@keyframes composition-arrive{0%,30%{opacity:0}58%{opacity:.55}90%,100%{opacity:1}}
+.project-spotlight,.about-body,.journey-detail{animation:detail-in 360ms cubic-bezier(.2,.7,.2,1) both}
+.chapter-progress button:before{transition:background-color 420ms ease,transform 420ms ease;transform:scaleY(.65)}
+.chapter-progress button[aria-current]:before{transform:scaleY(1)}
+.project-picker button,.journey-role,.about-tabs button,.language-switch,.stage-controls button{transition:background-color 220ms ease,border-color 220ms ease,color 220ms ease}
+.work-cover{height:auto}
+.identity-intro{animation:intro-away 360ms 840ms ease-in-out both;background:#0a1520}
+.identity-intro:before{background:radial-gradient(circle,#31585224,transparent 65%)}
+.intro-signature{grid-template-columns:76px auto;column-gap:28px;animation:signature-in 500ms cubic-bezier(.2,.7,.2,1) both}
+.intro-emblem{position:relative;width:76px;height:100px}
+.intro-emblem .brand-mark{position:relative;z-index:1;width:76px;height:76px}
+.intro-construction{position:absolute;width:120px;height:100px;inset:0 -22px;fill:none;stroke:var(--copper);stroke-width:.6;opacity:.5;overflow:visible}
+.intro-construction path{transform-origin:center;animation:construction-clear 700ms cubic-bezier(.4,0,.2,1) both}
+.intro-construction path:first-child{--line-shift:26px}.intro-construction path:last-child{--line-shift:-26px}
+@keyframes construction-clear{0%{opacity:0;transform:translateY(0) scaleX(.6)}25%{opacity:.6}80%,100%{opacity:0;transform:translateY(var(--line-shift,0px)) scaleX(1)}}
+.intro-name{font-size:clamp(36px,4.3vw,58px);font-weight:550}
+.intro-signature p{font-size:12px;letter-spacing:0;color:var(--body);margin-top:12px}
+.intro-rule{margin-top:19px;animation:signature-rule 600ms 100ms cubic-bezier(.2,.7,.2,1) both}
+[dir=rtl] .intro-rule{transform-origin:right}
+@media(max-width:700px){.intro-signature{grid-template-columns:60px auto;column-gap:22px}.intro-emblem{width:60px;height:88px}.intro-emblem .brand-mark{width:60px;height:60px}.intro-construction{width:96px;height:88px;inset:0 -18px}.intro-name{font-size:38px}.intro-signature p{font-size:11px}}
+.motion-paused .chapter-panel{animation:none}
+/* Keep labels in the reserved lower edge of the visual, clear of the laptop. */
+.work-figure{position:static}
+.work-caption{top:auto;bottom:0;inset-inline:0;width:100%;padding:0}

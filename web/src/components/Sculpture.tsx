@@ -4,6 +4,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { JourneyDto } from "../types";
 import { SECTIONS, sculptureForm, sculptureGeometry } from "./sculptureGeometry";
 import { sectionDetails } from "./sectionDetails";
+import { CHAPTER_TRAVEL_MS } from "./useChapterTransition";
 
 type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; aboutTab?:number };
 const ease=(t:number)=>t*t*t*(t*(t*6-15)+10);
@@ -50,7 +51,7 @@ export function Sculpture(props:Props) {
     const fromRotation=root.quaternion.clone(),center=target.center.clone(),fromCenter=center.clone();
     const fit=()=>Math.max(target.bounds.y,target.bounds.x/(stageTarget.width/stageTarget.height))*(current.current.chapter===1?1.10:1.32);
     let scale=stage.height/fit(),fromScale=scale,toScale=scale;
-    let previous="",started=performance.now(),frame=0,last=performance.now(),phase=0,stopped=false,disposed=false;
+    let previous="",started=performance.now(),frame=0,last=performance.now(),phase=0,stopped=false,disposed=false,geometrySettled=false;
     const resize=()=>{width=Math.max(1,parent.clientWidth);height=Math.max(1,parent.clientHeight);renderer.setSize(width,height,false)};
     const observer=new ResizeObserver(resize);observer.observe(parent);resize();
     const pointer=new THREE.Vector2(),softPointer=new THREE.Vector2();
@@ -80,27 +81,27 @@ export function Sculpture(props:Props) {
       const dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden)return;
       const {chapter,paused,journey,selectedJourneyIndex=0,aboutTab=0}=current.current;
       const measured=measureStage();if(!measured){el.style.display="none";return;}el.style.display="block";
-      const portrait=measured.height>measured.width*1.15,id=`${chapter}:${portrait}:${aboutTab}:${Math.round(measured.width)}:${Math.round(measured.height)}`;
+      const portrait=measured.height>measured.width*1.15,id=`${chapter}:${portrait}:${aboutTab}`;
       if(previous!==id){
+        geometrySettled=false;
         const first=previous==="";
         fromPositions=new Float32Array(positions.array);fromRotation.copy(root.quaternion);fromCenter.copy(center);fromScale=scale;
         stageFrom={...stage!};stageTarget={...measured};
         target=sculptureForm(chapter,portrait,aboutTab);toScale=stageTarget.height/fit();started=now;
         if(first){fromScale=toScale;scale=toScale;fromCenter.copy(target.center);center.copy(target.center);stageFrom={...measured};stage={...measured}}
         previous=id;materials[3].visible=!target.closed;
-        if(first)started=now-1150;
+        if(first)started=now-CHAPTER_TRAVEL_MS;
         if(chapter===2){
           routeGeometry.setFromPoints(target.surface);
           while(stations.length<(journey?.length??0)){const station=new THREE.Mesh(stationGeometry,stationMaterial);stations.push(station);idle.add(station)}
           stations.forEach((station,i)=>{station.visible=i<(journey?.length??0);sampleSurface(.94-.88*i/Math.max(1,(journey?.length??1)-1),station.position)});
         }
       }
-      const raw=paused?1:Math.min(1,(now-started)/1150),t=ease(raw);
+      const raw=paused?1:Math.min(1,(now-started)/CHAPTER_TRAVEL_MS),t=ease(raw);
       details.show(chapter,t);
-      if(raw<1||positions.array[0]!==target.positions[0]){
+      if(!geometrySettled){
         for(let i=0;i<target.positions.length;i++)positions.array[i]=THREE.MathUtils.lerp(fromPositions[i],target.positions[i],t);
         positions.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingSphere();
-      }
       if(target.closed){
         const normals=geometry.getAttribute("normal") as THREE.BufferAttribute;
         for(let j=0;j<8;j++){
@@ -109,21 +110,25 @@ export function Sculpture(props:Props) {
         }
         normals.needsUpdate=true;
       }
+      geometrySettled=raw===1;
+      }
       // Position, scale, orientation and vertices share exactly one clock and easing.
       // A full-size canvas keeps the outgoing form visible throughout its travel.
       stageTarget={...measured};
+      toScale=stageTarget.height/fit();
       stage={...measured,x:THREE.MathUtils.lerp(stageFrom.x,stageTarget.x,t),y:THREE.MathUtils.lerp(stageFrom.y,stageTarget.y,t),width:THREE.MathUtils.lerp(stageFrom.width,stageTarget.width,t),height:THREE.MathUtils.lerp(stageFrom.height,stageTarget.height,t)};
-      root.quaternion.copy(fromRotation).slerp(target.rotation,t);center.lerpVectors(fromCenter,target.center,t);scale=THREE.MathUtils.lerp(fromScale,toScale,t);
+      root.quaternion.copy(fromRotation).slerp(target.rotation,t);center.lerpVectors(fromCenter,target.center,t);scale=raw<1?THREE.MathUtils.lerp(fromScale,toScale,t):paused?toScale:THREE.MathUtils.damp(scale,toScale,12,dt);
       root.scale.setScalar(scale);root.position.set(stage.x+stage.width/2-width/2-center.x*scale,height/2-stage.y-stage.height/2-center.y*scale,0);
       if(!paused)phase+=dt;
       softPointer.lerp(pointer,1-Math.exp(-dt*3));
-      idle.rotation.set(paused?0:softPointer.y*.045,paused?0:Math.sin(phase*.32)*.025+softPointer.x*.065,0);idle.position.y=paused?0:Math.sin(phase*.55)*.025;
+      const stillness=paused?0:ease(Math.max(0,(raw-.65)/.35));
+      idle.rotation.set(softPointer.y*.022*stillness,(Math.sin(phase*.32)*.012+softPointer.x*.032)*stillness,0);idle.position.y=Math.sin(phase*.55)*.012*stillness;
       const selection=Math.max(0,Math.min((journey?.length??1)-1,selectedJourneyIndex));
       if(selection!==previousSelection){selectedFrom=selectedAt;selectedTarget=.94-.88*selection/Math.max(1,(journey?.length??1)-1);selectionStarted=now;previousSelection=selection}
       selectedAt=THREE.MathUtils.lerp(selectedFrom,selectedTarget,ease(paused?1:Math.min(1,(now-selectionStarted)/550)));
       if(chapter===2)sampleSurface(selectedAt,marker.position);
       const desiredOpacity=chapter===2?(raw>.65?(raw-.65)/.35:0):0;
-      routeOpacity=paused?desiredOpacity:THREE.MathUtils.damp(routeOpacity,desiredOpacity,8,dt);
+      routeOpacity=chapter!==2?0:paused?desiredOpacity:THREE.MathUtils.damp(routeOpacity,desiredOpacity,8,dt);
       routeMaterial.opacity=routeOpacity*.85;markerMaterial.opacity=routeOpacity;stationMaterial.opacity=routeOpacity*.85;
       route.visible=marker.visible=routeOpacity>.005;stations.forEach((station,i)=>{station.visible=routeOpacity>.005&&i<(journey?.length??0)});
       camera.left=-width/2;camera.right=width/2;camera.top=height/2;camera.bottom=-height/2;
@@ -137,7 +142,7 @@ export function Sculpture(props:Props) {
         measured.anchor.querySelectorAll<HTMLElement>("[data-route-station]").forEach(label=>{
           const i=Number(label.dataset.routeStation);
           sampleSurface(.94-.88*i/Math.max(1,(journey?.length??1)-1),point);idle.localToWorld(point);point.project(camera);
-          label.style.left=`${(point.x+1)*width/2-measured.x}px`;label.style.top=`${(1-point.y)*height/2-measured.y}px`;label.style.opacity=String(raw===1?1:0);
+          label.style.left=`${(point.x+1)*width/2-measured.x}px`;label.style.top=`${(1-point.y)*height/2-measured.y}px`;label.style.opacity=String(THREE.MathUtils.smoothstep(raw,.72,1));
         });
       }
     };

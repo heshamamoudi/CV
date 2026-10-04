@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { HomePage } from "./HomePage";
 import type { HomeData } from "../types";
@@ -50,12 +50,17 @@ const home: HomeData = {
   updatedAt: "2026-09-15T00:00:00Z",
 };
 
+const click = (element: Element) => { fireEvent.click(element); act(() => vi.advanceTimersByTime(160)); };
+const keyDown = (element: Window, event: object) => { fireEvent.keyDown(element, event); act(() => vi.advanceTimersByTime(160)); };
+
 describe("HomePage", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
   it('renders the profile fields edited in admin and exposes only an available CV', () => {
     const { rerender } = render(<MemoryRouter initialEntries={['/ar']}><HomePage home={home} /></MemoryRouter>);
     expect(screen.getByText(home.profile.eyebrow)).toBeInTheDocument();
     expect(screen.getByText(home.profile.heroTitle)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '05 لنتحدث' }));
+    click(screen.getByRole('button', { name: '05 لنتحدث' }));
     expect(screen.queryByRole('link', { name: /تحميل السيرة/ })).not.toBeInTheDocument();
     rerender(<MemoryRouter initialEntries={['/ar']}><HomePage home={{ ...home, hasCv: true }} /></MemoryRouter>);
     expect(screen.getByRole('link', { name: /تحميل السيرة/ })).toHaveAttribute('href', '/ar/cv');
@@ -73,13 +78,13 @@ describe("HomePage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
       "العمودي",
     );
-    fireEvent.click(screen.getByRole("button", { name: "03 المسيرة" }));
+    click(screen.getByRole("button", { name: "03 المسيرة" }));
     expect(
       screen.getByRole("heading", { name: "قائد تطوير التطبيقات" }),
     ).toBeInTheDocument();
     expect(screen.getByText(/حتى الآن/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "04 نبذة" }));
-    fireEvent.click(screen.getByRole("button", { name: "التقنيات" }));
+    click(screen.getByRole("button", { name: "04 نبذة" }));
+    click(screen.getByRole("button", { name: "التقنيات" }));
     expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
   });
 
@@ -89,7 +94,7 @@ describe("HomePage", () => {
         <HomePage home={home} />
       </MemoryRouter>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "الخلفية" }));
+    click(screen.getByRole("button", { name: "الخلفية" }));
 
     expect(
       screen.getByText("مطور JavaScript متكامل — Udacity"),
@@ -121,16 +126,16 @@ describe("HomePage", () => {
         <HomePage home={home} />
       </MemoryRouter>,
     );
-    fireEvent.keyDown(window, { key: "End" });
+    keyDown(window, { key: "End" });
     expect(screen.getByRole("link", { name: /a@b.c/ })).toHaveAttribute(
       "href",
       "mailto:a@b.c",
     );
-    fireEvent.click(screen.getByRole("button", { name: /إيقاف الحركة/ }));
+    click(screen.getByRole("button", { name: /إيقاف الحركة/ }));
     expect(
       screen.getByRole("button", { name: /تشغيل الحركة/ }),
     ).toHaveAttribute("aria-pressed", "true");
-    fireEvent.keyDown(window, { key: "Home" });
+    keyDown(window, { key: "Home" });
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("هشام");
   });
 
@@ -144,7 +149,7 @@ describe("HomePage", () => {
     fireEvent.mouseLeave(role);
     fireEvent.focus(role);
     expect(screen.getByRole('heading', { name: home.journey[0].title })).toBeInTheDocument();
-    fireEvent.click(role);
+    click(role);
     expect(role).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: 'Second role' })).toBeInTheDocument();
   });
@@ -159,12 +164,12 @@ describe("HomePage", () => {
     const chapters = container.querySelectorAll(".chapter-progress button");
     expect(container.querySelector(".journey-roles")).toHaveAttribute("data-scroll-region");
     expect(container.querySelector(".journey-detail")).toHaveAttribute("data-scroll-region");
-    fireEvent.click(screen.getByRole("button", { name: /2022 Third role Third company/ }));
+    click(screen.getByRole("button", { name: /2022 Third role Third company/ }));
     expect(screen.getByRole("heading", { name: "Third role" })).toBeInTheDocument();
     expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "2");
 
-    fireEvent.click(chapters[3]);
-    fireEvent.click(chapters[2]);
+    click(chapters[3]);
+    click(chapters[2]);
     expect(screen.getByRole("heading", { name: "Third role" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /2022 Third role Third company/ })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("sculpture")).toHaveAttribute("data-role-index", "2");
@@ -179,7 +184,7 @@ describe("HomePage", () => {
     const first = screen.getByRole("button", { name: /2025 First role First company/ });
     const second = screen.getByRole("button", { name: /2023 Second role Second company/ });
     fireEvent.mouseEnter(second);
-    fireEvent.click(first);
+    click(first);
     fireEvent.mouseEnter(second);
 
     expect(screen.getByRole("heading", { name: "First role" })).toBeInTheDocument();
@@ -194,7 +199,7 @@ describe("HomePage", () => {
       { ...home.journey[0], id: 3, title: "Third role", organisation: "Third company", start: "2022-04" },
     ];
     const { rerender } = render(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey }} /></MemoryRouter>);
-    fireEvent.click(screen.getByRole("button", { name: /2022 Third role Third company/ }));
+    click(screen.getByRole("button", { name: /2022 Third role Third company/ }));
     rerender(<MemoryRouter initialEntries={["/ar#journey"]}><HomePage home={{ ...home, journey: journey.slice(0, 2) }} /></MemoryRouter>);
 
     expect(screen.queryByRole("button", { name: /Third role/ })).not.toBeInTheDocument();

@@ -41,7 +41,7 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         title = seo.Title ?? title;
         description = seo.Description ?? description;
 
-        head.Append("<title>").Append(E(home?.SiteTitle ?? "Hesham Amoudi")).Append("</title>");
+        head.Append("<title>").Append(E(title)).Append("</title>");
         if (description.Length > 0)
             head.Append("<meta name=\"description\" content=\"").Append(E(Trim(description, 160))).Append("\">");
 

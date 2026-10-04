@@ -4,15 +4,17 @@ import type { HomeData } from "../types";
 import { useStrings } from "../i18n/useStrings";
 import { ContactForm } from "../components/ContactForm";
 import { JourneyExplorer } from "../components/JourneyExplorer";
+import { useChapterTransition } from "../components/useChapterTransition";
 
 const Sculpture=lazy(()=>import("../components/Sculpture").then(m=>({default:m.Sculpture})));
 export const chapters=["intro","work","journey","about","contact"];
 
 export function HomePage({home}:{home:HomeData}){
   const ar=home.lang==="ar",t=useStrings(home.lang),p=home.profile,copy=(en:string,arabic:string)=>ar?arabic:en;
-  const location=useLocation(),navigate=useNavigate(),selected=chapters.indexOf(location.hash.slice(1)),chapter=selected<0?0:selected;
-  const chapterRef=useRef(chapter);chapterRef.current=chapter;
+  const location=useLocation(),navigate=useNavigate(),selected=chapters.indexOf(location.hash.slice(1)),requestedChapter=selected<0?0:selected;
+  const chapterRef=useRef(requestedChapter);chapterRef.current=requestedChapter;
   const [paused,setPaused]=useState(()=>typeof matchMedia==="function"&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const {chapter,phase}=useChapterTransition(requestedChapter,paused);
   const [projectIndex,setProjectIndex]=useState(()=>Math.max(0,home.projects.findIndex(item=>item.slug===home.featuredProject?.slug)));
   const [roleIndex,setRoleIndex]=useState(0),[aboutTab,setAboutTab]=useState(0);
   const project=home.projects[Math.min(projectIndex,home.projects.length-1)];
@@ -35,9 +37,9 @@ export function HomePage({home}:{home:HomeData}){
     return()=>{window.removeEventListener("wheel",wheel);window.removeEventListener("keydown",key);window.removeEventListener("touchstart",start);window.removeEventListener("touchend",end)}
   },[go]);
   useEffect(()=>{document.documentElement.dataset.chapter=String(chapter);return()=>{delete document.documentElement.dataset.chapter}},[chapter]);
-  return <div className={`experience chapter-${chapter}${paused?" motion-paused":""}`}>
+  return <div className={`experience chapter-${chapter}${paused?" motion-paused":""}`} data-transition={phase}>
     <Suspense fallback={null}><Sculpture chapter={chapter} paused={paused} journey={home.journey} selectedJourneyIndex={roleIndex} selectedProjectIndex={projectIndex} aboutTab={aboutTab}/></Suspense>
-    <section className="chapter-panel" data-scroll-region key={chapter} aria-label={labels[chapter]}>
+    <section className="chapter-panel" data-phase={phase} data-scroll-region key={chapter} aria-label={labels[chapter]} aria-busy={phase!=="idle"}>
       {chapter===0&&<div className="intro-content chapter-grid">
         <div className="intro-copy"><p className="section-kicker">{p.eyebrow}</p><p className="intro-identity">{p.name} <span>/</span> {p.headline}</p>
           <h1 className="hero-name"><span className="sr-only">{p.name}. </span>{p.heroTitle}</h1>

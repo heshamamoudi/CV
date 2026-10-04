@@ -40,7 +40,7 @@ export function Layout({
         introShown = true;
         setSplash(false);
       },
-      reduce ? 150 : 1550,
+      reduce ? 0 : 1200,
     );
     return () => clearTimeout(timer);
   }, [splash]);
@@ -62,11 +62,12 @@ export function Layout({
           <span className="intro-edition" aria-hidden="true">{lang === "ar" ? "أعمال مختارة" : "SELECTED WORK / PERSONAL PORTFOLIO"}</span>
           <div className="intro-signature">
             <div className="intro-emblem">
+              <svg className="intro-construction" viewBox="0 0 120 100" aria-hidden="true"><path d="M0 24H120"/><path d="M0 50H120"/><path d="M0 76H120"/></svg>
             <BrandMark />
             </div>
             <div className="intro-name"><span>{firstName}</span><span>{familyName.join(" ")}</span></div>
             <span className="intro-rule" aria-hidden="true" />
-            <p>{lang === "ar" ? "الفكرة. الحرفة. الأثر." : "Thought. Craft. Impact."}</p>
+            <p>{lang === "ar" ? "من التعقيد إلى الوضوح." : "Complexity, made clear."}</p>
           </div>
           <button className="intro-skip" onClick={dismiss} autoFocus>
             {lang === "ar" ? "تخطّ المقدمة ↖" : "Skip intro ↗"}

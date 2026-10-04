@@ -43,6 +43,7 @@ public class PageTests
     {
         var html = await (await ClientAsync()).GetStringAsync("/en/journey");
 
+        Assert.Contains("<title>Journey — Hesham Amoudi</title>", html);
         Assert.Contains("<link rel=\"canonical\" href=\"https://heshamamoudi.com/en/journey\">", html);
         Assert.Contains("<link rel=\"alternate\" hreflang=\"ar\" href=\"https://heshamamoudi.com/ar/journey\">", html);
         Assert.Contains("<link rel=\"alternate\" hreflang=\"x-default\" href=\"https://heshamamoudi.com/en/journey\">", html);
@@ -190,7 +191,7 @@ public class PageTests
         var html = await app.CreateClient().GetStringAsync("/en");
         var head = html[..html.IndexOf("</head>", StringComparison.Ordinal)];
 
-        Assert.Contains("<title>Hesham Amoudi</title>", head);
+        Assert.Contains("<title>Hesham Amoudi — A &lt;b&gt;&quot;q&quot;&lt;/b&gt;</title>", head);
         Assert.Contains("content=\"Hesham Amoudi — A &lt;b&gt;&quot;q&quot;&lt;/b&gt;\"", head);
         Assert.DoesNotContain("<b>", head);
     }

@@ -27,10 +27,10 @@ public class SeoAdminTests
 
         var ar = await app.CreateClient().GetStringAsync("/ar");
         var en = await app.CreateClient().GetStringAsync("/en");
-        Assert.Contains("<title>Hesham Amoudi</title>", ar);
+        Assert.Contains("<title>هشام العمودي | مطور تطبيقات</title>", ar);
         Assert.Contains("<meta name=\"description\" content=\"وصف مخصص\">", ar);
         Assert.Contains("<meta property=\"og:title\" content=\"هشام العمودي | مطور تطبيقات\">", ar);
-        Assert.Contains("<title>Hesham Amoudi</title>", en);
+        Assert.Contains("<title>Hesham Amoudi — Lead Application Development</title>", en);
         Assert.Equal("وصف مخصص", (await admin.GetFromJsonAsync<JsonObject>("/api/admin/seo"))!["pages"]![0]!["description"]!["ar"]!.GetValue<string>());
     }
 
