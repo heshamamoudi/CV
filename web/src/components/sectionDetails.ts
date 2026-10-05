@@ -25,26 +25,44 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
       return add(new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelSize:.025,bevelThickness:.025,bevelSegments:2,steps:1}),material,[0,0,z]);
     };
     if(chapter===0){
-      // A connected architectural system: floors, rear supports, and one clear spine.
-      for(const y of [-1.78,-.59,.60,1.78])box([3.2,.11,1.30],[0,y,-.59]);
-      for(const x of [-1.54,1.54])box([.12,3.60,.12],[x,0,-1.18]);
-      box([.13,3.54,.10],[-.36,0,.12],1);
-      for(const [y,direction] of [[-.59,1],[.60,-1],[1.78,1]]){
-        const length=direction===1?1.9:1.18;
-        box([length,.075,.09],[-.36+direction*length/2,y,.13],1);
+      group.name='solution-bridge';
+      // Three independently grounded inputs meet one continuous load-bearing span.
+      for(const x of [-1.94,1.94]) box([1.38,.18,2.50],[x,-1.53,0],2).name='foundation';
+      for(const [i,z] of [-.82,0,.82].entries()) {
+        box([.66,1.08,.49],[-1.93,-.89,z],0).name=`input-pier-${i+1}`;
+        box([.82,.12,.61],[-1.93,-.30,z],1);
       }
-      // Recessed modules sit on their floors; nothing floats outside the structure.
-      box([.74,.47,.63],[-1.00,-1.48,-.55],2);
-      box([1.14,.47,.63],[.48,-.30,-.55],2);
-      box([.74,.47,.63],[-1.00,.89,-.55],2);
+      box([.85,1.08,1.86],[1.92,-.89,0],0).name='unified-support';
+      box([4.90,.18,2.26],[0,-.23,0],0).name='solution-span';
+      // Visible copper circulation collects the separate input lanes at a junction.
+      for(const z of [-.82,0,.82]) {
+        const curve=new THREE.CatmullRomCurve3([
+          new THREE.Vector3(-2.48,-.10,z),new THREE.Vector3(-1.38,-.10,z),
+          new THREE.Vector3(-.45,-.10,z*.45),new THREE.Vector3(.26,-.10,0),
+        ]);
+        add(new THREE.TubeGeometry(curve,20,.043,6,false),1).name='input-route';
+      }
+      box([2.20,.085,.14],[1.32,-.10,0],1).name='resolved-route';
+      box([.28,.14,.32],[.27,-.09,0],1).name='junction';
+      // One small keystone emphasizes the resolved load path at the crown.
+      box([.42,.21,.60],[0,1.84,0],1).name='keystone';
     }
     if(chapter===1){
-      // The display, copper hinge and tapered-looking deck read as a working laptop.
-      box([5.50,.14,1.45],[0,-1.99,.63],0,[.18,0,0]);
-      box([4.62,.09,.14],[0,-1.82,-.035],1);
-      box([3.73,.012,.39],[0,-1.867,.17],2,[.18,0,0]);
-      box([1.10,.012,.42],[0,-1.97,.95],2,[.18,0,0]);
-      for(let i=0;i<8;i++)box([.31,.014,.25],[(i-3.5)*.44,-1.844,.16],0,[.18,0,0]);
+      group.name='constructive-assembly';
+      box([5.04,.22,2.04],[-.055,-1.60,-.27],2).name='build-foundation';
+      // Three substantial volumes rise from the same foundation. Open joints show
+      // how a useful whole is built; no screen, keyboard, hinge or display frame.
+      for(let i=0;i<3;i++) {
+        const x=-1.585+i*1.53, height=.84+i*1.11;
+        box([1.28,height,1.18],[x,-1.46+height/2,-.58],i===1?2:0).name=`building-block-${i+1}`;
+        box([1.40,.12,1.30],[x,-1.40+height,-.58],1).name=`joining-beam-${i+1}`;
+        // Narrow recessed joints convey assembled material rather than a solid chart.
+        for(let course=1;course<=i;course++)box([1.29,.032,1.19],[x,-1.46+course*1.02,-.58],2).name='construction-joint';
+      }
+      // A single copper route climbs the completed steps, connecting effort to output.
+      box([.08,1.13,.08],[-.82,.10,.18],1);
+      box([.08,1.13,.08],[.71,1.20,.18],1);
+      for(const [x,y] of [[-1.585,-.46],[-.055,.65],[1.475,1.76]])box([1.48,.08,.08],[x,y,.18],1);
     }
     if(chapter===3){
       // An open book: two covers, a copper binding and quiet typographic rules.
@@ -75,6 +93,8 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
     turn:new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(index*1.1)*1.05,Math.cos(index*.8)*.95,Math.sin(index*2.1)*1.4)),
   }));
   let fromOpacity=groups.map(()=>0);
+  const built = groups.map(group=>group.children.map(mesh=>mesh.position.clone()));
+  let fromBuild = built.map(group=>group.map(position=>position.clone()));
   const smooth=(x:number)=>{const t=THREE.MathUtils.clamp(x,0,1);return t*t*(3-2*t)};
   return {
     groups,
@@ -87,6 +107,16 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
     show(chapter:number,progress:number){
       if(chapter!==activeChapter){
         fromOpacity=groups.map(group=>(group.userData.palette as THREE.MeshStandardMaterial[])[0].opacity);
+        fromBuild=groups.map((group,index)=>group.children.map((mesh,i)=>{
+          // Hidden pieces begin just outside their final joints, then settle in
+          // order. Interruptions resume from the actual currently visible state.
+          if(index===chapter && index<=1 && fromOpacity[index]<.005) {
+            mesh.position.copy(built[index][i]);
+            mesh.position.y-=index===1?.40+(i%3)*.13:.18;
+            mesh.position.z+=index===1?.24:0;
+          }
+          return mesh.position.clone();
+        }));
         activeChapter=chapter;
       }
       groups.forEach((group,index)=>{
@@ -96,6 +126,10 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
           ? THREE.MathUtils.lerp(fromOpacity[index],1,smooth((progress-.12)/.76))
           : fromOpacity[index]*(1-smooth(progress/.36));
         group.visible=opacity>.005;
+        if(index===chapter && index<=1) group.children.forEach((mesh,i)=>{
+          const delay=index===1?(i%3)*.06:0;
+          mesh.position.lerpVectors(fromBuild[index][i],built[index][i],smooth((progress-.15-delay)/(.72-delay)));
+        });
         (group.userData.palette as THREE.MeshStandardMaterial[]).forEach(material=>{material.opacity=opacity;material.depthWrite=opacity>.95});
       });
     },

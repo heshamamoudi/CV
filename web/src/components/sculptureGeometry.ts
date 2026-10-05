@@ -29,14 +29,17 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
   let path: THREE.Vector2[];
   let euler: [number, number, number];
   if (chapter === 0) {
-    // A structural frame carries three connected system levels and one copper spine.
-    path = roundedPath([[1.60, 1.84], [-1.60, 1.84], [-1.60, -1.84], [1.60, -1.84]], true, .08);
-    halfWidth = .17; depth = .20;
-    euler = [.20, -.52, -.04];
+    // A load-bearing arch gathers three input paths into one clear crossing.
+    // Its inclined shoulders and open span deliberately avoid a cabinet/frame.
+    path = roundedPath([[-2.35,-1.35],[-2.35,-.25],[-1.12,1.42],[0,1.90],[1.12,1.42],[2.35,-.25],[2.35,-1.35]],true,.16);
+    halfWidth = .19; depth = .25;
+    euler = [.30, -.54, -.035];
   } else if (chapter === 1) {
-    path = roundedPath([[2.55, 1.66], [-2.55, 1.66], [-2.55, -1.66], [2.55, -1.66]], true, .11);
-    halfWidth = .23; depth = .19;
-    euler = [.075, -.055, -.015];
+    // One connected stepped outline becomes the structural edge of a build.
+    // Solid modules fill these three rising bays; there is no display aperture.
+    path = roundedPath([[-2.35,-1.48],[-2.35,-.46],[-.82,-.46],[-.82,.65],[.71,.65],[.71,1.76],[2.24,1.76],[2.24,-1.48]],true,.045);
+    halfWidth = .105; depth = .13;
+    euler = [.34, -.54, -.03];
   } else if (chapter === 2) {
     // An ascending route: the original closed sheet opens into a winding ribbon.
     // The broad bends leave room for distinct career stations and their labels.
@@ -85,8 +88,12 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(...euler));
   const box = new THREE.Box3(), vertex = new THREE.Vector3();
   for (let i = 0; i < positions.length; i += 3) box.expandByPoint(vertex.fromArray(positions, i).applyQuaternion(rotation));
-  // Include attached architecture, laptop deck, and book cover in the fit.
-  const detailBounds: [number,number,number][] = chapter===0 ? [[-1.78,-1.96,-1.35],[1.78,1.96,.24]] : chapter===1 ? [[-2.8,-2.3,-.2],[2.8,-1.7,1.5]] : chapter===3 ? [[-2.38,-1.40,-.12],[2.38,1.42,.65]] : [];
+  // Fit all eight corners of the solution bridge and construction foundation.
+  const limits = chapter===0 ? [[-2.70,-1.72,-1.30],[2.70,2.13,1.34]] : chapter===1 ? [[-2.65,-1.78,-1.30],[2.55,1.98,.88]] : null;
+  const detailBounds: [number,number,number][] = chapter===3 ? [[-2.38,-1.40,-.12],[2.38,1.42,.65]] : [];
+  if(limits) for(const x of [limits[0][0],limits[1][0]])
+    for(const y of [limits[0][1],limits[1][1]])
+      for(const z of [limits[0][2],limits[1][2]]) detailBounds.push([x,y,z]);
   for(const point of detailBounds)box.expandByPoint(vertex.set(...point).applyQuaternion(rotation));
   return { positions, rotation, bounds: box.getSize(new THREE.Vector3()), center: box.getCenter(new THREE.Vector3()), surface, closed };
 }

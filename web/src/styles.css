@@ -138,3 +138,14 @@ html.immersive,html.immersive body{height:100%;overflow:hidden;overscroll-behavi
  [dir=rtl] .intro-statement h2 { font-size:37px; line-height:1.25; }
 }
 @media(prefers-reduced-motion:reduce) { .identity-intro { display:none; } }
+
+/* The work sculpture tells the building story; the actual project is a small proof below it. */
+.work-visual { min-height:500px; }
+.work-stage { inset:0 0 140px; }
+.work-figure { position:absolute; inset-inline-end:0; bottom:0; width:210px; max-width:43%; padding:0; align-items:stretch; gap:9px; }
+.work-cover { width:100%; max-height:112px; border:1px solid var(--line); box-shadow:0 9px 24px #0003; }
+.work-caption { position:static; inset:auto; width:100%; padding:0; display:block; font-size:9px; line-height:1.5; }
+.work-caption span { display:block; overflow-wrap:anywhere; }
+.work-caption span:last-child { margin-top:3px; color:var(--copper); }
+@media(min-width:701px) and (max-width:1050px) and (orientation:portrait) { .work-visual { min-height:410px; } .work-stage { inset:0 0 120px; } .work-figure { width:175px; } .work-cover { max-height:95px; } }
+@media(max-width:700px) { .work-visual { min-height:340px; margin:10px 0 18px; } .work-stage { inset:0 0 108px; } .work-figure { width:148px; max-width:47%; } .work-cover { max-height:76px; } .work-caption { font-size:8px; } }
