@@ -43,6 +43,9 @@ export interface ProjectItem {
   title: LocalizedText;
   summary: LocalizedText;
   body: LocalizedText;
+  workflowTitle?: LocalizedText;
+  workflowCaption?: LocalizedText;
+  workflowStages?: LocalizedText[];
   technologies: string[];
   featured: boolean;
   visible: boolean;

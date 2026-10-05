@@ -55,6 +55,11 @@ public static class ProjectEditorialRefresh
             db.Projects.Add(new Project
             {
                 Slug = "selfhost-platform",
+                WorkflowTitle = LocalizedText.Of("HOW IT WORKS", "كيف يعمل"),
+                WorkflowCaption = LocalizedText.Of("From deployment to reliable operations.", "من النشر إلى تشغيل موثوق."),
+                WorkflowStageOne = LocalizedText.Of("Deploy", "النشر"),
+                WorkflowStageTwo = LocalizedText.Of("Monitor", "المراقبة"),
+                WorkflowStageThree = LocalizedText.Of("Recover", "الاستعادة"),
                 Title = LocalizedText.Of("Selfhost — from repository to production", "Selfhost — من المستودع إلى التشغيل"),
                 Summary = LocalizedText.Of(
                     "A self-hosted operations platform that brings deployment, service health and recovery into one control panel.",
@@ -79,6 +84,11 @@ public static class ProjectEditorialRefresh
             db.Projects.Add(new Project
             {
                 Slug = "inviteqr",
+                WorkflowTitle = LocalizedText.Of("HOW IT WORKS", "كيف يعمل"),
+                WorkflowCaption = LocalizedText.Of("A clear path from invitation to arrival.", "مسار واضح من الدعوة إلى الوصول."),
+                WorkflowStageOne = LocalizedText.Of("Invite", "الدعوة"),
+                WorkflowStageTwo = LocalizedText.Of("Guest", "الضيف"),
+                WorkflowStageThree = LocalizedText.Of("Check in", "الدخول"),
                 Title = LocalizedText.Of("InviteQR — guest management, made personal", "InviteQR — إدارة الضيوف بطابع شخصي"),
                 Summary = LocalizedText.Of(
                     "An Arabic-first wedding platform with a branded portal and a private guest list for every couple.",

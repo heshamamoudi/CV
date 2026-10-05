@@ -26,6 +26,9 @@ export function Sculpture(props:Props) {
     renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.90;renderer.domElement.setAttribute('aria-hidden','true');el.appendChild(renderer.domElement);
     const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-3,3,3,-3,.1,4000);
+    const textMeasure=document.createElement('canvas').getContext('2d');
+    let labelWidths=new WeakMap<HTMLElement,{text:string;width:number}>();
+    void document.fonts?.ready.then(()=>{labelWidths=new WeakMap();});
     const studio=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(studio,.04);
     scene.environment=environment.texture;scene.environmentIntensity=.85;studio.dispose();pmrem.dispose();
     scene.add(new THREE.HemisphereLight(0xeaf5f0,0x173139,.6));
@@ -197,8 +200,21 @@ export function Sculpture(props:Props) {
           point.set(node.x,node.y-.13,.20);idle.localToWorld(point);point.project(camera);
           label.style.left=`${(point.x+1)*width/2-measured.x}px`;
           label.style.top=`${(1-point.y)*height/2-measured.y}px`;
-          label.style.width=`${node.width*scale*.86}px`;
-          label.style.fontSize=`${Math.max(chapter===0?12:11,Math.min(chapter===0?17:13,scale*.21))}px`;
+          const labelWidth=node.width*scale*.86;
+          label.style.width=`${labelWidth}px`;
+          let fontSize=Math.max(chapter===0?12:11,Math.min(chapter===0?17:13,scale*.21));
+          if(chapter===1&&textMeasure) {
+            const text=label.textContent??'';
+            let measuredText=labelWidths.get(label);
+            if(!measuredText||measuredText.text!==text) {
+              textMeasure.font=`750 100px ${getComputedStyle(label).fontFamily}`;
+              measuredText={text,width:Math.max(1,...text.split(/\s+/).map(word=>textMeasure.measureText(word).width))};
+              labelWidths.set(label,measuredText);
+            }
+            // Keep short editorial words whole on mobile; longer labels can use two lines.
+            fontSize=Math.min(fontSize,Math.max(8,labelWidth*94/measuredText.width));
+          }
+          label.style.fontSize=`${fontSize}px`;
           label.style.opacity=String(introPlaying?0:THREE.MathUtils.smoothstep(raw,.55,1));
         });
       }

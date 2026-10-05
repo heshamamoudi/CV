@@ -59,6 +59,11 @@ public sealed class Project : IOrdered
     public LocalizedText Title { get; set; } = new();
     public LocalizedText Summary { get; set; } = new();
     public LocalizedText Body { get; set; } = new();
+    public LocalizedText WorkflowTitle { get; set; } = ProjectWorkflowDefaults.Title();
+    public LocalizedText WorkflowCaption { get; set; } = ProjectWorkflowDefaults.Caption();
+    public LocalizedText WorkflowStageOne { get; set; } = ProjectWorkflowDefaults.Stages()[0];
+    public LocalizedText WorkflowStageTwo { get; set; } = ProjectWorkflowDefaults.Stages()[1];
+    public LocalizedText WorkflowStageThree { get; set; } = ProjectWorkflowDefaults.Stages()[2];
     public List<string> Technologies { get; set; } = [];
     public Guid? CoverMediaId { get; set; }
     public string RepositoryUrl { get; set; } = "";
@@ -69,6 +74,17 @@ public sealed class Project : IOrdered
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public bool IsComplete(string lang) => Title.Has(lang) && Summary.Has(lang);
+}
+
+public static class ProjectWorkflowDefaults
+{
+    public static LocalizedText Title() => LocalizedText.Of("HOW IT WORKS", "كيف يعمل");
+    public static LocalizedText Caption() => LocalizedText.Of("An idea, built into a useful result.", "فكرة تتحول إلى نتيجة مفيدة.");
+    public static List<LocalizedText> Stages() => [
+        LocalizedText.Of("Plan", "التخطيط"),
+        LocalizedText.Of("Build", "البناء"),
+        LocalizedText.Of("Deliver", "التسليم"),
+    ];
 }
 
 public sealed class Technology : IOrdered

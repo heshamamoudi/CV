@@ -142,6 +142,55 @@ public class ContentAdminTests
     }
 
     [Fact]
+    public async Task Project_workflow_copy_binds_saves_and_resolves_in_the_requested_language()
+    {
+        var (app, admin) = await AdminTestApp.CreateAsync();
+        var project = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/projects"))!
+            .Single(p => p!["slug"]!.GetValue<string>() == "selfhost-platform")!.AsObject();
+        var id = project["id"]!.GetValue<int>();
+        project["workflowTitle"] = L("Release workflow", "مسار الإصدار");
+        project["workflowCaption"] = L("From a change to a healthy service.", "من التغيير إلى خدمة مستقرة.");
+        project["workflowStages"] = new JsonArray(
+            L("Review", "المراجعة"), L("Deploy", "النشر"), L("Verify", "التحقق"));
+
+        var saved = await admin.PutAsJsonAsync($"/api/admin/projects/{id}", project);
+        Assert.Equal(HttpStatusCode.OK, saved.StatusCode);
+        var reread = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/projects"))!
+            .Single(p => p!["id"]!.GetValue<int>() == id)!.AsObject();
+        Assert.Equal("Review", reread["workflowStages"]![0]!["en"]!.GetValue<string>());
+        Assert.Equal("النشر", reread["workflowStages"]![1]!["ar"]!.GetValue<string>());
+
+        var publicClient = app.CreateClient();
+        var english = (await publicClient.GetFromJsonAsync<JsonObject>("/api/public/en/projects/selfhost-platform"))!;
+        var arabic = (await publicClient.GetFromJsonAsync<JsonObject>("/api/public/ar/projects/selfhost-platform"))!;
+        Assert.Equal("Release workflow", english["workflowTitle"]!.GetValue<string>());
+        Assert.Equal("Review", english["workflowStages"]![0]!.GetValue<string>());
+        Assert.Equal("مسار الإصدار", arabic["workflowTitle"]!.GetValue<string>());
+        Assert.Equal("التحقق", arabic["workflowStages"]![2]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task Project_workflow_copy_requires_exactly_three_bilingual_short_stage_labels()
+    {
+        var (_, admin) = await AdminTestApp.CreateAsync();
+        var project = (await admin.GetFromJsonAsync<JsonArray>("/api/admin/projects"))![0]!.AsObject();
+        project["workflowTitle"] = L("Workflow", "سير العمل");
+        project["workflowCaption"] = L("Caption", "وصف");
+        project["workflowStages"] = new JsonArray(L("One", "واحد"), L("Two", "اثنان"));
+
+        var reply = await admin.PutAsJsonAsync($"/api/admin/projects/{project["id"]}", project);
+        var errors = (await reply.Content.ReadFromJsonAsync<JsonObject>())!["errors"]!.AsObject();
+
+        Assert.Equal(HttpStatusCode.BadRequest, reply.StatusCode);
+        Assert.True(errors.ContainsKey("workflowStages"));
+
+        project["workflowStages"] = new JsonArray(L("A label that is much too long", "مرحلة"), L("Two", "اثنان"), L("Three", "ثلاثة"));
+        reply = await admin.PutAsJsonAsync($"/api/admin/projects/{project["id"]}", project);
+        errors = (await reply.Content.ReadFromJsonAsync<JsonObject>())!["errors"]!.AsObject();
+        Assert.True(errors.ContainsKey("workflowStages[0].en"));
+    }
+
+    [Fact]
     public async Task Only_one_project_is_featured()
     {
         var (_, admin) = await AdminTestApp.CreateAsync();

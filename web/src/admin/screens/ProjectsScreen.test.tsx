@@ -192,6 +192,24 @@ describe('editing one project', () => {
     ]);
   });
 
+  it('round-trips bilingual workflow labels through the project editor', async () => {
+    serve();
+    show();
+    await open('Safety Management System');
+
+    fireEvent.change(screen.getByLabelText('English', { selector: '#workflowTitle-en' }), { target: { value: 'Incident response' } });
+    fireEvent.change(screen.getByLabelText('Arabic', { selector: '#workflowTitle-ar' }), { target: { value: 'الاستجابة للحوادث' } });
+    fireEvent.change(screen.getByLabelText('English', { selector: '#workflowStages\\[0\\]-en' }), { target: { value: 'Report' } });
+    fireEvent.change(screen.getByLabelText('Arabic', { selector: '#workflowStages\\[0\\]-ar' }), { target: { value: 'الإبلاغ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => expect(sent('PUT', '/api/admin/projects/3')).toHaveLength(1));
+    expect(sent('PUT', '/api/admin/projects/3')[0].body).toMatchObject({
+      workflowTitle: { en: 'Incident response', ar: 'الاستجابة للحوادث' },
+      workflowStages: [{ en: 'Report', ar: 'الإبلاغ' }, { en: 'Build', ar: 'البناء' }, { en: 'Deliver', ar: 'التسليم' }],
+    });
+  });
+
   it('refuses a thirty-first technology in words, without dropping it silently', async () => {
     const thirty = Array.from({ length: 30 }, (_, i) => `Tech ${i + 1}`);
     serve([{ ...safety, technologies: thirty }, kiosk]);
@@ -260,6 +278,10 @@ describe('editing one project', () => {
 
     await waitFor(() => expect(sent('POST', '/api/admin/projects')).toHaveLength(1));
     expect(sent('POST', '/api/admin/projects')[0].body).toMatchObject({ slug: 'new-thing', technologies: [], visible: true });
+    expect(sent('POST', '/api/admin/projects')[0].body).toMatchObject({
+      workflowTitle: { en: 'HOW IT WORKS', ar: 'كيف يعمل' },
+      workflowStages: [{ en: 'Plan', ar: 'التخطيط' }, { en: 'Build', ar: 'البناء' }, { en: 'Deliver', ar: 'التسليم' }],
+    });
     // No title yet, so the list calls it by its address.
     expect(await screen.findByRole('button', { name: 'Edit: new-thing' })).toBeInTheDocument();
   });

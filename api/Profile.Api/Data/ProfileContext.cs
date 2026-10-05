@@ -44,6 +44,8 @@ public sealed class ProfileContext(DbContextOptions<ProfileContext> options) : D
         b.Entity<Project>(e =>
         {
             Text(e, x => x.Title); Text(e, x => x.Summary); Text(e, x => x.Body);
+            Text(e, x => x.WorkflowTitle); Text(e, x => x.WorkflowCaption);
+            Text(e, x => x.WorkflowStageOne); Text(e, x => x.WorkflowStageTwo); Text(e, x => x.WorkflowStageThree);
             e.HasIndex(x => x.Slug).IsUnique();
             e.Property(x => x.RepositoryUrl).HasMaxLength(500);
             e.Property(x => x.LiveUrl).HasMaxLength(500);

@@ -10,7 +10,8 @@ public sealed record JourneyEdit(
 
 public sealed record ProjectEdit(
     string Slug, LocalizedText Title, LocalizedText Summary, LocalizedText Body, List<string> Technologies,
-    bool Featured, bool Visible, Guid? CoverMediaId, string? RepositoryUrl = "", string? LiveUrl = "");
+    bool Featured, bool Visible, Guid? CoverMediaId, string? RepositoryUrl = "", string? LiveUrl = "",
+    LocalizedText? WorkflowTitle = null, LocalizedText? WorkflowCaption = null, List<LocalizedText>? WorkflowStages = null);
 
 public sealed record TechnologyEdit(string Name, LocalizedText Category);
 public sealed record CertificateEdit(LocalizedText Title, string Issuer, DateOnly IssuedOn);
@@ -62,6 +63,17 @@ public static partial class ContentAdmin
             async (db, e, existing) =>
             {
                 var p = new Problems().Text("title", e.Title, 200).Text("summary", e.Summary, 600).Text("body", e.Body, 8000);
+                if (e.WorkflowTitle is not null) RequiredPair(p, "workflowTitle", e.WorkflowTitle, 80);
+                if (e.WorkflowCaption is not null) RequiredPair(p, "workflowCaption", e.WorkflowCaption, 200);
+                if (e.WorkflowStages is not null)
+                {
+                    if (e.WorkflowStages.Count != 3) p.Add("workflowStages", "must contain exactly 3 labels");
+                    for (var i = 0; i < e.WorkflowStages.Count; i++)
+                    {
+                        if (e.WorkflowStages[i] is null) p.Add($"workflowStages[{i}]", "required");
+                        else RequiredPair(p, $"workflowStages[{i}]", e.WorkflowStages[i], 18);
+                    }
+                }
                 if (e.Slug is null || e.Slug.Length > 80 || !SlugPattern().IsMatch(e.Slug)) p.Add("slug", "lower-case letters, digits and single hyphens");
                 else if (await db.Projects.AnyAsync(x => x.Slug == e.Slug && (existing == null || x.Id != existing.Id))) p.Add("slug", "already used by another project");
                 if (e.Technologies is null) p.Add("technologies", "required");
@@ -91,12 +103,20 @@ public static partial class ContentAdmin
                     await db.Projects.Where(x => x.Featured && x.Id != project.Id).ForEachAsync(x => x.Featured = false);
 
                 project.Slug = e.Slug; project.Title = e.Title; project.Summary = e.Summary; project.Body = e.Body;
+                project.WorkflowTitle = e.WorkflowTitle ?? ProjectWorkflowDefaults.Title();
+                project.WorkflowCaption = e.WorkflowCaption ?? ProjectWorkflowDefaults.Caption();
+                var stages = e.WorkflowStages ?? ProjectWorkflowDefaults.Stages();
+                if (stages.Count == 3)
+                {
+                    project.WorkflowStageOne = stages[0]; project.WorkflowStageTwo = stages[1]; project.WorkflowStageThree = stages[2];
+                }
                 project.Technologies = e.Technologies.Select(t => t.Trim()).ToList();
                 project.Featured = e.Featured; project.Visible = e.Visible; project.CoverMediaId = e.CoverMediaId;
                 project.RepositoryUrl = e.RepositoryUrl?.Trim() ?? ""; project.LiveUrl = e.LiveUrl?.Trim() ?? "";
                 project.UpdatedAt = DateTimeOffset.UtcNow;
             },
-            p => new { p.Id, p.SortOrder, p.Slug, p.Title, p.Summary, p.Body, p.Technologies, p.Featured, p.Visible, p.CoverMediaId, p.RepositoryUrl, p.LiveUrl });
+            p => new { p.Id, p.SortOrder, p.Slug, p.Title, p.Summary, p.Body, p.Technologies, p.Featured, p.Visible, p.CoverMediaId, p.RepositoryUrl, p.LiveUrl,
+                p.WorkflowTitle, p.WorkflowCaption, WorkflowStages = new[] { p.WorkflowStageOne, p.WorkflowStageTwo, p.WorkflowStageThree } });
 
         OrderedCrud.Map<Technology, TechnologyEdit>(admin, "/technologies",
             db => db.Technologies,
@@ -131,5 +151,11 @@ public static partial class ContentAdmin
             (_, e, _) => Task.FromResult(new Problems().Text("name", e.Name, 60).Text("level", e.Level, 60)),
             (_, e, l) => { l.Name = e.Name; l.Level = e.Level; return Task.CompletedTask; },
             l => new { l.Id, l.SortOrder, l.Name, l.Level });
+    }
+
+    private static void RequiredPair(Problems p, string field, LocalizedText text, int max)
+    {
+        p.Line(field + ".en", text.En, max);
+        p.Line(field + ".ar", text.Ar, max);
     }
 }

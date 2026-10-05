@@ -308,6 +308,46 @@ namespace Profile.Api.Data.Migrations
                     b.Property<Guid?>("CoverMediaId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("WorkflowCaption_Ar")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowCaption_En")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowStageOne_Ar")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowStageOne_En")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowStageThree_Ar")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowStageThree_En")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowStageTwo_Ar")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowStageTwo_En")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowTitle_Ar")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkflowTitle_En")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("Featured")
                         .HasColumnType("boolean");
 
@@ -1004,6 +1044,56 @@ namespace Profile.Api.Data.Migrations
                                 .HasForeignKey("ProjectId");
                         });
 
+                    b.OwnsOne("Profile.Api.Data.LocalizedText", "WorkflowCaption", b1 =>
+                        {
+                            b1.Property<int>("ProjectId").HasColumnType("integer");
+                            b1.Property<string>("Ar").IsRequired().HasColumnType("text");
+                            b1.Property<string>("En").IsRequired().HasColumnType("text");
+                            b1.HasKey("ProjectId");
+                            b1.ToTable("Projects");
+                            b1.WithOwner().HasForeignKey("ProjectId");
+                        });
+
+                    b.OwnsOne("Profile.Api.Data.LocalizedText", "WorkflowStageOne", b1 =>
+                        {
+                            b1.Property<int>("ProjectId").HasColumnType("integer");
+                            b1.Property<string>("Ar").IsRequired().HasColumnType("text");
+                            b1.Property<string>("En").IsRequired().HasColumnType("text");
+                            b1.HasKey("ProjectId");
+                            b1.ToTable("Projects");
+                            b1.WithOwner().HasForeignKey("ProjectId");
+                        });
+
+                    b.OwnsOne("Profile.Api.Data.LocalizedText", "WorkflowStageTwo", b1 =>
+                        {
+                            b1.Property<int>("ProjectId").HasColumnType("integer");
+                            b1.Property<string>("Ar").IsRequired().HasColumnType("text");
+                            b1.Property<string>("En").IsRequired().HasColumnType("text");
+                            b1.HasKey("ProjectId");
+                            b1.ToTable("Projects");
+                            b1.WithOwner().HasForeignKey("ProjectId");
+                        });
+
+                    b.OwnsOne("Profile.Api.Data.LocalizedText", "WorkflowStageThree", b1 =>
+                        {
+                            b1.Property<int>("ProjectId").HasColumnType("integer");
+                            b1.Property<string>("Ar").IsRequired().HasColumnType("text");
+                            b1.Property<string>("En").IsRequired().HasColumnType("text");
+                            b1.HasKey("ProjectId");
+                            b1.ToTable("Projects");
+                            b1.WithOwner().HasForeignKey("ProjectId");
+                        });
+
+                    b.OwnsOne("Profile.Api.Data.LocalizedText", "WorkflowTitle", b1 =>
+                        {
+                            b1.Property<int>("ProjectId").HasColumnType("integer");
+                            b1.Property<string>("Ar").IsRequired().HasColumnType("text");
+                            b1.Property<string>("En").IsRequired().HasColumnType("text");
+                            b1.HasKey("ProjectId");
+                            b1.ToTable("Projects");
+                            b1.WithOwner().HasForeignKey("ProjectId");
+                        });
+
                     b.Navigation("Body")
                         .IsRequired();
 
@@ -1012,6 +1102,12 @@ namespace Profile.Api.Data.Migrations
 
                     b.Navigation("Title")
                         .IsRequired();
+
+                    b.Navigation("WorkflowCaption").IsRequired();
+                    b.Navigation("WorkflowStageOne").IsRequired();
+                    b.Navigation("WorkflowStageTwo").IsRequired();
+                    b.Navigation("WorkflowStageThree").IsRequired();
+                    b.Navigation("WorkflowTitle").IsRequired();
                 });
 
             modelBuilder.Entity("Profile.Api.Data.ProjectSlugRedirect", b =>

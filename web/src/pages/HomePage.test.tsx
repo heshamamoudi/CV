@@ -56,17 +56,29 @@ const keyDown = (element: Window, event: object) => { fireEvent.keyDown(element,
 describe("HomePage", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
-  it('updates the primary image, accessible diagram and morph target together on project selection', async () => {
-    const projects=['selfhost-platform','inviteqr'].map((slug,i)=>({slug,title:i?'InviteQR':'Selfhost',summary:'Project summary',body:'',technologies:[],featured:i===0,availableInOtherLanguage:true,cover:{src:`/${slug}.webp`,srcSet:'',width:1280,height:720,alt:i?'Guest list':'Service dashboard'}}));
-    render(<MemoryRouter initialEntries={['/en#work']}><HomePage home={{...home,lang:'en',projects}} /></MemoryRouter>);
+  it.each(['en','ar'] as const)('updates configured %s copy, primary image, accessible diagram and morph target together on project selection', async lang => {
+    const workflows=lang==='en' ? [
+      {workflowTitle:'Release flow',workflowCaption:'Reviewed delivery.',workflowStages:['Prepare','Review','Publish']},
+      {workflowTitle:'Event flow',workflowCaption:'A welcoming arrival.',workflowStages:['Send','Confirm','Arrive']},
+    ] : [
+      {workflowTitle:'مسار الإصدار',workflowCaption:'تسليم تمت مراجعته.',workflowStages:['الإعداد','المراجعة','النشر']},
+      {workflowTitle:'مسار الفعالية',workflowCaption:'وصول مرحب به.',workflowStages:['الإرسال','التأكيد','الوصول']},
+    ];
+    const projects=['selfhost-platform','inviteqr'].map((slug,i)=>({slug,title:i?'InviteQR':'Selfhost',summary:'Project summary',body:'',technologies:[],featured:i===0,availableInOtherLanguage:true,...workflows[i],cover:{src:`/${slug}.webp`,srcSet:'',width:1280,height:720,alt:i?'Guest list':'Service dashboard'}}));
+    const {container}=render(<MemoryRouter initialEntries={[`/${lang}#work`]}><HomePage home={{...home,lang,projects}} /></MemoryRouter>);
     await act(async()=>{});
     expect(screen.getByRole('img',{name:'Service dashboard'})).toHaveAttribute('src','/selfhost-platform.webp');
     expect(screen.getByTestId('sculpture')).toHaveAttribute('data-project','selfhost-platform');
-    expect(screen.getByRole('img',{name:'Deployment, service monitoring and recovery.'})).toBeInTheDocument();
+    const diagramName=(index:number)=>[workflows[index].workflowTitle,...workflows[index].workflowStages,workflows[index].workflowCaption].join(' — ');
+    expect(screen.getByRole('img',{name:diagramName(0)})).toBeInTheDocument();
+    expect(Array.from(container.querySelectorAll('[data-system-node] strong'),node=>node.textContent)).toEqual(workflows[0].workflowStages);
     fireEvent.click(screen.getByRole('button',{name:/02 InviteQR/}));
     expect(screen.getByRole('img',{name:'Guest list'})).toHaveAttribute('src','/inviteqr.webp');
     expect(screen.getByTestId('sculpture')).toHaveAttribute('data-project','inviteqr');
-    const diagram=screen.getByRole('img',{name:'Invitation, guest management and check-in workflow.'});
+    const diagram=screen.getByRole('img',{name:diagramName(1)});
+    expect(Array.from(container.querySelectorAll('[data-system-node] strong'),node=>node.textContent)).toEqual(workflows[1].workflowStages);
+    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent(workflows[1].workflowCaption);
+    expect(screen.queryByRole('img',{name:diagramName(0)})).not.toBeInTheDocument();
     expect(screen.getByRole('img',{name:'Guest list'}).closest('figure')!.compareDocumentPosition(diagram)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
   it('renders the profile fields edited in admin and exposes only an available CV', () => {

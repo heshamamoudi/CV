@@ -16,6 +16,7 @@ export interface ProjectDto {
   slug: string; title: string; summary: string; body: string; technologies: string[];
   featured: boolean; availableInOtherLanguage: boolean;
   cover?: ImageDto | null;
+  workflowTitle?: string; workflowCaption?: string; workflowStages?: string[];
   repositoryUrl?: string; liveUrl?: string;
 }
 export interface HomeData {

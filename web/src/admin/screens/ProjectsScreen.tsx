@@ -28,6 +28,10 @@ const labels = {
     title: 'Title',
     summary: 'Summary',
     body: 'Body',
+    workflowTitle: 'Workflow diagram title',
+    workflowCaption: 'Workflow diagram caption',
+    workflowStage1: 'Stage 1', workflowStage2: 'Stage 2', workflowStage3: 'Stage 3',
+    workflowHint: 'These labels appear in the project’s 3D workflow diagram. Keep each stage short; provide both languages.',
     technologies: 'Technologies',
     techAdd: 'Add a technology',
     techHint: 'Type a name and press Enter. Up to 30, each at most 40 characters.',
@@ -62,6 +66,10 @@ const labels = {
     title: 'العنوان',
     summary: 'نبذة',
     body: 'النص',
+    workflowTitle: 'عنوان مخطط سير العمل',
+    workflowCaption: 'وصف مخطط سير العمل',
+    workflowStage1: 'المرحلة ١', workflowStage2: 'المرحلة ٢', workflowStage3: 'المرحلة ٣',
+    workflowHint: 'تظهر هذه النصوص في مخطط سير العمل ثلاثي الأبعاد للمشروع. اجعل كل مرحلة قصيرة وأكمل اللغتين.',
     technologies: 'التقنيات',
     techAdd: 'إضافة تقنية',
     techHint: 'اكتب الاسم ثم اضغط Enter. حتى ٣٠ تقنية، كل اسم ٤٠ حرفاً على الأكثر.',
@@ -88,6 +96,7 @@ const labels = {
 };
 
 const fill = (template: string, name: string) => template.replace('{name}', () => name);
+const workflowStageLabel = ['workflowStage1', 'workflowStage2', 'workflowStage3'] as const;
 
 const blank = (): ProjectItem => ({
   id: 0,
@@ -96,6 +105,13 @@ const blank = (): ProjectItem => ({
   title: emptyText(),
   summary: emptyText(),
   body: emptyText(),
+  workflowTitle: { en: 'HOW IT WORKS', ar: 'كيف يعمل' },
+  workflowCaption: { en: 'An idea, built into a useful result.', ar: 'فكرة تتحول إلى نتيجة مفيدة.' },
+  workflowStages: [
+    { en: 'Plan', ar: 'التخطيط' },
+    { en: 'Build', ar: 'البناء' },
+    { en: 'Deliver', ar: 'التسليم' },
+  ],
   technologies: [],
   featured: false,
   visible: true,
@@ -110,6 +126,13 @@ const payload = (project: ProjectItem) => ({
   title: project.title,
   summary: project.summary,
   body: project.body,
+  workflowTitle: project.workflowTitle ?? { en: 'HOW IT WORKS', ar: 'كيف يعمل' },
+  workflowCaption: project.workflowCaption ?? { en: 'An idea, built into a useful result.', ar: 'فكرة تتحول إلى نتيجة مفيدة.' },
+  workflowStages: project.workflowStages?.length === 3 ? project.workflowStages : [
+    { en: 'Plan', ar: 'التخطيط' },
+    { en: 'Build', ar: 'البناء' },
+    { en: 'Deliver', ar: 'التسليم' },
+  ],
   technologies: project.technologies,
   featured: project.featured,
   visible: project.visible,
@@ -366,6 +389,46 @@ export function ProjectsScreen() {
             rows={8}
             onChange={(body: LocalizedText) => editor.set({ body })}
           />
+
+          <fieldset className="projects-workflow-fields">
+            <legend>{s('workflowTitle')}</legend>
+            <p className="admin-hint">{s('workflowHint')}</p>
+            <LocalizedField
+              name="workflowTitle"
+              label={s('workflowTitle')}
+              value={value.workflowTitle ?? emptyText()}
+              error={error}
+              maxLength={80}
+              onChange={(workflowTitle: LocalizedText) => editor.set({ workflowTitle })}
+            />
+            <LocalizedField
+              name="workflowCaption"
+              label={s('workflowCaption')}
+              value={value.workflowCaption ?? emptyText()}
+              error={error}
+              multiline
+              rows={2}
+              maxLength={200}
+              onChange={(workflowCaption: LocalizedText) => editor.set({ workflowCaption })}
+            />
+            {[0, 1, 2].map(index => (
+              <LocalizedField
+                key={index}
+                name={`workflowStages[${index}]`}
+                label={s(workflowStageLabel[index])}
+                value={value.workflowStages?.[index] ?? emptyText()}
+                error={error}
+                maxLength={18}
+                onChange={(stage: LocalizedText) => {
+                  const stages = value.workflowStages?.length === 3
+                    ? [...value.workflowStages]
+                    : [{ en: 'Plan', ar: 'التخطيط' }, { en: 'Build', ar: 'البناء' }, { en: 'Deliver', ar: 'التسليم' }];
+                  stages[index] = stage;
+                  editor.set({ workflowStages: stages });
+                }}
+              />
+            ))}
+          </fieldset>
 
           <Technologies
             value={value.technologies}
