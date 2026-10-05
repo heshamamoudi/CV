@@ -23,23 +23,22 @@ function roundedPath(points: [number, number][], closed: boolean, cut: number) {
   if (closed) path.closePath();
   return path.getSpacedPoints(SECTIONS);
 }
-export function sculptureForm(chapter: number, portrait: boolean, tab = 0): SculptureForm {
+export function sculptureForm(chapter: number, portrait: boolean, tab = 0, project: 'selfhost' | 'inviteqr' | 'delivery' = 'selfhost'): SculptureForm {
   const closed = chapter === 0 || chapter === 1;
   let halfWidth = .43, depth = .19;
   let path: THREE.Vector2[];
   let euler: [number, number, number];
   if (chapter === 0) {
-    // A load-bearing arch gathers three input paths into one clear crossing.
-    // Its inclined shoulders and open span deliberately avoid a cabinet/frame.
-    path = roundedPath([[-2.35,-1.35],[-2.35,-.25],[-1.12,1.42],[0,1.90],[1.12,1.42],[2.35,-.25],[2.35,-1.35]],true,.16);
-    halfWidth = .19; depth = .25;
-    euler = [.30, -.54, -.035];
+    // A routing circuit joins the application, API, services and workflow layers.
+    path = roundedPath([[-2.05,1.15],[2.05,1.15],[2.05,-1.15],[-2.05,-1.15]],true,.12);
+    halfWidth = .042; depth = .045;
+    euler = [.10, -.16, -.035];
   } else if (chapter === 1) {
-    // One connected stepped outline becomes the structural edge of a build.
-    // Solid modules fill these three rising bays; there is no display aperture.
-    path = roundedPath([[-2.35,-1.48],[-2.35,-.46],[-.82,-.46],[-.82,.65],[.71,.65],[.71,1.76],[2.24,1.76],[2.24,-1.48]],true,.045);
-    halfWidth = .105; depth = .13;
-    euler = [.34, -.54, -.03];
+    // The orchestration loop becomes a guest workflow when the selected project changes.
+    const ys=project==='inviteqr'?[-.35,.45,-.35]:project==='selfhost'?[.4,-.45,.4]:[0,0,0];
+    path = roundedPath([[-1.65,ys[0]],[0,ys[1]],[1.65,ys[2]],[1.65,-1.12],[-1.65,-1.12]],true,.11);
+    halfWidth = .038; depth = .04;
+    euler = [.08, -.12, project==='inviteqr'?.025:-.025];
   } else if (chapter === 2) {
     // An ascending route: the original closed sheet opens into a winding ribbon.
     // The broad bends leave room for distinct career stations and their labels.
@@ -88,8 +87,8 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0): Scul
   const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(...euler));
   const box = new THREE.Box3(), vertex = new THREE.Vector3();
   for (let i = 0; i < positions.length; i += 3) box.expandByPoint(vertex.fromArray(positions, i).applyQuaternion(rotation));
-  // Fit all eight corners of the solution bridge and construction foundation.
-  const limits = chapter===0 ? [[-2.70,-1.72,-1.30],[2.70,2.13,1.34]] : chapter===1 ? [[-2.65,-1.78,-1.30],[2.55,1.98,.88]] : null;
+  // Include every software module, its backing layers and connector ends in the fit.
+  const limits = chapter===0 ? [[-2.97,-1.87,-.34],[2.97,1.88,.48]] : chapter===1 ? [[-2.40,-1.43,-.34],[2.40,1.24,.50]] : null;
   const detailBounds: [number,number,number][] = chapter===3 ? [[-2.38,-1.40,-.12],[2.38,1.42,.65]] : [];
   if(limits) for(const x of [limits[0][0],limits[1][0]])
     for(const y of [limits[0][1],limits[1][1]])

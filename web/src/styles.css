@@ -139,13 +139,23 @@ html.immersive,html.immersive body{height:100%;overflow:hidden;overscroll-behavi
 }
 @media(prefers-reduced-motion:reduce) { .identity-intro { display:none; } }
 
-/* The work sculpture tells the building story; the actual project is a small proof below it. */
-.work-visual { min-height:500px; }
-.work-stage { inset:0 0 140px; }
-.work-figure { position:absolute; inset-inline-end:0; bottom:0; width:210px; max-width:43%; padding:0; align-items:stretch; gap:9px; }
-.work-cover { width:100%; max-height:112px; border:1px solid var(--line); box-shadow:0 9px 24px #0003; }
-.work-caption { position:static; inset:auto; width:100%; padding:0; display:block; font-size:9px; line-height:1.5; }
+/* Software topology labels remain crisp while their connected modules morph. */
+.software-stage { position:relative; }
+.software-node { position:absolute; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:translate(-50%,-50%); opacity:0; pointer-events:none; color:#112a2c; text-align:center; line-height:1.25; font-weight:700; }
+.software-node strong { font-size:1em; font-weight:750; }
+.software-node small { margin-top:5px; color:#395453; font-size:max(9px,.65em); font-weight:550; }
+.software-node-compact { line-height:1.2; }
+/* The selected project is the primary visual; its system is a small explanation below. */
+.work-visual { min-height:500px; display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:20px; }
+.work-figure { position:relative; inset:auto; width:100%; max-width:none; padding:0; margin:0; align-items:stretch; gap:10px; }
+.work-cover { width:100%; max-height:350px; height:auto; object-fit:contain; border:1px solid var(--line); box-shadow:0 16px 36px #0004; }
+.work-caption { position:static; inset:auto; width:100%; padding:0; display:flex; justify-content:space-between; gap:16px; font-size:10px; line-height:1.5; }
 .work-caption span { display:block; overflow-wrap:anywhere; }
-.work-caption span:last-child { margin-top:3px; color:var(--copper); }
-@media(min-width:701px) and (max-width:1050px) and (orientation:portrait) { .work-visual { min-height:410px; } .work-stage { inset:0 0 120px; } .work-figure { width:175px; } .work-cover { max-height:95px; } }
-@media(max-width:700px) { .work-visual { min-height:340px; margin:10px 0 18px; } .work-stage { inset:0 0 108px; } .work-figure { width:148px; max-width:47%; } .work-cover { max-height:76px; } .work-caption { font-size:8px; } }
+.work-caption span:last-child { color:var(--copper); }
+.work-system { display:grid; grid-template-columns:minmax(230px,48%) 1fr; gap:16px; align-items:center; border-top:1px solid var(--line); padding-top:10px; }
+.work-stage { position:relative; inset:auto; width:100%; height:154px; }
+.work-system-caption p { margin:9px 0 0; color:var(--body); font-size:13px; line-height:1.6; max-width:24ch; }
+.work-system-caption .micro-label { font-size:9px; color:var(--copper); }
+@media(min-width:701px) and (max-width:1050px) and (orientation:portrait) { .work-visual { min-height:480px; gap:14px; } .work-cover { max-height:310px; } .work-stage { height:130px; } }
+@media(max-width:700px) { .intro-stage { height:285px; } .work-visual { min-height:0; margin:16px 0 20px; gap:12px; } .work-figure { width:100%; max-width:none; } .work-cover { max-height:240px; width:100%; } .work-caption { font-size:9px; flex-direction:column; gap:3px; } .work-system { grid-template-columns:minmax(190px,65%) 1fr; gap:9px; padding-top:5px; } .work-stage { height:113px; } .work-system-caption p { font-size:10px; margin-top:6px; } .work-system-caption .micro-label { font-size:7px; } }
+@media(max-width:700px) { .intro-stage .software-node small { display:none; } }

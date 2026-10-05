@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router";
 import { HomePage } from "./HomePage";
 import type { HomeData } from "../types";
 
-vi.mock("../components/Sculpture", () => ({ Sculpture: ({ selectedJourneyIndex }: { selectedJourneyIndex: number }) => <div data-testid="sculpture" data-role-index={selectedJourneyIndex} /> }));
+vi.mock("../components/Sculpture", () => ({ Sculpture: ({ selectedJourneyIndex, selectedProjectSlug }: { selectedJourneyIndex: number; selectedProjectSlug?:string }) => <div data-testid="sculpture" data-role-index={selectedJourneyIndex} data-project={selectedProjectSlug} /> }));
 
 const home: HomeData = {
   lang: "ar",
@@ -56,6 +56,19 @@ const keyDown = (element: Window, event: object) => { fireEvent.keyDown(element,
 describe("HomePage", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
+  it('updates the primary image, accessible diagram and morph target together on project selection', async () => {
+    const projects=['selfhost-platform','inviteqr'].map((slug,i)=>({slug,title:i?'InviteQR':'Selfhost',summary:'Project summary',body:'',technologies:[],featured:i===0,availableInOtherLanguage:true,cover:{src:`/${slug}.webp`,srcSet:'',width:1280,height:720,alt:i?'Guest list':'Service dashboard'}}));
+    render(<MemoryRouter initialEntries={['/en#work']}><HomePage home={{...home,lang:'en',projects}} /></MemoryRouter>);
+    await act(async()=>{});
+    expect(screen.getByRole('img',{name:'Service dashboard'})).toHaveAttribute('src','/selfhost-platform.webp');
+    expect(screen.getByTestId('sculpture')).toHaveAttribute('data-project','selfhost-platform');
+    expect(screen.getByRole('img',{name:'Deployment, service monitoring and recovery.'})).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button',{name:/02 InviteQR/}));
+    expect(screen.getByRole('img',{name:'Guest list'})).toHaveAttribute('src','/inviteqr.webp');
+    expect(screen.getByTestId('sculpture')).toHaveAttribute('data-project','inviteqr');
+    const diagram=screen.getByRole('img',{name:'Invitation, guest management and check-in workflow.'});
+    expect(screen.getByRole('img',{name:'Guest list'}).closest('figure')!.compareDocumentPosition(diagram)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
   it('renders the profile fields edited in admin and exposes only an available CV', () => {
     const { rerender } = render(<MemoryRouter initialEntries={['/ar']}><HomePage home={home} /></MemoryRouter>);
     expect(screen.getByText(home.profile.eyebrow)).toBeInTheDocument();

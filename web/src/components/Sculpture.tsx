@@ -7,8 +7,9 @@ import { sectionDetails } from "./sectionDetails";
 import { CHAPTER_TRAVEL_MS } from "./useChapterTransition";
 import { INTRO_DURATION_MS, useIntro } from './IntroContext';
 import { introEase, introMorph, introTravel, sculptureIntroForm } from './sculptureIntro';
+import { architectureNodes, projectNodes, projectSculpture } from './softwareArchitecture';
 
-type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; aboutTab?:number };
+type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; selectedProjectSlug?:string; aboutTab?:number };
 const ease=(t:number)=>t*t*t*(t*(t*6-15)+10);
 
 /** One continuous object; only its fold, orientation and aperture change. */
@@ -48,7 +49,7 @@ export function Sculpture(props:Props) {
     let stage=measureStage();
     if(!stage){details.dispose();renderer.dispose();renderer.domElement.remove();environment.dispose();materials.forEach(material=>material.dispose());return;}
     let stageFrom={...stage},stageTarget={...stage};
-    let target=sculptureForm(current.current.chapter,stage.height>stage.width*1.15,current.current.aboutTab);
+    let target=sculptureForm(current.current.chapter,stage.height>stage.width*1.15,current.current.aboutTab,projectSculpture(current.current.selectedProjectSlug));
     const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);idle.add(mesh);root.quaternion.copy(target.rotation);
     const positions=geometry.getAttribute("position") as THREE.BufferAttribute;
     const woven = sculptureIntroForm();
@@ -69,7 +70,7 @@ export function Sculpture(props:Props) {
     }
     let fromPositions=new Float32Array(positions.array);
     const fromRotation=root.quaternion.clone(),center=target.center.clone(),fromCenter=center.clone();
-    const fit=()=>Math.max(target.bounds.y,target.bounds.x/(stageTarget.width/stageTarget.height))*(current.current.chapter===1?1.10:1.32);
+    const fit=()=>Math.max(target.bounds.y,target.bounds.x/(stageTarget.width/stageTarget.height))*(current.current.chapter===0?1.08:current.current.chapter===1?1.10:1.32);
     let scale=stage.height/fit(),fromScale=scale,toScale=scale;
     let previous="",started=performance.now(),frame=0,last=performance.now(),phase=0,stopped=false,disposed=false,geometrySettled=false;
     const resize=()=>{width=Math.max(1,parent.clientWidth);height=Math.max(1,parent.clientHeight);renderer.setSize(width,height,false)};
@@ -99,18 +100,19 @@ export function Sculpture(props:Props) {
     const update=(now:number)=>{
       if(stopped)return;frame=requestAnimationFrame(update);
       const dt=Math.min((now-last)/1000,.05);last=now;if(document.hidden)return;
-      const {chapter,paused,journey,selectedJourneyIndex=0,aboutTab=0}=current.current;
+      const {chapter,paused,journey,selectedJourneyIndex=0,aboutTab=0,selectedProjectSlug}=current.current;
+      const variant=projectSculpture(selectedProjectSlug);
       if(introPlaying && (!introState.current.active || paused || chapter!==0)) {
         introPlaying=false;geometrySettled=false;details.assemble(1);dockCanvas();introState.current.finish();
       }
       const measured=measureStage();if(!measured){el.style.display="none";return;}el.style.display="block";
-      const portrait=measured.height>measured.width*1.15,id=`${chapter}:${portrait}:${aboutTab}`;
+      const portrait=measured.height>measured.width*1.15,id=`${chapter}:${portrait}:${aboutTab}:${chapter===1?variant:''}`;
       if(previous!==id){
         geometrySettled=false;
         const first=previous==="";
         fromPositions=new Float32Array(positions.array);fromRotation.copy(root.quaternion);fromCenter.copy(center);fromScale=scale;
         stageFrom={...stage!};stageTarget={...measured};
-        target=sculptureForm(chapter,portrait,aboutTab);toScale=stageTarget.height/fit();started=now;
+        target=sculptureForm(chapter,portrait,aboutTab,variant);toScale=stageTarget.height/fit();started=now;
         if(first){fromScale=toScale;scale=toScale;fromCenter.copy(target.center);center.copy(target.center);stageFrom={...measured};stage={...measured}}
         previous=id;materials[3].visible=!target.closed;
         if(first)started=now-CHAPTER_TRAVEL_MS;
@@ -121,7 +123,7 @@ export function Sculpture(props:Props) {
         }
       }
       const raw=paused?1:Math.min(1,(now-started)/CHAPTER_TRAVEL_MS),t=ease(raw);
-      details.show(chapter,t);
+      details.show(chapter,t,variant);
       if(!geometrySettled){
         for(let i=0;i<target.positions.length;i++)positions.array[i]=THREE.MathUtils.lerp(fromPositions[i],target.positions[i],t);
         positions.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingSphere();
@@ -186,6 +188,20 @@ export function Sculpture(props:Props) {
       const panel=measured.anchor.closest<HTMLElement>(".chapter-panel"),parentRect=parent.getBoundingClientRect();
       if(panel && !introPlaying){const r=panel.getBoundingClientRect();el.style.clipPath=`inset(${Math.max(0,r.top-parentRect.top)}px 0 ${Math.max(0,parentRect.bottom-r.bottom)}px 0)`;}else el.style.clipPath="none";
       renderer.render(scene,camera);
+      if(chapter===0 || chapter===1) {
+        const nodes=chapter===0?architectureNodes:projectNodes[variant];
+        const point=new THREE.Vector3();
+        measured.anchor.querySelectorAll<HTMLElement>('[data-system-node]').forEach(label=>{
+          const node=nodes.find(item=>item.id===label.dataset.systemNode);
+          if(!node)return;
+          point.set(node.x,node.y-.13,.20);idle.localToWorld(point);point.project(camera);
+          label.style.left=`${(point.x+1)*width/2-measured.x}px`;
+          label.style.top=`${(1-point.y)*height/2-measured.y}px`;
+          label.style.width=`${node.width*scale*.86}px`;
+          label.style.fontSize=`${Math.max(chapter===0?12:11,Math.min(chapter===0?17:13,scale*.21))}px`;
+          label.style.opacity=String(introPlaying?0:THREE.MathUtils.smoothstep(raw,.55,1));
+        });
+      }
       if(chapter===2){
         const point=new THREE.Vector3();
         measured.anchor.querySelectorAll<HTMLElement>("[data-route-station]").forEach(label=>{

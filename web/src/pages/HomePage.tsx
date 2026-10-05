@@ -2,6 +2,8 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router";
 import type { HomeData } from "../types";
 import { useStrings } from "../i18n/useStrings";
+import { SoftwareLabels } from '../components/SoftwareLabels';
+import { projectSculpture } from '../components/softwareArchitecture';
 import { ContactForm } from "../components/ContactForm";
 import { JourneyExplorer } from "../components/JourneyExplorer";
 import { useChapterTransition } from "../components/useChapterTransition";
@@ -38,7 +40,7 @@ export function HomePage({home}:{home:HomeData}){
   },[go]);
   useEffect(()=>{document.documentElement.dataset.chapter=String(chapter);return()=>{delete document.documentElement.dataset.chapter}},[chapter]);
   return <div className={`experience chapter-${chapter}${paused?" motion-paused":""}`} data-transition={phase}>
-    <Suspense fallback={null}><Sculpture chapter={chapter} paused={paused} journey={home.journey} selectedJourneyIndex={roleIndex} selectedProjectIndex={projectIndex} aboutTab={aboutTab}/></Suspense>
+    <Suspense fallback={null}><Sculpture chapter={chapter} paused={paused} journey={home.journey} selectedJourneyIndex={roleIndex} selectedProjectIndex={projectIndex} selectedProjectSlug={project?.slug} aboutTab={aboutTab}/></Suspense>
     <section className="chapter-panel" data-phase={phase} data-scroll-region key={chapter} aria-label={labels[chapter]} aria-busy={phase!=="idle"}>
       {chapter===0&&<div className="intro-content chapter-grid">
         <div className="intro-copy"><p className="section-kicker">{p.eyebrow}</p><p className="intro-identity">{p.name} <span>/</span> {p.headline}</p>
@@ -46,7 +48,7 @@ export function HomePage({home}:{home:HomeData}){
           <p className="hero-subtitle">{p.heroSubtitle}</p>
           <div className="intro-actions"><button className="round-link" onClick={()=>go(1)}><span>{t("hero.explore")}</span><i aria-hidden="true">↗</i></button><button className="intro-secondary" onClick={()=>go(2)}>{t("nav.journey")} ↗</button></div>
           {home.journey[0]&&<p className="intro-proof"><span>{home.journey[0].organisation}</span>{home.journey[0].highlights[0]}</p>}
-        </div><div className="intro-stage scene-stage" data-scene-anchor aria-hidden="true"/><p className="scene-caption">{p.location}</p>
+        </div><div className="intro-stage scene-stage software-stage" data-scene-anchor role="img" aria-label={copy('Software solution architecture: React application, .NET API, services, workflow, automation and shared data.','معمارية الحل البرمجي: تطبيق React وواجهة .NET API والخدمات وسير العمل والأتمتة والبيانات المشتركة.')}><SoftwareLabels lang={home.lang}/></div><p className="scene-caption">{p.location}</p>
       </div>}
       {chapter===1&&<div className="work-content">
         <p className="section-kicker">01 / {t("section.project")}</p><h2 className="chapter-title">{copy("Selected work.","أعمال مختارة.")}</h2>
@@ -54,7 +56,7 @@ export function HomePage({home}:{home:HomeData}){
           <div className="project-picker" aria-label={t("page.projects")}>{home.projects.map((item,i)=><button key={item.slug} className={i===projectIndex?"chosen":""} onClick={()=>setProjectIndex(i)} aria-pressed={i===projectIndex}><span>{String(i+1).padStart(2,"0")}</span><strong>{item.title}</strong><b aria-hidden="true">↗</b></button>)}</div>
           {project&&<div className="project-spotlight" key={project.slug}><span className="micro-label">{copy("PROJECT","مشروع")} / {String(projectIndex+1).padStart(2,"0")}</span><p>{project.summary}</p><div className="project-tags">{project.technologies.slice(0,4).map(item=><span key={item}>{item}</span>)}</div><Link className="text-link" to={`/${home.lang}/projects/${project.slug}`}>{copy("Explore the project","استكشف المشروع")} ↗</Link></div>}
           <Link className="all-work" to={`/${home.lang}/projects`}>{copy("View all projects","جميع المشاريع")} ↗</Link>
-        </div><div className="work-visual"><div className="work-stage scene-stage" data-scene-anchor aria-hidden="true"/>{project?.cover&&<figure className="work-figure" key={project.slug}><img className="work-cover" src={project.cover.src} srcSet={project.cover.srcSet} sizes="(max-width: 700px) 90vw, 54vw" width={project.cover.width} height={project.cover.height} alt={project.cover.alt}/><figcaption className="work-caption"><span>{project.cover.alt}</span><span dir="ltr">{project.liveUrl?new URL(project.liveUrl).hostname:project.title}</span></figcaption></figure>}</div></div>
+        </div><div className="work-visual" data-project={project?.slug}>{project?.cover&&<figure className="work-figure" key={project.slug}><img className="work-cover" src={project.cover.src} srcSet={project.cover.srcSet} sizes="(max-width: 700px) 90vw, 54vw" width={project.cover.width} height={project.cover.height} alt={project.cover.alt}/><figcaption className="work-caption"><span>{project.cover.alt}</span><span dir="ltr">{project.liveUrl?new URL(project.liveUrl).hostname:project.title}</span></figcaption></figure>}<div className="work-system"><div className="work-stage scene-stage software-stage" data-scene-anchor role="img" aria-label={projectSculpture(project?.slug)==='selfhost'?copy('Deployment, service monitoring and recovery.','النشر ومراقبة الخدمات والاستعادة.'):projectSculpture(project?.slug)==='inviteqr'?copy('Invitation, guest management and check-in workflow.','سير عمل الدعوة وإدارة الضيوف وتسجيل الدخول.'):copy('Define, build and deliver.','التحديد والبناء والتسليم.')}><SoftwareLabels lang={home.lang} project={projectSculpture(project?.slug)}/></div><div className="work-system-caption"><span className="micro-label">{copy('HOW IT WORKS','كيف يعمل')}</span><p>{projectSculpture(project?.slug)==='selfhost'?copy('From deployment to reliable operations.','من النشر إلى تشغيل موثوق.'):projectSculpture(project?.slug)==='inviteqr'?copy('A clear path from invitation to arrival.','مسار واضح من الدعوة إلى الوصول.'):copy('An idea, built into a useful result.','فكرة تتحول إلى نتيجة مفيدة.')}</p></div></div></div></div>
       </div>}
       {chapter===2&&<div className="journey-content"><p className="section-kicker">02 / {t("section.journey")}</p><h2 className="chapter-title">{copy("The journey.","المسيرة.")}</h2><p className="journey-subtitle">{copy("New challenges. Greater responsibility. The same curiosity.","تحديات جديدة. مسؤولية أكبر. والفضول ذاته.")}</p><JourneyExplorer journey={home.journey} lang={home.lang} initialIndex={roleIndex} onActive={setRoleIndex}/></div>}
       {chapter===3&&<div className="about-content chapter-grid"><div className="about-copy"><p className="section-kicker">03 / {t("section.about")}</p><h2 className="chapter-title">{copy("Human first. Engineer always.","الإنسان أولاً. مهندس دائماً.")}</h2>
