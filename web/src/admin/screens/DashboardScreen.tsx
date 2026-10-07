@@ -17,7 +17,7 @@ const labels = {
     complete: 'No one-sided translations found.',
     completeHint: 'Fields with content have matching English and Arabic. Optional fields may stay empty.',
     lead: 'These fields have text in one language only. Required fields decide whether an entry appears; optional copy appears only in its translated language.',
-    count: '{n} translation gaps',
+    count: '{n} entries with translation gaps',
     // {field} arrives already in plain words, e.g. "headline" or "highlight 2".
     missingEn: 'English {field}',
     missingAr: 'Arabic {field}',
@@ -39,7 +39,7 @@ const labels = {
     complete: 'لا توجد ترجمات بلغة واحدة فقط.',
     completeHint: 'الحقول التي تحتوي على نص لها ترجمة بالإنجليزية والعربية. ويمكن ترك الحقول الاختيارية فارغة.',
     lead: 'تحتوي هذه الحقول على نص بلغة واحدة فقط. الحقول المطلوبة تحدد ظهور العنصر، أما النص الاختياري فيظهر بلغته المتاحة فقط.',
-    count: '{n} فجوات في الترجمة',
+    count: '{n} عناصر بها فجوات في الترجمة',
     missingEn: '{field} بالإنجليزية',
     missingAr: '{field} بالعربية',
     'area.profile': 'الملف الشخصي',
