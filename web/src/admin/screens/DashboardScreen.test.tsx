@@ -42,7 +42,7 @@ describe('the dashboard', () => {
 
     show();
 
-    expect(await screen.findByText(/both languages/i)).toBeInTheDocument();
+    expect(await screen.findByText(/No one-sided translations/i)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Journey' })).not.toBeInTheDocument();
   });
 
@@ -87,7 +87,7 @@ describe('the dashboard', () => {
     fail = false;
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
-    expect(await screen.findByText(/both languages/i)).toBeInTheDocument();
+    expect(await screen.findByText(/No one-sided translations/i)).toBeInTheDocument();
     await waitFor(() => expect(calls(stub, '/api/admin/completeness')).toBe(2));
   });
 
