@@ -223,7 +223,7 @@ public class ContentAdminTests
 
         var html = await app.CreateClient().GetStringAsync("/en");
         Assert.Contains("Kubernetes", html);
-        Assert.Contains("CISA — ISACA", html);
-        Assert.Contains("French — Basic", html);
+        Assert.Contains("CISA, ISACA", html);
+        Assert.Contains("French, Basic", html);
     }
 }

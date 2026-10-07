@@ -30,7 +30,7 @@ public class CvContentRefreshTests
             Assert.True(role.Summary.Has("en") && role.Summary.Has("ar"));
             Assert.True(role.IsComplete("en") && role.IsComplete("ar"));
         });
-        Assert.Equal(4, await db.ContentRevisions.CountAsync());
+        Assert.Equal(5, await db.ContentRevisions.CountAsync());
     }
 
     [Fact]
@@ -65,6 +65,6 @@ public class CvContentRefreshTests
         await db.SaveChangesAsync();
         await ContentSeed.EnsureAsync(db);
         Assert.Equal(before["en"]!.GetValue<string>(), profile.HeroTitle.En);
-        Assert.Equal(4, await db.ContentRevisions.CountAsync());
+        Assert.Equal(5, await db.ContentRevisions.CountAsync());
     }
 }

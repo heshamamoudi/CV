@@ -9,7 +9,7 @@ export function ProjectPage({ project }: { project: ProjectDto }) {
     <ArchiveFrame chapter={1} label={ar ? "عن المشروع" : "PROJECT SPOTLIGHT"}>
       <article className="project-story" data-scroll-region>
         <Link className="project-back" to={`/${lang}/projects`}>
-          ← {ar ? "جميع المشاريع" : "All projects"}
+          {ar ? "جميع المشاريع" : "All projects"}
         </Link>
         <p className="section-kicker">
           {ar ? "من الفكرة إلى التنفيذ" : "FROM IDEA TO IMPLEMENTATION"}
@@ -38,14 +38,13 @@ export function ProjectPage({ project }: { project: ProjectDto }) {
           </div>
         )}
         {(project.repositoryUrl || project.liveUrl) && <div className="project-external-links">
-          {project.repositoryUrl && <a href={project.repositoryUrl} target="_blank" rel="noopener noreferrer">{ar ? "المستودع البرمجي" : "Source repository"} ↗</a>}
-          {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">{project.slug === 'selfhost-platform' ? (ar ? "افتح لوحة التحكم" : "Open control panel") : (ar ? "زيارة الموقع" : "Visit live site")} ↗</a>}
+          {project.repositoryUrl && <a href={project.repositoryUrl} target="_blank" rel="noopener noreferrer">{ar ? "المستودع البرمجي" : "Source repository"}</a>}
+          {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">{project.slug === 'selfhost-platform' ? (ar ? "افتح لوحة التحكم" : "Open control panel") : (ar ? "زيارة الموقع" : "Visit live site")}</a>}
         </div>}
         <Link className="round-link" to={`/${lang}#contact`}>
           <span>
             {ar ? "لنتحدث عن فكرتك" : "Let’s talk about your next idea"}
           </span>
-          <i>↗</i>
         </Link>
       </article>
     </ArchiveFrame>

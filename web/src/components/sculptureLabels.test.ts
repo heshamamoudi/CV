@@ -5,11 +5,11 @@ it('takes milestone years only from published roles, including the earliest and 
   const roles = ['2028-07', '2018-04', '2022-01', '2022-10', '2023-05'].map(start => ({ start })) as HomeData['journey'];
   const labels = sculptureLabels(roles, [{ category: 'Skills', items: ['Rust', 'React'] }]);
   expect(labels[2]).toEqual(['2018', '2022', '2023', '2028']);
-  expect(labels[3]).toEqual(['Rust', 'React', '·', '·']);
+  expect(labels[3]).toEqual(['Rust', 'React', '', '']);
 });
 
 it('does not invent dates or technologies when content is empty', () => {
-  expect(sculptureLabels([], [])[2]).toEqual(['·', '·', '·', '·']);
+  expect(sculptureLabels([], [])[2]).toEqual(['', '', '', '']);
 });
 
 it('positions every role chronologically, including repeated years and additional roles', () => {

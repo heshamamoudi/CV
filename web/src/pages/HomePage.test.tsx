@@ -69,7 +69,7 @@ describe("HomePage", () => {
     await act(async()=>{});
     expect(screen.getByRole('img',{name:'Service dashboard'})).toHaveAttribute('src','/selfhost-platform.webp');
     expect(screen.getByTestId('sculpture')).toHaveAttribute('data-project','selfhost-platform');
-    const diagramName=(index:number)=>[workflows[index].workflowTitle,...workflows[index].workflowStages,workflows[index].workflowCaption].join(' — ');
+    const diagramName=(index:number)=>[workflows[index].workflowTitle,...workflows[index].workflowStages,workflows[index].workflowCaption].join('. ');
     expect(screen.getByRole('img',{name:diagramName(0)})).toBeInTheDocument();
     expect(Array.from(container.querySelectorAll('[data-system-node] strong'),node=>node.textContent)).toEqual(workflows[0].workflowStages);
     fireEvent.click(screen.getByRole('button',{name:/02 InviteQR/}));
@@ -122,12 +122,12 @@ describe("HomePage", () => {
     click(screen.getByRole("button", { name: "الخلفية" }));
 
     expect(
-      screen.getByText("مطور JavaScript متكامل — Udacity"),
+      screen.getByText("مطور JavaScript متكامل, Udacity"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("بكالوريوس تقنية المعلومات — جامعة الملك عبدالعزيز"),
+      screen.getByText("بكالوريوس تقنية المعلومات, جامعة الملك عبدالعزيز"),
     ).toBeInTheDocument();
-    expect(screen.getByText("العربية — اللغة الأم")).toBeInTheDocument();
+    expect(screen.getByText("العربية, اللغة الأم")).toBeInTheDocument();
   });
 
   it("does not render a link the server blanked", () => {

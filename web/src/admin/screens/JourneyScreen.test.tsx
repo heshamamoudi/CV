@@ -121,7 +121,7 @@ describe('the journey list', () => {
     expect(within(rows[1]).getByText('One language only')).toBeInTheDocument();
     expect(within(rows[1]).getByText('Hidden')).toBeInTheDocument();
     expect(within(rows[0]).queryByText('One language only')).toBeNull();
-    expect(within(rows[0]).getByText('2022-01-01 – Present')).toBeInTheDocument();
+    expect(within(rows[0]).getByText('2022-01-01 to Present')).toBeInTheDocument();
   });
 
   it('falls back to the other language for a title the interface language is missing', async () => {

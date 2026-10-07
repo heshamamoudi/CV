@@ -66,7 +66,7 @@ export function OrderableList<T>({ items, id, label, renderItem, onReorder }: Or
             }}
           >
             <button type="button" aria-label={`${t('action.up')}: ${label(item)}`} disabled={index === 0} onClick={() => move(index, index - 1, true)}>
-              ↑
+              {t('action.up')}
             </button>
             <button
               type="button"
@@ -74,7 +74,7 @@ export function OrderableList<T>({ items, id, label, renderItem, onReorder }: Or
               disabled={index === items.length - 1}
               onClick={() => move(index, index + 1, true)}
             >
-              ↓
+              {t('action.down')}
             </button>
           </div>
           <div className="admin-orderable-body">{renderItem(item, index)}</div>

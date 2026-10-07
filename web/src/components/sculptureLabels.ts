@@ -15,7 +15,7 @@ export function sculptureLabels(journey: HomeData['journey'], technologies: Home
   const skills = [...new Set(technologies.flatMap(group => group.items))];
   const sampled = years.length > 4
     ? Array.from({ length: 4 }, (_, i) => years[Math.round(i * (years.length - 1) / 3)])
-    : Array.from({ length: 4 }, (_, i) => years[i] ?? '·');
-  const tech = Array.from({ length: 4 }, (_, i) => skills[i] ?? '·');
-  return [tech, ['01', '02', '03', '↗'], sampled, tech, ['Hi', '↗', 'أهلاً', ':)']];
+    : Array.from({ length: 4 }, (_, i) => years[i] ?? '');
+  const tech = Array.from({ length: 4 }, (_, i) => skills[i] ?? '');
+  return [tech, ['01', '02', '03'], sampled, tech, ['Hi', 'أهلاً']];
 }

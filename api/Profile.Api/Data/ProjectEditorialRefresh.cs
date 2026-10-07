@@ -55,18 +55,18 @@ public static class ProjectEditorialRefresh
             db.Projects.Add(new Project
             {
                 Slug = "selfhost-platform",
-                WorkflowTitle = LocalizedText.Of("HOW IT WORKS", "كيف يعمل"),
+                WorkflowTitle = LocalizedText.Of("How it works", "كيف يعمل"),
                 WorkflowCaption = LocalizedText.Of("From deployment to reliable operations.", "من النشر إلى تشغيل موثوق."),
                 WorkflowStageOne = LocalizedText.Of("Deploy", "النشر"),
                 WorkflowStageTwo = LocalizedText.Of("Monitor", "المراقبة"),
                 WorkflowStageThree = LocalizedText.Of("Recover", "الاستعادة"),
-                Title = LocalizedText.Of("Selfhost — from repository to production", "Selfhost — من المستودع إلى التشغيل"),
+                Title = LocalizedText.Of("Selfhost: From code to production", "Selfhost: من الشيفرة إلى التشغيل"),
                 Summary = LocalizedText.Of(
                     "A self-hosted operations platform that brings deployment, service health and recovery into one control panel.",
                     "منصة استضافة ذاتية تجمع نشر التطبيقات ومراقبة الخدمات والاستعادة في لوحة تحكم واحدة."),
                 Body = LocalizedText.Of(
-                    "Problem: Operating several applications made deployment, monitoring and recovery recurring work.\n\nApproach: I built a .NET 8 Blazor Server control panel for Docker workloads, with a Node.js host agent and PostgreSQL. GitHub Actions publishes images to GHCR; Cloudflare Tunnel exposes services and Cloudflare Access protects the control panel. Repository connection and preflight feed a Source → Build → Runtime → Live pipeline. Deployments wait for health checks and can roll back.\n\nOutcome: One panel now shows live service health, CPU, memory and logs, alongside deploy history, backups, restore drills and an activity audit. The workflow makes application delivery and recovery repeatable.",
-                    "المشكلة: جعل تشغيل عدة تطبيقات النشرَ والمراقبةَ والاستعادة أعمالًا متكررة.\n\nالنهج: بنيت لوحة تحكم باستخدام ‎.NET 8 وBlazor Server لإدارة خدمات Docker، مع وكيل مضيف مبني بـNode.js وقاعدة PostgreSQL. تنشر GitHub Actions الصور إلى GHCR، ويعرض Cloudflare Tunnel الخدمات بينما تحمي Cloudflare Access لوحة التحكم. يمر ربط المستودع والفحص المسبق بمراحل المصدر ثم البناء ثم التشغيل ثم الإتاحة. تنتظر عمليات النشر اجتياز فحوصات الصحة ويمكن التراجع عنها عند الفشل.\n\nالنتيجة: تعرض لوحة واحدة صحة الخدمات واستهلاك المعالج والذاكرة والسجلات المباشرة، إلى جانب سجل النشر والنسخ الاحتياطية وتجارب الاستعادة وسجل النشاط. أصبح تسليم التطبيقات واستعادتها عملية قابلة للتكرار."),
+                    "I was spending too much time deploying, monitoring and recovering several applications.\n\nTo make this easier, I built a .NET 8 Blazor Server control panel for Docker workloads, with a Node.js host agent and PostgreSQL. GitHub Actions publishes images to GHCR. Cloudflare Tunnel exposes services, while Cloudflare Access protects the control panel. Repository checks lead into a release process that builds, runs and verifies each service before it goes live. Deployments wait for health checks and can roll back.\n\nToday, the panel shows live service health, CPU, memory and logs, alongside deploy history, backups, restore drills and an activity audit. It gives me one place to manage routine releases and recovery.",
+                    "كان تشغيل عدة تطبيقات يجعل النشر والمراقبة والاستعادة أعمالاً متكررة.\n\nبنيت لوحة تحكم باستخدام ‎.NET 8 وBlazor Server لإدارة خدمات Docker، مع وكيل مضيف مبني بـNode.js وقاعدة PostgreSQL. تنشر GitHub Actions الصور إلى GHCR. يعرض Cloudflare Tunnel الخدمات، بينما تحمي Cloudflare Access لوحة التحكم. تفحص المنصة المستودع، ثم تبني كل خدمة وتشغلها وتتحقق من صحتها قبل إتاحتها. ويمكن التراجع عن أي نشر عند الفشل.\n\nتعرض اللوحة صحة الخدمات واستهلاك المعالج والذاكرة والسجلات المباشرة، إلى جانب سجل النشر والنسخ الاحتياطية وتجارب الاستعادة وسجل النشاط. أصبحت لدي مساحة واحدة أتابع منها النشر والاستعادة."),
                 Technologies = [".NET 8", "Blazor Server", "PostgreSQL", "Docker", "Node.js", "GitHub Actions", "Cloudflare"],
                 RepositoryUrl = "https://github.com/heshamamoudi/selfhost",
                 LiveUrl = "https://admin.fikrahaive.com",
@@ -84,18 +84,18 @@ public static class ProjectEditorialRefresh
             db.Projects.Add(new Project
             {
                 Slug = "inviteqr",
-                WorkflowTitle = LocalizedText.Of("HOW IT WORKS", "كيف يعمل"),
+                WorkflowTitle = LocalizedText.Of("How it works", "كيف يعمل"),
                 WorkflowCaption = LocalizedText.Of("A clear path from invitation to arrival.", "مسار واضح من الدعوة إلى الوصول."),
                 WorkflowStageOne = LocalizedText.Of("Invite", "الدعوة"),
                 WorkflowStageTwo = LocalizedText.Of("Guest", "الضيف"),
                 WorkflowStageThree = LocalizedText.Of("Check in", "الدخول"),
-                Title = LocalizedText.Of("InviteQR — guest management, made personal", "InviteQR — إدارة الضيوف بطابع شخصي"),
+                Title = LocalizedText.Of("InviteQR: Wedding guest management", "InviteQR: إدارة ضيوف الزواج"),
                 Summary = LocalizedText.Of(
                     "An Arabic-first wedding platform with a branded portal and a private guest list for every couple.",
                     "منصة زفاف عربية تمنح كل زوجين بوابة بطابعهما الخاص وقائمة ضيوف مستقلة."),
                 Body = LocalizedText.Of(
-                    "Problem: Managing wedding guest lists through an operator made every change indirect. Each couple needed a private place that felt like their own celebration.\n\nApproach: The operator provisions a portal on its own subdomain. The couple sees its chosen template, names and colours, then manages its guest list directly. Arabic-first Razor Pages and small fetch updates keep the mobile experience responsive without a persistent connection. Bulk name entry normalises Arabic input; tenant-scoped queries and access rules keep lists separate.\n\nOutcome: Couples can see guest status counts and export their lists as PDF or Excel. The operator retains a view across portals, while each couple works only with its own guests.",
-                    "المشكلة: كانت إدارة قوائم ضيوف الزواج عبر المشغّل تجعل كل تعديل خطوة غير مباشرة. احتاج كل زوجين إلى مساحة خاصة تعكس طابع مناسبتهم.\n\nالنهج: ينشئ المشغّل بوابة على نطاق فرعي مستقل. يرى الزوجان القالب المختار وأسماءهما وألوانهما، ثم يديران قائمة الضيوف مباشرة. تستخدم المنصة صفحات Razor عربية أولًا وتحديثات fetch صغيرة لتبقى مناسبة للجوال دون اتصال دائم. يتيح إدخال الأسماء بالجملة توحيد النص العربي، وتفصل الاستعلامات والصلاحيات قوائم كل زوجين.\n\nالنتيجة: يمكن للزوجين متابعة أعداد الضيوف بحسب الحالة وتصدير القائمة إلى PDF أو Excel. يحتفظ المشغّل برؤية لجميع البوابات، بينما يصل كل زوجين إلى ضيوفهما فقط."),
+                    "Managing guest lists through an operator made every change take an extra step. Each couple needed a private space that felt like their own celebration.\n\nThe operator provisions a portal on its own subdomain. Couples see their chosen template, names and colours, then manage their guest list directly. Arabic-first Razor Pages and lightweight updates keep the mobile experience responsive. Bulk name entry tidies Arabic text, while tenant-scoped queries and access rules keep guest lists separate.\n\nCouples can check guest status and export their lists as PDF or Excel. The operator can oversee every portal, while each couple sees only its own guests.",
+                    "كانت إدارة قوائم الضيوف عبر المشغّل تجعل كل تعديل خطوة إضافية. واحتاج كل زوجين إلى مساحة خاصة تعكس طابع مناسبتهما.\n\nينشئ المشغّل بوابة على نطاق فرعي مستقل. يرى الزوجان القالب والأسماء والألوان التي اختاراها، ثم يديران قائمة الضيوف مباشرة. وتبقي صفحات Razor العربية والتحديثات الخفيفة تجربة الجوال سريعة. كما يوحّد الإدخال الجماعي كتابة الأسماء العربية، وتفصل صلاحيات الوصول قوائم كل زوجين.\n\nيتابع الزوجان حالة الضيوف ويصدران قائمتهما إلى PDF أو Excel. ويمكن للمشغّل متابعة جميع البوابات، بينما لا يرى كل زوجين سوى ضيوفه."),
                 Technologies = [".NET 8", "Razor Pages", "EF Core", "PostgreSQL", "JavaScript", "Docker", "QuestPDF", "ClosedXML"],
                 RepositoryUrl = "https://github.com/heshamamoudi/inviteQr",
                 LiveUrl = "https://inviteqr.info",

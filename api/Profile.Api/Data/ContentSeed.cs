@@ -16,6 +16,7 @@ public static class ContentSeed
             await ProjectEditorialRefresh.ApplyAsync(db, ct);
             await LegacyProjectCleanup.ApplyAsync(db, ct);
             await ProjectDemoMediaRefresh.ApplyAsync(db, ct);
+            await ContentCopyRefresh.ApplyAsync(db, ct);
             return;
         }
 
@@ -124,6 +125,7 @@ public static class ContentSeed
         await ProjectEditorialRefresh.ApplyAsync(db, ct);
         await LegacyProjectCleanup.ApplyAsync(db, ct);
         await ProjectDemoMediaRefresh.ApplyAsync(db, ct);
+        await ContentCopyRefresh.ApplyAsync(db, ct);
     }
 
     private static LocalizedText T(string en, string ar) => LocalizedText.Of(en, ar);

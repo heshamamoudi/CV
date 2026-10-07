@@ -27,7 +27,7 @@ const labels = {
     sender: 'Sender', received: 'Received', status: 'Status', message: 'Message', reply: 'Reply by email',
     markNew: 'Mark new', markRead: 'Mark read', archive: 'Archive', delete: 'Delete',
     deleteQuestion: 'Delete message from {name}: “{subject}”? This cannot be undone.',
-    previous: 'Previous', next: 'Next', page: 'Page {page} of {pages}', range: '{first}–{last} of {total}',
+    previous: 'Previous', next: 'Next', page: 'Page {page} of {pages}', range: '{first} to {last} of {total}',
     mutationError: 'That change could not be saved. Try again.',
   },
   ar: {
@@ -37,7 +37,7 @@ const labels = {
     sender: 'المرسل', received: 'تاريخ الاستلام', status: 'الحالة', message: 'الرسالة', reply: 'الرد عبر البريد',
     markNew: 'وضع كجديدة', markRead: 'وضع كمقروءة', archive: 'أرشفة', delete: 'حذف',
     deleteQuestion: 'حذف رسالة {name}: «{subject}»؟ لا يمكن التراجع عن ذلك.',
-    previous: 'السابق', next: 'التالي', page: 'صفحة {page} من {pages}', range: '{first}–{last} من {total}',
+    previous: 'السابق', next: 'التالي', page: 'صفحة {page} من {pages}', range: 'من {first} إلى {last} من أصل {total}',
     mutationError: 'تعذّر حفظ التغيير. حاول مرة أخرى.',
   },
 } satisfies Record<AdminLang, Record<string, string>>;

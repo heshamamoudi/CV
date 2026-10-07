@@ -165,7 +165,7 @@ export function DashboardScreen() {
     return areas.filter(area => byArea.has(area)).map(area => ({ area, items: byArea.get(area) ?? [] }));
   }, [items]);
 
-  /** "highlights[1].en" → "English highlight 2" / "النقطة 2 بالإنجليزية". */
+  /** Turn a field key such as highlights[1].en into a label the owner can scan. */
   const inWords = (entry: string): string => {
     const match = missingPattern.exec(entry);
     if (!match) return entry;
@@ -191,7 +191,7 @@ export function DashboardScreen() {
           { n: '05', title: lang === 'ar' ? 'التواصل والسيرة الذاتية' : 'Contact & CV', text: lang === 'ar' ? 'راجع الرسائل الواردة، وأدر روابط التواصل والسيرة الذاتية.' : 'Read contact form messages. Email and social links are managed in Profile; manage the CV separately.', edit: '/admin/messages', cv: '/admin/cv', view: '#contact', action: lang === 'ar' ? 'فتح البريد الوارد' : 'Open inbox' },
         ].map(card => <article className="admin-chapter-card" key={card.n}>
           <span>{card.n} / 05</span><h3>{card.title}</h3><p>{card.text}</p>
-          <div><Link to={card.edit}>{card.action}</Link>{'cv' in card ? <Link to={card.cv!}>{lang === 'ar' ? 'إدارة السيرة الذاتية' : 'Manage CV'}</Link> : null}<a href={`/${lang}${card.view}`} target="_blank" rel="noopener noreferrer">{lang === 'ar' ? 'عرض الفصل ↗' : 'View chapter ↗'}</a></div>
+          <div><Link to={card.edit}>{card.action}</Link>{'cv' in card ? <Link to={card.cv!}>{lang === 'ar' ? 'إدارة السيرة الذاتية' : 'Manage CV'}</Link> : null}<a href={`/${lang}${card.view}`} target="_blank" rel="noopener noreferrer">{lang === 'ar' ? 'عرض الفصل' : 'View chapter'}</a></div>
         </article>)}
       </div>
 

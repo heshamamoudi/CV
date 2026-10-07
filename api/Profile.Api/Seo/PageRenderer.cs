@@ -32,11 +32,11 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
 
         var (title, description) = kind switch
         {
-            PageKind.Home => ($"{name} — {home!.Profile.Headline}", home.Profile.Summary),
-            PageKind.Journey => ($"{s("page.journey")} — {name}", home!.Profile.Summary),
-            PageKind.Projects => ($"{s("page.projects")} — {name}", home!.Profile.Summary),
-            PageKind.Project => ($"{project!.Title} — {name}", project.Summary),
-            _ => ($"{s("notFound.title")} — {name}", ""),
+            PageKind.Home => ($"{name}, {home!.Profile.Headline}", home.Profile.Summary),
+            PageKind.Journey => ($"{s("page.journey")}: {name}", home!.Profile.Summary),
+            PageKind.Projects => ($"{s("page.projects")}: {name}", home!.Profile.Summary),
+            PageKind.Project => ($"{project!.Title}: {name}", project.Summary),
+            _ => ($"{s("notFound.title")}: {name}", ""),
         };
         title = seo.Title ?? title;
         description = seo.Description ?? description;
@@ -134,9 +134,9 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
 
         b.Append("<section id=\"about\"><h2>").Append(E(s("section.about"))).Append("</h2><p>").Append(E(p.About)).Append("</p>");
         b.Append("<p>").Append(E(p.Summary)).Append("</p>");
-        List(b, s("section.certificates"), home.Certificates.Select(c => $"{c.Title} — {c.Issuer}"));
-        List(b, s("section.education"), home.Education.Select(e => $"{e.Degree} — {e.Institution}"));
-        List(b, s("section.languages"), home.Languages.Select(l => $"{l.Name} — {l.Level}"));
+        List(b, s("section.certificates"), home.Certificates.Select(c => $"{c.Title}, {c.Issuer}"));
+        List(b, s("section.education"), home.Education.Select(e => $"{e.Degree}, {e.Institution}"));
+        List(b, s("section.languages"), home.Languages.Select(l => $"{l.Name}, {l.Level}"));
         b.Append("</section>");
 
         b.Append("<section id=\"contact\"><h2>").Append(E(s("section.contact"))).Append("</h2><address>")
@@ -154,7 +154,7 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         foreach (var j in home.Journey)
         {
             b.Append("<li><article><h3>").Append(E(j.Title)).Append("</h3><p>").Append(E(j.Organisation)).Append("</p>")
-             .Append("<p><time datetime=\"").Append(j.Start).Append("\">").Append(j.Start).Append("</time> – ")
+             .Append("<p><time datetime=\"").Append(j.Start).Append("\">").Append(j.Start).Append("</time> ").Append(home.Lang == "ar" ? "إلى" : "to").Append(' ')
              .Append(j.End is null ? E(s("journey.present")) : $"<time datetime=\"{j.End}\">{j.End}</time>").Append("</p><ul>");
             foreach (var h in j.Highlights) b.Append("<li>").Append(E(h)).Append("</li>");
             b.Append("</ul></article></li>");

@@ -12,7 +12,7 @@ export function JourneyList({ journey, lang }: { journey: JourneyDto[]; lang: La
             <h3>{j.title}</h3>
             <p>{j.organisation}</p>
             <p>
-              <time dateTime={j.start}>{formatMonthYear(j.start, lang)}</time> – {j.end ? <time dateTime={j.end}>{formatMonthYear(j.end, lang)}</time> : t('journey.present')}
+              <time dateTime={j.start}>{formatMonthYear(j.start, lang)}</time> {lang === 'ar' ? 'إلى' : 'to'} {j.end ? <time dateTime={j.end}>{formatMonthYear(j.end, lang)}</time> : t('journey.present')}
             </p>
             <ul>{j.highlights.map(h => <li key={h}>{h}</li>)}</ul>
           </article>

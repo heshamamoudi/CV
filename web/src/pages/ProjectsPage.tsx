@@ -47,9 +47,6 @@ export function ProjectsPage({ home }: { home: HomeData }) {
               <p>{project.summary}</p>
               {project.technologies.length > 0 && <div className="project-tags">{project.technologies.slice(0, 3).map(item => <span key={item}>{item}</span>)}</div>}
             </div>
-            <span className="library-arrow" aria-hidden="true">
-              ↗
-            </span>
           </Link>
         ))}
       </div>

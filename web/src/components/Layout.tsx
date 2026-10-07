@@ -83,7 +83,7 @@ export function Layout({
           <div className="intro-statement"><p className="intro-overline">{lang === 'ar' ? 'فكرة واحدة. احتمالات متعددة.' : 'ONE IDEA. MANY POSSIBILITIES.'}</p><h2>{lang === 'ar' ? <>من التعقيد<br /><em>إلى الوضوح.</em></> : <>Complexity,<br /><em>made clear.</em></>}</h2><p className="intro-sequence"><span>01 / {lang === 'ar' ? 'فهم التعقيد' : 'UNTANGLE'}</span><span>02 / {lang === 'ar' ? 'بناء الوضوح' : 'BUILD CLARITY'}</span></p></div>
           <div className="intro-bottom" aria-hidden="true"><span>{lang === 'ar' ? 'أنظمة مترابطة. نتائج واضحة.' : 'CONNECTED SYSTEMS. CLEAR OUTCOMES.'}</span><div className="intro-progress-track"><i /></div><span>HA / 01</span></div>
           <button className="intro-skip" onClick={dismiss} autoFocus>
-            {lang === "ar" ? "تخطّ المقدمة ↖" : "Skip intro ↗"}
+            {lang === "ar" ? "تخطّ المقدمة" : "Skip intro"}
           </button>
         </div>
       )}
@@ -99,7 +99,7 @@ export function Layout({
             className="wordmark"
             to={`/${lang}`}
             aria-label={
-              `${displayName} — ${lang === 'ar' ? 'الرئيسية' : 'Home'}`
+              `${displayName}, ${lang === 'ar' ? 'الرئيسية' : 'Home'}`
             }
           >
             <BrandMark />
@@ -115,7 +115,7 @@ export function Layout({
             <Link to={`/${lang}#journey`}>{t("nav.journey")}</Link>
             <Link to={`/${lang}#about`}>{t("nav.about")}</Link>
             <Link to={`/${lang}#contact`}>
-              {t("nav.contact")} <span>↗</span>
+              {t("nav.contact")}
             </Link>
           </nav>
           <div className="header-end">
@@ -142,8 +142,7 @@ export function Layout({
         {!isHome && (
           <footer className="document-footer">
             <Link to={`/${lang}`}>
-              {lang === "ar" ? "العودة إلى التجربة" : "Back to the experience"}{" "}
-              ↗
+              {lang === "ar" ? "العودة إلى التجربة" : "Back to the experience"}
             </Link>
             <BrandMark />
           </footer>

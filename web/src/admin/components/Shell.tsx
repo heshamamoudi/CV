@@ -47,7 +47,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </nav>
         <div className="admin-who">
           {email ? <span className="admin-email">{email}</span> : null}
-          <a href={`/${lang}`} target="_blank" rel="noopener noreferrer">{t('app.public')} ↗</a>
+          <a href={`/${lang}`} target="_blank" rel="noopener noreferrer">{t('app.public')}</a>
           <button type="button" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}>
             {t('lang.switch')}
           </button>
@@ -56,7 +56,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <main className="admin-main">
         <div className="admin-screenbar">
           <span>{lang === 'ar' ? 'المحتوى' : 'CONTENT'} <b>/ {page ? t(page.key) : '404'}</b></span>
-          <a href={`/${lang}${previewPath}`} target="_blank" rel="noopener noreferrer">{lang === 'ar' ? 'معاينة الموقع المحفوظ' : 'Preview saved site'} ↗</a>
+          <a href={`/${lang}${previewPath}`} target="_blank" rel="noopener noreferrer">{lang === 'ar' ? 'معاينة الموقع المحفوظ' : 'Preview saved site'}</a>
         </div>
         {children}
       </main>

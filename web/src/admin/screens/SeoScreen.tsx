@@ -52,9 +52,9 @@ const labels = {
     descriptionHint: 'Custom text: up to 200 characters. Search snippets use the first 160.',
     settings: 'Analytics and settings',
     measurement: 'Google Analytics measurement id',
-    measurementHint: 'GA4 admin → data streams, beside the stream name. Empty means no analytics.',
+    measurementHint: 'In Google Analytics, open Admin, then Data streams. The ID appears beside the stream name. Leave it empty to disable analytics.',
     property: 'Google Analytics property id',
-    propertyHint: 'GA4 admin → property settings, the numeric id under the property name.',
+    propertyHint: 'In Google Analytics, open Admin and find the numeric ID under Property settings.',
     token: 'Search Console verification token',
     tokenHint: "Search Console's HTML tag method: the content value only, not the whole tag.",
     email: 'Notification email address',
@@ -103,9 +103,9 @@ const labels = {
     descriptionHint: 'بحد أقصى 200 حرف.',
     settings: 'التحليلات والإعدادات',
     measurement: 'معرّف قياس Google Analytics',
-    measurementHint: 'إدارة GA4 ← تدفقات البيانات، بجانب اسم التدفق. الفراغ يعني بلا تحليلات.',
+    measurementHint: 'في Google Analytics، افتح الإدارة ثم تدفقات البيانات. يظهر المعرّف بجانب اسم التدفق. اتركه فارغاً لإيقاف التحليلات.',
     property: 'معرّف خاصية Google Analytics',
-    propertyHint: 'إدارة GA4 ← إعدادات الخاصية، المعرّف الرقمي تحت اسم الخاصية.',
+    propertyHint: 'في Google Analytics، افتح الإدارة وابحث عن المعرّف الرقمي ضمن إعدادات الموقع.',
     token: 'رمز التحقق في Search Console',
     tokenHint: 'طريقة وسم HTML في Search Console: قيمة content فقط، لا الوسم كاملاً.',
     email: 'عنوان بريد الإشعارات',
@@ -188,7 +188,7 @@ function SeoField({ page, name, value, fallback, onChange, error, text }: {
                 hint={`${custom ? s('custom') : s('automatic')} · ${effective.length}${custom ? ` / ${max}` : ''}`}
                 onChange={next => onChange({ ...value, [lang]: next })} />
               {custom ? <button className="seo-reset" type="button" onClick={() => onChange({ ...value, [lang]: '' })}
-                aria-label={`${s('reset')} — ${t(lang === 'en' ? 'field.english' : 'field.arabic')} — ${s(name === 'title' ? 'pageTitle' : 'pageDescription')}`}>{s('reset')}</button> : null}
+                aria-label={`${s('reset')}: ${t(lang === 'en' ? 'field.english' : 'field.arabic')}, ${s(name === 'title' ? 'pageTitle' : 'pageDescription')}`}>{s('reset')}</button> : null}
             </div>
           );
         })}
@@ -215,7 +215,7 @@ function PagePanel({ page, loaded, profile, media, onDirty, text }: {
 
   const field = fieldErrors(panel.error);
   const defaults = (lang: AdminLang) => profile ? {
-    title: page === 'home' ? `${profile.name[lang]} — ${profile.headline[lang]}` : `${publicStrings[lang][`page.${page}`]} — ${profile.name[lang]}`,
+    title: page === 'home' ? `${profile.name[lang]}, ${profile.headline[lang]}` : `${publicStrings[lang][`page.${page}`]}: ${profile.name[lang]}`,
     description: profile.summary[lang],
   } : { title: '', description: '' };
   const fallback = { en: defaults('en'), ar: defaults('ar') };
@@ -253,7 +253,7 @@ function PagePanel({ page, loaded, profile, media, onDirty, text }: {
         </p>
       ) : null}
         </div>
-        <aside className="seo-preview" aria-label={`${s(page)} — ${s('preview')}`}>
+        <aside className="seo-preview" aria-label={`${s(page)}: ${s('preview')}`}>
           <div className="seo-preview-heading"><span>{s('preview')}</span><div className="seo-preview-languages" role="group" aria-label={s('preview')}>
             {(['en', 'ar'] as const).map(lang => <button type="button" key={lang} aria-pressed={previewLang === lang} onClick={() => setPreviewLang(lang)}>{lang === 'en' ? 'EN' : 'ع'}</button>)}
           </div></div>
@@ -262,7 +262,7 @@ function PagePanel({ page, loaded, profile, media, onDirty, text }: {
             <div className="seo-link-text"><span className="seo-path" dir="ltr">{path}</span><h3>{title || s('noTitle')}</h3><p>{description.length > 200 ? `${description.slice(0, 199).trimEnd()}…` : description || s('noDescription')}</p></div>
           </div>
           <p className="admin-hint">{s('previewHint')}</p>
-          <a href={path} target="_blank" rel="noreferrer">{s('openPage')} <span aria-hidden="true">↗</span></a>
+          <a href={path} target="_blank" rel="noreferrer">{s('openPage')}</a>
         </aside>
       </div>
 
@@ -436,11 +436,11 @@ export function SeoScreen() {
       <p className="seo-eyebrow">{s('eyebrow')}</p>
       <h1>{s('title')}</h1>
       <p className="admin-hint">{s('lead')}</p>
-      <div className="seo-introduction"><span className="seo-introduction-mark" aria-hidden="true">↗</span><div><h2>{s('overview')}</h2><p>{s('overviewHint')}</p></div></div>
+      <div className="seo-introduction"><div><h2>{s('overview')}</h2><p>{s('overviewHint')}</p></div></div>
       {profileState !== 'ready' ? <p className="seo-load-note" role="status">{s(profileState === 'failed' ? 'profileFailed' : 'profileLoading')} {profileState === 'failed' ? <button type="button" onClick={() => setProfileReloads(n => n + 1)}>{t('action.retry')}</button> : null}</p> : null}
       <nav className="seo-page-nav" aria-label={s('pages')}>
-        {PAGES.map((key, index) => <a href={`#seo-${key}`} key={key}><span>0{index + 1}</span>{s(key)}<span aria-hidden="true">↓</span></a>)}
-        <a href="#seo-settings"><span>04</span>{s('integrations')}<span aria-hidden="true">↓</span></a>
+        {PAGES.map((key, index) => <a href={`#seo-${key}`} key={key}><span>0{index + 1}</span>{s(key)}</a>)}
+        <a href="#seo-settings"><span>04</span>{s('integrations')}</a>
       </nav>
       {PAGES.map(key => (
         <PagePanel key={key} page={key} loaded={pages.get(key) ?? null} profile={profile} media={media} onDirty={onDirty} text={text} />

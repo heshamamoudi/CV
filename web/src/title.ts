@@ -9,11 +9,11 @@ const label = (lang: Lang, key: 'page.journey' | 'page.projects' | 'notFound.tit
 export function pageTitle(kind: PublicKind, lang: Lang, home: HomeData | null, project: ProjectDto | null): string {
   const name = home?.profile.name || home?.siteTitle || 'Hesham Amoudi';
   switch (kind) {
-    case 'home': return home ? `${name} — ${home.profile.headline}` : name;
-    case 'journey': return `${label(lang, 'page.journey')} — ${name}`;
-    case 'projects': return `${label(lang, 'page.projects')} — ${name}`;
-    case 'project': return `${project?.title || label(lang, 'notFound.title')} — ${name}`;
-    default: return `${label(lang, 'notFound.title')} — ${name}`;
+    case 'home': return home ? `${name}, ${home.profile.headline}` : name;
+    case 'journey': return `${label(lang, 'page.journey')}: ${name}`;
+    case 'projects': return `${label(lang, 'page.projects')}: ${name}`;
+    case 'project': return `${project?.title || label(lang, 'notFound.title')}: ${name}`;
+    default: return `${label(lang, 'notFound.title')}: ${name}`;
   }
 }
 

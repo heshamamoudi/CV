@@ -31,7 +31,7 @@ it('lets a rendering scene finish, traps keyboard focus, and releases content on
   act(()=>vi.advanceTimersByTime(8000));
   expect(dialog).toBeInTheDocument();
   fireEvent.keyDown(dialog,{key:'Tab',shiftKey:true});
-  expect(screen.getByRole('button',{name:'Skip intro ↗'})).toHaveFocus();
+  expect(screen.getByRole('button',{name:'Skip intro'})).toHaveFocus();
   fireEvent.keyDown(dialog,{key:'Escape'});
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(screen.getByRole('main')).toHaveFocus();

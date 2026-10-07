@@ -70,7 +70,7 @@ describe('the SEO screen', () => {
     });
     show();
     await screen.findByRole('region', { name: 'Journey page' });
-    await waitFor(() => expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('Journey — Hesham'));
+    await waitFor(() => expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('Journey: Hesham'));
     await waitFor(() => expect(screen.getByRole('region', { name: 'Journey page' }).querySelector('.seo-link-image img')).toHaveAttribute('src', '/brand/og-card.png'));
     expect(box('Journey page', 'Page description', 'Arabic')).toHaveValue('بناء أنظمة مفيدة.');
     expect(region('Journey page').getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -79,10 +79,10 @@ describe('the SEO screen', () => {
     fireEvent.click(region('Journey page').getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(putTo(fetched, '/api/admin/seo/pages/journey')).toHaveLength(1));
     expect(JSON.parse(String(putTo(fetched, '/api/admin/seo/pages/journey')[0][1]?.body))).toEqual({ title: { en: 'A different journey', ar: '' }, description: { en: '', ar: '' }, shareMediaId: null });
-    fireEvent.click(region('Journey page').getByRole('button', { name: 'Use automatic text — English — Link-sharing title' }));
-    expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('Journey — Hesham');
+    fireEvent.click(region('Journey page').getByRole('button', { name: 'Use automatic text: English, Link-sharing title' }));
+    expect(box('Journey page', 'Link-sharing title', 'English')).toHaveValue('Journey: Hesham');
     fireEvent.click(region('Journey page').getByRole('button', { name: 'ع' }));
-    expect(region('Journey page').getByRole('heading', { name: 'المسيرة — هشام' })).toBeInTheDocument();
+    expect(region('Journey page').getByRole('heading', { name: 'المسيرة: هشام' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Journey page' }).querySelector('.seo-link-image img')).toHaveAttribute('src', '/brand/og-card-ar.png');
   });
 
@@ -115,13 +115,13 @@ describe('the SEO screen', () => {
     show();
     await screen.findByRole('region', { name: 'Home page' });
 
-    fireEvent.change(box('Home page', 'Link-sharing title', 'English'), { target: { value: 'Hesham Amoudi — software engineer' } });
+    fireEvent.change(box('Home page', 'Link-sharing title', 'English'), { target: { value: 'Hesham Amoudi, software engineer' } });
     fireEvent.click(region('Home page').getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(putTo(fetched, '/api/admin/seo/pages/home')).toHaveLength(1));
     const sent = JSON.parse(String(putTo(fetched, '/api/admin/seo/pages/home')[0][1]?.body));
     expect(sent).toEqual({
-      title: { en: 'Hesham Amoudi — software engineer', ar: 'هشام عمودي' },
+      title: { en: 'Hesham Amoudi, software engineer', ar: 'هشام عمودي' },
       description: { en: 'Engineer', ar: 'مهندس' },
       shareMediaId: null,
     });
@@ -190,8 +190,8 @@ describe('the SEO screen', () => {
     show();
     await screen.findByRole('region', { name: 'Analytics and settings' });
 
-    expect(screen.getByLabelText('Google Analytics measurement id')).toHaveAccessibleDescription(/data streams/);
-    expect(screen.getByLabelText('Google Analytics property id')).toHaveAccessibleDescription(/property settings/);
+    expect(screen.getByLabelText('Google Analytics measurement id')).toHaveAccessibleDescription(/Data streams/);
+    expect(screen.getByLabelText('Google Analytics property id')).toHaveAccessibleDescription(/Property settings/);
     expect(screen.getByLabelText('Search Console verification token')).toHaveAccessibleDescription(/HTML tag/);
   });
 

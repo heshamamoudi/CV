@@ -289,7 +289,7 @@ export function JourneyScreen() {
               </h3>
               <p className="admin-journey-facts">
                 <span>{written(entry.organisation) ? show(entry.organisation) : t('field.none')}</span>
-                <span>{`${entry.startDate} – ${entry.endDate ?? s('present')}`}</span>
+                <span>{`${entry.startDate} ${lang === 'ar' ? 'إلى' : 'to'} ${entry.endDate ?? s('present')}`}</span>
                 <span>{entry.visible ? t('field.visible') : s('hidden')}</span>
                 {halfWritten(entry) ? <span className="admin-journey-partial">{s('oneLanguage')}</span> : null}
               </p>

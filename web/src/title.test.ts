@@ -10,16 +10,16 @@ const project = { title: 'Platform', summary: 'Project summary', slug: 'platform
 
 describe('pageTitle', () => {
   it('uses the route title and localized labels', () => {
-    expect(pageTitle('home', 'en', home, null)).toBe('Hesham — Software Engineer');
-    expect(pageTitle('journey', 'ar', home, null)).toBe(`${strings.ar['page.journey']} — Hesham`);
-    expect(pageTitle('projects', 'en', home, null)).toBe('Projects — Hesham');
-    expect(pageTitle('project', 'en', home, project)).toBe('Platform — Hesham');
-    expect(pageTitle('notfound', 'ar', home, null)).toBe(`${strings.ar['notFound.title']} — Hesham`);
+    expect(pageTitle('home', 'en', home, null)).toBe('Hesham, Software Engineer');
+    expect(pageTitle('journey', 'ar', home, null)).toBe(`${strings.ar['page.journey']}: Hesham`);
+    expect(pageTitle('projects', 'en', home, null)).toBe('Projects: Hesham');
+    expect(pageTitle('project', 'en', home, project)).toBe('Platform: Hesham');
+    expect(pageTitle('notfound', 'ar', home, null)).toBe(`${strings.ar['notFound.title']}: Hesham`);
   });
 
   it('uses available defaults when fields are missing', () => {
     expect(pageTitle('home', 'en', null, null)).toBe('Hesham Amoudi');
-    expect(pageTitle('project', 'en', home, null)).toBe(`${strings.en['notFound.title']} — Hesham`);
+    expect(pageTitle('project', 'en', home, null)).toBe(`${strings.en['notFound.title']}: Hesham`);
   });
 });
 
@@ -32,7 +32,7 @@ describe('updatePageHead', () => {
   it('refreshes canonical, language alternates, social metadata, and image without duplicating tags', () => {
     updatePageHead('journey', 'en', home, null, '/en/journey');
     updatePageHead('journey', 'en', home, null, '/en/journey');
-    expect(document.title).toBe('Journey — Hesham');
+    expect(document.title).toBe('Journey: Hesham');
     expect(document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href).toBe('https://test.example/en/journey');
     expect(document.head.querySelector<HTMLLinkElement>('link[hreflang="ar"]')?.href).toBe('https://test.example/ar/journey');
     expect(document.head.querySelector<HTMLLinkElement>('link[hreflang="x-default"]')?.href).toBe('https://test.example/en/journey');

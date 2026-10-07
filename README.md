@@ -17,6 +17,10 @@ The project editor supports bilingual case studies, cover images, technologies,
 and optional repository/live links. A one-time guarded refresh adds sourced
 Selfhost and InviteQR cases while preserving owner edits.
 
+Interface copy uses direct wording and text labels in place of decorative arrow
+glyphs. Editorial separators use ordinary punctuation, while technical names
+and identifiers retain their standard spelling.
+
 Run the tests exactly as CI does:
 
     docker run --rm -v "D:/selfhost/apps/portfolio/src:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet test tests/Profile.Api.Tests

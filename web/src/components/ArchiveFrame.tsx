@@ -45,7 +45,7 @@ export function ArchiveFrame({
       </Suspense>
       <div className="archive-topline">
         <Link to={`/${lang}#${chapter === 2 ? "journey" : "work"}`}>
-          ↖ {ar ? "العودة إلى التجربة" : "Back to the experience"}
+          {ar ? "العودة إلى التجربة" : "Back to the experience"}
         </Link>
         <span>{label}</span>
       </div>
@@ -53,7 +53,7 @@ export function ArchiveFrame({
       <footer className="stage-footer">
         <span>{home?.profile.name}</span>
         <Link to={`/${lang}#contact`}>
-          {ar ? "لنتحدث ↖" : "Have something in mind? Let’s talk ↗"}
+          {ar ? "لنتحدث" : "Have something in mind? Let’s talk"}
         </Link>
         <button
           className="motion-toggle"

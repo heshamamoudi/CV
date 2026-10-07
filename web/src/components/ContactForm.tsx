@@ -102,7 +102,7 @@ export function ContactForm({ lang }: Props) {
       <h3>{copy(lang, "Message received.", "وصلت الرسالة.")}</h3>
       <p>{copy(lang, "Thank you for reaching out.", "شكراً لتواصلك.")}</p>
       <button type="button" onClick={() => { setSent(false); setNotice(""); }}>
-        {copy(lang, "Send another message", "إرسال رسالة أخرى")} <span aria-hidden="true">↗</span>
+        {copy(lang, "Send another message", "إرسال رسالة أخرى")}
       </button>
     </div>
   );
@@ -135,7 +135,7 @@ export function ContactForm({ lang }: Props) {
       </div>
       <p className="contact-privacy-note">{copy(lang, "Your details are used only to reply to your message.", "تُستخدم بياناتك للرد على رسالتك فقط.")}</p>
       <div className="contact-submit-row">
-        <button type="submit" disabled={busy}>{busy ? copy(lang, "Sending…", "جارٍ الإرسال…") : copy(lang, "Send message", "إرسال الرسالة")}<span aria-hidden="true">↗</span></button>
+        <button type="submit" disabled={busy}>{busy ? copy(lang, "Sending…", "جارٍ الإرسال…") : copy(lang, "Send message", "إرسال الرسالة")}</button>
         <p className="contact-notice" role="status" aria-live="polite">{notice}</p>
       </div>
     </form>
