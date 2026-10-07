@@ -66,14 +66,15 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
       }
     }
     if(chapter===3){
-      // An open book: two covers, a copper binding and quiet typographic rules.
+      // Cloth covers sit below layered paper; the animated leaf is a separate,
+      // deformable surface so the open silhouette survives every page turn.
       for(const side of [-1,1]){
         const angle=-side*.235;
         box([2.36,2.80,.075],[side*1.15,.035,.18],2,[0,angle,0]);
-        for(let line=0;line<4;line++){
-          const lineWidth=line===3?.91:1.49;
-          const x=side*(line===3?1.39:1.10);
-          box([lineWidth,.014,.009],[x,.65-line*.29,.55*Math.abs(x)/2.3+.104],2,[0,angle,0]);
+        for(let line=0;line<7;line++){
+          const lineWidth=line===6?.91:1.49;
+          const x=side*(line===6?1.39:1.10);
+          box([lineWidth,line===0?.035:.014,.009],[x,.46-line*.19,.55*Math.abs(x)/2.3+.104],line===0?1:2,[0,angle,0]);
         }
       }
       box([.055,2.66,.025],[0,.05,.103],1);

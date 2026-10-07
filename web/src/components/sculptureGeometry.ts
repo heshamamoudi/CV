@@ -49,7 +49,7 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0, proje
     // Two broad leaves meet at the spine of an open book.
     path = Array.from({length:SECTIONS+1},(_,i)=>new THREE.Vector2((i/SECTIONS-.5)*4.6,.06*Math.sin(i/SECTIONS*Math.PI)));
     halfWidth = 1.32; depth = .085;
-    euler = [.22, -.18 + tab * .06, -.065];
+    euler = [.28, -.18 + tab * .06, -.075];
   } else {
     // An envelope outline, its V-fold, and the raised opening flap share one path.
     path = roundedPath([[-2,1],[-2,-1.25],[2,-1.25],[2,1],[0,-.18],[-2,1],[0,2.12],[2,1]],false,.07);
@@ -89,10 +89,11 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0, proje
   for (let i = 0; i < positions.length; i += 3) box.expandByPoint(vertex.fromArray(positions, i).applyQuaternion(rotation));
   // Include every software module, its backing layers and connector ends in the fit.
   const limits = chapter===0 ? [[-2.97,-1.87,-.34],[2.97,1.88,.48]] : chapter===1 ? [[-2.40,-1.43,-.34],[2.40,1.24,.50]] : null;
-  const detailBounds: [number,number,number][] = chapter===3 ? [[-2.38,-1.40,-.12],[2.38,1.42,.65]] : [];
-  if(limits) for(const x of [limits[0][0],limits[1][0]])
-    for(const y of [limits[0][1],limits[1][1]])
-      for(const z of [limits[0][2],limits[1][2]]) detailBounds.push([x,y,z]);
+  const detailLimits=limits??(chapter===3?[[-2.38,-1.72,-.12],[2.38,1.42,1.82]]:chapter===4?[[-2.4,-1.40,-.30],[2.4,2.40,.35]]:null);
+  const detailBounds: [number,number,number][] = [];
+  if(detailLimits) for(const x of [detailLimits[0][0],detailLimits[1][0]])
+    for(const y of [detailLimits[0][1],detailLimits[1][1]])
+      for(const z of [detailLimits[0][2],detailLimits[1][2]]) detailBounds.push([x,y,z]);
   for(const point of detailBounds)box.expandByPoint(vertex.set(...point).applyQuaternion(rotation));
   return { positions, rotation, bounds: box.getSize(new THREE.Vector3()), center: box.getCenter(new THREE.Vector3()), surface, closed };
 }

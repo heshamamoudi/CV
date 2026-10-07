@@ -8,6 +8,7 @@ import { CHAPTER_TRAVEL_MS } from "./useChapterTransition";
 import { INTRO_DURATION_MS, useIntro } from './IntroContext';
 import { introEase, introMorph, introTravel, sculptureIntroForm } from './sculptureIntro';
 import { architectureNodes, projectNodes, projectSculpture } from './softwareArchitecture';
+import { sculptureMotion } from './sculptureMotion';
 
 type Props = { chapter:number; paused:boolean; rtl?:boolean; journey?:JourneyDto[]; technologies?:{category:string;items:string[]}[]; selectedJourneyIndex?:number; selectedProjectIndex?:number; selectedProjectSlug?:string; aboutTab?:number };
 const ease=(t:number)=>t*t*t*(t*(t*6-15)+10);
@@ -40,8 +41,10 @@ export function Sculpture(props:Props) {
       new THREE.MeshStandardMaterial({color:0x244c49,metalness:.4,roughness:.37}),
       new THREE.MeshStandardMaterial({color:0xb96b44,metalness:.68,roughness:.27}),
     ];
+    const faceColors=[new THREE.Color(0xbfcfc5),new THREE.Color(0xeee6d1),new THREE.Color(0xe0dacb)];
     const idle=new THREE.Group(),root=new THREE.Group();scene.add(root);root.add(idle);
     const details=sectionDetails(materials);details.groups.forEach(group=>idle.add(group));
+    const motion=sculptureMotion();motion.groups.forEach(group=>idle.add(group));
     let width=Math.max(1,parent.clientWidth),height=Math.max(1,parent.clientHeight);
     const measureStage=()=>{
       const anchor=parent.querySelector<HTMLElement>("[data-scene-anchor]");
@@ -50,7 +53,7 @@ export function Sculpture(props:Props) {
       return {x:r.left-p.left,y:r.top-p.top,width:Math.max(1,r.width),height:Math.max(1,r.height),anchor};
     };
     let stage=measureStage();
-    if(!stage){details.dispose();renderer.dispose();renderer.domElement.remove();environment.dispose();materials.forEach(material=>material.dispose());return;}
+    if(!stage){details.dispose();motion.dispose();renderer.dispose();renderer.domElement.remove();environment.dispose();materials.forEach(material=>material.dispose());return;}
     let stageFrom={...stage},stageTarget={...stage};
     let target=sculptureForm(current.current.chapter,stage.height>stage.width*1.15,current.current.aboutTab,projectSculpture(current.current.selectedProjectSlug));
     const geometry=sculptureGeometry(target.positions),mesh=new THREE.Mesh(geometry,materials);idle.add(mesh);root.quaternion.copy(target.rotation);
@@ -94,7 +97,7 @@ export function Sculpture(props:Props) {
     };
     const dispose=()=>{
       if(disposed)return;disposed=true;observer.disconnect();window.removeEventListener("pointermove",move);renderer.domElement.removeEventListener("webglcontextlost",lost);
-      geometry.dispose();details.dispose();materials.forEach(material=>material.dispose());environment.dispose();
+      geometry.dispose();details.dispose();motion.dispose();materials.forEach(material=>material.dispose());environment.dispose();
       routeGeometry.dispose();routeMaterial.dispose();marker.geometry.dispose();markerMaterial.dispose();stationGeometry.dispose();stationMaterial.dispose();
       renderer.dispose();renderer.domElement.remove();
     };
@@ -150,7 +153,10 @@ export function Sculpture(props:Props) {
       if(!paused)phase+=dt;
       softPointer.lerp(pointer,1-Math.exp(-dt*3));
       const stillness=paused?0:ease(Math.max(0,(raw-.65)/.35));
-      idle.rotation.set(softPointer.y*.022*stillness,(Math.sin(phase*.32)*.012+softPointer.x*.032)*stillness,0);idle.position.y=Math.sin(phase*.55)*.012*stillness;
+      const breathing=chapter===3?.042:chapter===4?.035:.018;
+      idle.rotation.set((Math.sin(phase*.38)*.018+softPointer.y*.035)*stillness,(Math.sin(phase*.32)*.028+softPointer.x*.048)*stillness,Math.sin(phase*.27)*.008*stillness);idle.position.y=Math.sin(phase*.55)*breathing*stillness;
+      materials[0].color.lerp(faceColors[chapter===3?1:chapter===4?2:0],paused?1:1-Math.exp(-dt*5));
+      materials[0].metalness=THREE.MathUtils.damp(materials[0].metalness,chapter===3?.16:chapter===4?.32:.68,5,paused?1:dt);
       const selection=Math.max(0,Math.min((journey?.length??1)-1,selectedJourneyIndex));
       if(selection!==previousSelection){selectedFrom=selectedAt;selectedTarget=.94-.88*selection/Math.max(1,(journey?.length??1)-1);selectionStarted=now;previousSelection=selection}
       selectedAt=THREE.MathUtils.lerp(selectedFrom,selectedTarget,ease(paused?1:Math.min(1,(now-selectionStarted)/550)));
@@ -187,6 +193,7 @@ export function Sculpture(props:Props) {
         geometrySettled=false;
         if(progress===1){introPlaying=false;details.assemble(1);dockCanvas();introState.current.finish();}
       }
+      motion.update(chapter,t,phase,paused,introPlaying?introMorph(Math.min(1,introElapsed/INTRO_DURATION_MS)):1,aboutTab);
       // Clip only at the reading area's edges, never to the arriving object's box.
       const panel=measured.anchor.closest<HTMLElement>(".chapter-panel"),parentRect=parent.getBoundingClientRect();
       if(panel && !introPlaying){const r=panel.getBoundingClientRect();el.style.clipPath=`inset(${Math.max(0,r.top-parentRect.top)}px 0 ${Math.max(0,parentRect.bottom-r.bottom)}px 0)`;}else el.style.clipPath="none";

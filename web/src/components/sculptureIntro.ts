@@ -10,14 +10,14 @@ export function sculptureIntroForm(): SculptureForm {
     return new THREE.Vector3(radius * Math.cos(2 * a), radius * Math.sin(2 * a), .86 * Math.sin(3 * a));
   };
   const positions = new Float32Array((SECTIONS + 1) * 8 * 3);
-  const profile = [[.17,.16],[-.17,.16],[-.21,.12],[-.21,-.12],[-.17,-.16],[.17,-.16],[.21,-.12],[.21,.12]];
+  const profile = [[.055,.055],[-.055,.055],[-.075,.035],[-.075,-.035],[-.055,-.055],[.055,-.055],[.075,-.035],[.075,.035]];
   const surface: THREE.Vector3[] = [];
   for (let i = 0; i <= SECTIONS; i++) {
     const t = i / SECTIONS, point = curve(t);
     const tangent = curve(t + .0001).sub(curve(t - .0001)).normalize();
     const across = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize();
     const normal = new THREE.Vector3().crossVectors(tangent, across).normalize();
-    surface.push(point.clone().addScaledVector(normal, .185));
+    surface.push(point.clone().addScaledVector(normal, .08));
     profile.forEach(([w,d], j) => point.clone().addScaledVector(across,w).addScaledVector(normal,d).toArray(positions,(i*8+j)*3));
   }
   // Share the seam exactly, including its bevels, so the early object is watertight.
