@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { architectureNodes } from './softwareArchitecture';
+import { architectureRoutes } from './softwareArchitecture';
 
 const smooth = (value:number) => THREE.MathUtils.smoothstep(value,0,1);
 const point = (x:number,y:number,z=.18) => new THREE.Vector3(x,y,z);
@@ -42,31 +42,22 @@ export function sculptureMotion() {
   // Several dependencies converge onto one readable bus. Copper packets continue
   // through it after arrival; the system has a working state, not a frozen end pose.
   const topology=groups[0];topology.name='living-topology';
-  const routes=[
-    [[-2.05,1.15],[-1.02,1.15],[0,1.15]],
-    [[0,1.15],[1.02,1.15],[2.05,1.15]],
-    [[-2.05,1.15],[-2.05,0],[-2.05,-1.15]],
-    [[2.05,1.15],[2.05,0],[2.05,-1.15]],
-    [[-2.05,-1.15],[-1.02,-1.15],[0,-1.15]],
-    [[0,-1.15],[1.02,-1.15],[2.05,-1.15]],
-    [[0,1.15],[0,0],[0,-1.15]],
-    [[-2.05,0],[0,0],[2.05,0]],
-  ];
+  const routes=architectureRoutes;
   const connections=routes.map((route,index)=>{
-    const curve=new THREE.CatmullRomCurve3(route.map(([x,y])=>point(x,y,-.025)),false,'centripetal');
+    const curve=new THREE.CatmullRomCurve3(route.map(([x,y,z])=>point(x,y,z)),false,'centripetal',.12);
     const clean=curve.getPoints(48);
     const tangled=clean.map((p,i)=>{
       const t=i/48;
       return point(p.x+Math.sin(t*Math.PI*3+index*1.8)*.72,p.y+Math.sin(t*Math.PI*4+index)*.80,Math.sin(t*Math.PI*3+index)*.65);
     });
-    const wire=line(topology,clean,0x82b5a5,.45);
-    const packet=mesh(topology,new THREE.SphereGeometry(.048,12,8),basic(0xffd0a0));
-    const tail=Array.from({length:5},(_,i)=>mesh(topology,new THREE.SphereGeometry(.032-i*.003,8,6),basic(0xe3b07c,.55-i*.09)));
+    const wire=line(topology,clean,index<3?0x82b5a5:0xf5d2ae,index<3?.65:.7);
+    const packet=mesh(topology,new THREE.SphereGeometry(.042,12,8),basic(0xffd0a0));
+    const tail=Array.from({length:3},(_,i)=>mesh(topology,new THREE.SphereGeometry(.026-i*.005,8,6),basic(0xe3b07c,.40-i*.1)));
     return {wire,clean,tangled,packet,tail};
   });
-  const indicators=architectureNodes.map(node=>{
-    const status=mesh(topology,new THREE.SphereGeometry(.038,12,8),basic(0xb8ffe0));status.position.set(node.x+node.width/2-.13,node.y+.33,.17);
-    const halo=mesh(topology,new THREE.RingGeometry(.06,.075,24),basic(0x98e0c3,.45));halo.position.copy(status.position);halo.position.z+=.005;
+  const indicators=[1.63,.22,-1.20].map(y=>{
+    const status=mesh(topology,new THREE.SphereGeometry(.04,12,8),basic(0xb8ffe0));status.position.set(1.23,y,-.48);
+    const halo=mesh(topology,new THREE.RingGeometry(.065,.08,24),basic(0x98e0c3,.45));halo.position.copy(status.position);halo.rotation.x=-Math.PI/2;halo.position.y+=.012;
     return {status,halo};
   });
 
@@ -150,7 +141,7 @@ export function sculptureMotion() {
             }
             values.needsUpdate=true;connection.wire.geometry.computeBoundingSphere();
           }
-          const at=time*.18+index*.137;
+          const at=(paused?0:time)*.14+index*.137;
           sample(connection,at,connection.packet.position);
           connection.tail.forEach((item,i)=>sample(connection,at-(i+1)*.012,item.position));
         });

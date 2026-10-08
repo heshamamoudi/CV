@@ -29,10 +29,11 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0, proje
   let path: THREE.Vector2[];
   let euler: [number, number, number];
   if (chapter === 0) {
-    // A routing circuit joins the application, API, services and workflow layers.
-    path = roundedPath([[-2.05,1.15],[2.05,1.15],[2.05,-1.15],[-2.05,-1.15]],true,.12);
-    halfWidth = .042; depth = .045;
-    euler = [.10, -.16, -.035];
+    // The continuous intro ribbon resolves into the orchestration layer's rim.
+    // Its x/y path is laid horizontally below, so it shares the exploded stack.
+    path = roundedPath([[-1.88,-.85],[1.88,-.85],[1.88,.85],[-1.88,.85]],true,.10);
+    halfWidth = .026; depth = .028;
+    euler = [.62, -.42, -.035];
   } else if (chapter === 1) {
     // The orchestration loop becomes a guest workflow when the selected project changes.
     const ys=project==='inviteqr'?[-.35,.45,-.35]:project==='selfhost'?[.4,-.45,.4]:[0,0,0];
@@ -81,6 +82,7 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0, proje
     surface.push(center.clone().addScaledVector(normal, depth + .025));
     profile.forEach(([w, d], j) => {
       const v = center.clone().addScaledVector(across, w).addScaledVector(normal, d);
+      if(chapter===0)v.set(v.x,v.z+.055,-v.y);
       v.toArray(positions, (i * PROFILE + j) * 3);
     });
   }
@@ -88,7 +90,7 @@ export function sculptureForm(chapter: number, portrait: boolean, tab = 0, proje
   const box = new THREE.Box3(), vertex = new THREE.Vector3();
   for (let i = 0; i < positions.length; i += 3) box.expandByPoint(vertex.fromArray(positions, i).applyQuaternion(rotation));
   // Include every software module, its backing layers and connector ends in the fit.
-  const limits = chapter===0 ? [[-2.97,-1.87,-.34],[2.97,1.88,.48]] : chapter===1 ? [[-2.40,-1.43,-.34],[2.40,1.24,.50]] : null;
+  const limits = chapter===0 ? [[-3.55,-1.73,-1.01],[2.06,1.76,1.01]] : chapter===1 ? [[-2.40,-1.43,-.34],[2.40,1.24,.50]] : null;
   const detailLimits=limits??(chapter===3?[[-2.38,-1.72,-.12],[2.38,1.42,1.82]]:chapter===4?[[-2.4,-1.40,-.30],[2.4,2.40,.35]]:null);
   const detailBounds: [number,number,number][] = [];
   if(detailLimits) for(const x of [detailLimits[0][0],detailLimits[1][0]])

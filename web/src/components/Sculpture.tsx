@@ -204,12 +204,12 @@ export function Sculpture(props:Props) {
         measured.anchor.querySelectorAll<HTMLElement>('[data-system-node]').forEach(label=>{
           const node=nodes.find(item=>item.id===label.dataset.systemNode);
           if(!node)return;
-          point.set(node.x,node.y-.13,.20);idle.localToWorld(point);point.project(camera);
+          point.set(node.x,node.y-(chapter===0?0:.13),node.z??.20);idle.localToWorld(point);point.project(camera);
           label.style.left=`${(point.x+1)*width/2-measured.x}px`;
           label.style.top=`${(1-point.y)*height/2-measured.y}px`;
           const labelWidth=node.width*scale*.86;
           label.style.width=`${labelWidth}px`;
-          let fontSize=Math.max(chapter===0?12:11,Math.min(chapter===0?17:13,scale*.21));
+          let fontSize=Math.max(chapter===0?13:11,Math.min(chapter===0?22:13,scale*(chapter===0?.25:.21)));
           if(chapter===1&&textMeasure) {
             const text=label.textContent??'';
             let measuredText=labelWidths.get(label);

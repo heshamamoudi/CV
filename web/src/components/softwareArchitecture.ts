@@ -1,7 +1,7 @@
 import type { ProjectDto } from '../types';
 
 export type ProjectSculpture = 'selfhost' | 'inviteqr' | 'delivery';
-export type SceneNode = { id:string; x:number; y:number; width:number; kind:'module'|'data'|'flow'|'health'|'invite'|'check' };
+export type SceneNode = { id:string; x:number; y:number; z?:number; width:number; kind:'module'|'data'|'flow'|'health'|'invite'|'check' };
 export type SoftwareNode = SceneNode & { label:string; ar:string; detail:string; detailAr:string };
 
 export function projectSculpture(slug?:string):ProjectSculpture {
@@ -23,12 +23,19 @@ export function projectWorkflow(project:ProjectDto|undefined,lang:'en'|'ar') {
 }
 
 export const architectureNodes:SoftwareNode[] = [
-  {id:'client',x:-2.05,y:1.15,width:1.65,label:'React',ar:'React',detail:'Application',detailAr:'التطبيق',kind:'module'},
-  {id:'api',x:0,y:1.15,width:1.65,label:'.NET API',ar:'.NET API',detail:'Business logic',detailAr:'منطق الأعمال',kind:'module'},
-  {id:'services',x:2.05,y:1.15,width:1.65,label:'Services',ar:'الخدمات',detail:'Connected systems',detailAr:'أنظمة مترابطة',kind:'module'},
-  {id:'workflow',x:-2.05,y:-1.15,width:1.65,label:'Workflow',ar:'سير العمل',detail:'Aligned procedures',detailAr:'إجراءات متسقة',kind:'flow'},
-  {id:'automation',x:0,y:-1.15,width:1.65,label:'Automation',ar:'الأتمتة',detail:'Integration',detailAr:'التكامل',kind:'flow'},
-  {id:'data',x:2.05,y:-1.15,width:1.65,label:'Data',ar:'البيانات',detail:'Shared foundation',detailAr:'مصدر موحّد',kind:'data'},
+  {id:'applications',x:.20,y:1.53,z:.18,width:2.6,label:'Applications',ar:'التطبيقات',detail:'',detailAr:'',kind:'module'},
+  {id:'orchestration',x:.02,y:.13,z:.20,width:2.9,label:'Orchestration',ar:'التنسيق والتكامل',detail:'',detailAr:'',kind:'flow'},
+  {id:'data',x:.14,y:-1.27,z:.20,width:2.6,label:'Data',ar:'البيانات',detail:'',detailAr:'',kind:'data'},
+];
+
+// The same routes drive the physical conductors and their moving signals.
+// Inputs converge at the left edge; one spine distributes the resolved flow.
+export const architectureRoutes:[number,number,number][][] = [
+  [[-2.95,1.20,-.28],[-2.55,1.20,-.28],[-2.15,.08,-.28],[-1.62,.08,-.28]],
+  [[-3.15,.45,.24],[-2.70,.45,.24],[-2.20,.08,.24],[-1.62,.08,.24]],
+  [[-2.82,-.48,.62],[-2.43,-.48,.62],[-2.05,.08,.62],[-1.62,.08,.62]],
+  [[-1.62,.13,.24],[-.75,.13,-.48],[1.23,.13,-.48],[1.23,1.58,-.48]],
+  [[1.23,.13,-.48],[1.23,-1.27,-.48],[.78,-1.27,-.48]],
 ];
 
 export const projectNodes:Record<ProjectSculpture,SceneNode[]> = {

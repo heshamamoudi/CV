@@ -49,7 +49,7 @@ export function HomePage({home}:{home:HomeData}){
           <p className="hero-subtitle">{p.heroSubtitle}</p>
           <div className="intro-actions"><button className="round-link" onClick={()=>go(1)}><span>{t("hero.explore")}</span></button><button className="intro-secondary" onClick={()=>go(2)}>{t("nav.journey")}</button></div>
           {home.journey[0]&&<p className="intro-proof"><span>{home.journey[0].organisation}</span>{home.journey[0].highlights[0]}</p>}
-        </div><div className="intro-stage scene-stage software-stage" data-scene-anchor role="img" aria-label={copy('Software solution architecture: React application, .NET API, services, workflow, automation and shared data.','معمارية الحل البرمجي: تطبيق React وواجهة .NET API والخدمات وسير العمل والأتمتة والبيانات المشتركة.')}><SoftwareLabels lang={home.lang}/></div><p className="scene-caption">{p.location}</p>
+        </div><div className="intro-stage scene-stage software-stage" data-scene-anchor role="img" aria-label={copy('Layered software architecture: applications, orchestration, and a shared data foundation. Complex systems converge into a clear, connected solution.','معمارية برمجية متعددة الطبقات: تطبيقات وتنسيق للأنظمة وأساس مشترك للبيانات، تتكامل لتحويل التعقيد إلى حل واضح ومترابط.')}><SoftwareLabels lang={home.lang}/></div><p className="scene-caption">{p.location}</p>
       </div>}
       {chapter===1&&<div className="work-content">
         <p className="section-kicker">01 / {t("section.project")}</p><h2 className="chapter-title">{copy("Selected work.","أعمال مختارة.")}</h2>

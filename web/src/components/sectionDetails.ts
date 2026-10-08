@@ -1,5 +1,5 @@
 ﻿import * as THREE from "three";
-import { architectureNodes, projectNodes, type ProjectSculpture } from './softwareArchitecture';
+import { architectureRoutes, projectNodes, type ProjectSculpture } from './softwareArchitecture';
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
 type Point = [number, number, number];
@@ -25,10 +25,46 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
       const shape=new THREE.Shape();shape.moveTo(...points[0]);points.slice(1).forEach(point=>shape.lineTo(...point));shape.closePath();
       return add(new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelSize:.025,bevelThickness:.025,bevelSegments:2,steps:1}),material,[0,0,z]);
     };
-    if(chapter===0 || chapter===1 || chapter>=5){
+    if(chapter===0){
+      group.name='layered-architecture';
+      palette[0].color.setHex(0xe6e9d9);palette[0].metalness=.32;palette[0].roughness=.33;
+      palette[1].color.setHex(0xc18a63);palette[1].metalness=.48;palette[1].roughness=.32;
+      palette[2].color.setHex(0x214b48);palette[2].metalness=.35;palette[2].roughness=.38;
+      // Three horizontal architectural planes, separated in space. Beveled,
+      // clipped corners and stepped laminations read as one designed assembly.
+      const layer=(name:string,w:number,d:number,y:number,x:number,material:number,depth=.12)=>{
+        const c=.18;
+        const slab=panel([[-w/2+c,-d/2],[w/2-c,-d/2],[w/2,-d/2+c],[w/2,d/2-c],[w/2-c,d/2],[-w/2+c,d/2],[-w/2,d/2-c],[-w/2,-d/2+c]],depth,0,material);
+        slab.rotation.x=-Math.PI/2;slab.position.set(x,y,0);slab.name=name;return slab;
+      };
+      layer('application-plane',3.38,1.72,1.40,.24,0);
+      layer('application-reverse',3.28,1.62,1.32,.24,2,.055);
+      layer('orchestration-core',3.70,1.62,-.02,.02,1,.14);
+      layer('orchestration-reverse',3.58,1.50,-.10,.02,2,.055);
+      layer('data-foundation',3.70,1.90,-1.42,.14,2,.14);
+      layer('data-lamination',3.62,1.82,-1.55,.14,0,.035);
+      layer('data-base',3.70,1.90,-1.69,.14,2,.10);
+      // A single copper spine, visible in the air between layers, provides the
+      // focal hierarchy. Its pale collars make the two connections explicit.
+      box([.12,3.22,.12],[1.23,-.01,-.48],1).name='orchestration-spine';
+      for(const y of [-1.25,.17,1.58])box([.28,.075,.28],[1.23,y,-.48],0);
+      // Small, unlike source objects are deliberately dispersed; none is a card.
+      architectureRoutes.slice(0,3).forEach((route,index)=>{
+        const [x,y,z]=route[0];
+        if(index===0)box([.30,.30,.30],[x-.15,y,z],0,[0,0,.18]).name='input-system';
+        if(index===1)add(new THREE.OctahedronGeometry(.22),1,[x-.13,y,z]).name='input-event';
+        if(index===2)add(new THREE.CylinderGeometry(.15,.15,.29,24),0,[x-.14,y,z]).name='input-data';
+      });
+      // Two inset rules and three terminals suggest service boundaries without
+      // filling the sculpture with miniature text or dashboard decoration.
+      for(const z of [-.61,.62])box([1.62,.018,.027],[-.22,1.548,z],2);
+      for(const x of [-.65,-.20,.25])box([.18,.055,.16],[x,1.565,-.61],1);
+      box([1.70,.018,.027],[-.25,-1.258,.73],0);
+    }
+    if(chapter===1 || chapter>=5){
       const variant:ProjectSculpture=chapter===5?'inviteqr':chapter===6?'delivery':'selfhost';
-      const nodes=chapter===0?architectureNodes:projectNodes[variant];
-      group.name=chapter===0?'software-architecture':variant+'-workflow';
+      const nodes=projectNodes[variant];
+      group.name=variant+'-workflow';
       for(const node of nodes) {
         const x=node.x,y=node.y,w=node.width;
         box([w+.08,1.02,.075],[x,y,-.19],2).name=node.id+'-backing';
@@ -58,11 +94,6 @@ export function sectionDetails(baseMaterials: THREE.MeshStandardMaterial[]) {
           box([w,.10,.10],[x,y+.56,-.20],2);
           box([w-.14,.07,.09],[x,y+.68,-.24],1);
         }
-      }
-      if(chapter===0) {
-        // API/business logic and the workflow engine share a visible integration bus.
-        box([.065,1.25,.07],[0,0,-.02],1).name='integration-bus';
-        for(const x of [-2.05,0,2.05])add(new THREE.SphereGeometry(.055,12,8),1,[x,0,.02]);
       }
     }
     if(chapter===3){
