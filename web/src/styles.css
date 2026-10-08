@@ -150,6 +150,7 @@ html.immersive,html.immersive body{height:100%;overflow:hidden;overscroll-behavi
 .software-stage { position:relative; }
 .software-node { position:absolute; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:translate(-50%,-50%); opacity:0; pointer-events:none; color:#112a2c; text-align:center; line-height:1.25; font-weight:700; }
 .software-node strong { font-size:1em; font-weight:750; }
+.software-node-surface { white-space:nowrap; line-height:1; }
 .software-node small { margin-top:5px; color:#395453; font-size:max(9px,.65em); font-weight:550; }
 .software-node-compact { line-height:1.2; }
 /* The selected project is the primary visual; its system is a small explanation below. */

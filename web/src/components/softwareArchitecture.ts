@@ -23,9 +23,9 @@ export function projectWorkflow(project:ProjectDto|undefined,lang:'en'|'ar') {
 }
 
 export const architectureNodes:SoftwareNode[] = [
-  {id:'applications',x:.20,y:1.53,z:.18,width:2.6,label:'Applications',ar:'التطبيقات',detail:'',detailAr:'',kind:'module'},
-  {id:'orchestration',x:.02,y:.13,z:.20,width:2.9,label:'Orchestration',ar:'التنسيق والتكامل',detail:'',detailAr:'',kind:'flow'},
-  {id:'data',x:.14,y:-1.27,z:.20,width:2.6,label:'Data',ar:'البيانات',detail:'',detailAr:'',kind:'data'},
+  {id:'applications',x:.24,y:1.55,z:0,width:2.6,label:'Applications',ar:'التطبيقات',detail:'',detailAr:'',kind:'module'},
+  {id:'orchestration',x:.02,y:.15,z:0,width:2.9,label:'Orchestration',ar:'التنسيق والتكامل',detail:'',detailAr:'',kind:'flow'},
+  {id:'data',x:.14,y:-1.25,z:0,width:2.6,label:'Data',ar:'البيانات',detail:'',detailAr:'',kind:'data'},
 ];
 
 // The same routes drive the physical conductors and their moving signals.

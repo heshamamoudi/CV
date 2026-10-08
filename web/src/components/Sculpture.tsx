@@ -200,26 +200,35 @@ export function Sculpture(props:Props) {
       renderer.render(scene,camera);
       if(chapter===0 || chapter===1) {
         const nodes=chapter===0?architectureNodes:projectNodes[variant];
-        const point=new THREE.Vector3();
+        const point=new THREE.Vector3(),surfaceX=new THREE.Vector3(),surfaceZ=new THREE.Vector3();
         measured.anchor.querySelectorAll<HTMLElement>('[data-system-node]').forEach(label=>{
           const node=nodes.find(item=>item.id===label.dataset.systemNode);
           if(!node)return;
           point.set(node.x,node.y-(chapter===0?0:.13),node.z??.20);idle.localToWorld(point);point.project(camera);
           label.style.left=`${(point.x+1)*width/2-measured.x}px`;
           label.style.top=`${(1-point.y)*height/2-measured.y}px`;
+          if(chapter===0) {
+            // Follow the slab's two surface axes, not a camera-facing billboard.
+            // Normalize each axis to keep the type legible on the shallow planes.
+            surfaceX.set(node.x+1,node.y,node.z??0);idle.localToWorld(surfaceX);surfaceX.project(camera).sub(point);
+            surfaceZ.set(node.x,node.y,(node.z??0)+1);idle.localToWorld(surfaceZ);surfaceZ.project(camera).sub(point);
+            const xAxis=new THREE.Vector2(surfaceX.x*width,-surfaceX.y*height).normalize();
+            const zAxis=new THREE.Vector2(surfaceZ.x*width,-surfaceZ.y*height).normalize();
+            label.style.transform=`translate(-50%,-50%) matrix(${xAxis.x},${xAxis.y},${zAxis.x},${zAxis.y},0,0)`;
+          } else label.style.removeProperty('transform');
           const labelWidth=node.width*scale*.86;
           label.style.width=`${labelWidth}px`;
           let fontSize=Math.max(chapter===0?13:11,Math.min(chapter===0?22:13,scale*(chapter===0?.25:.21)));
-          if(chapter===1&&textMeasure) {
+          if(textMeasure) {
             const text=label.textContent??'';
             let measuredText=labelWidths.get(label);
             if(!measuredText||measuredText.text!==text) {
               textMeasure.font=`750 100px ${getComputedStyle(label).fontFamily}`;
-              measuredText={text,width:Math.max(1,...text.split(/\s+/).map(word=>textMeasure.measureText(word).width))};
+              measuredText={text,width:Math.max(1,...(chapter===0?[text]:text.split(/\s+/)).map(word=>textMeasure.measureText(word).width))};
               labelWidths.set(label,measuredText);
             }
-            // Keep short editorial words whole on mobile; longer labels can use two lines.
-            fontSize=Math.min(fontSize,Math.max(8,labelWidth*94/measuredText.width));
+            // Surface labels stay on one line; project labels may use two lines.
+            fontSize=Math.min(fontSize,chapter===0?labelWidth*94/measuredText.width:Math.max(8,labelWidth*94/measuredText.width));
           }
           label.style.fontSize=`${fontSize}px`;
           label.style.opacity=String(introPlaying?0:THREE.MathUtils.smoothstep(raw,.55,1));
