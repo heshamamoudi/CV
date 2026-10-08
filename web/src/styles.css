@@ -167,3 +167,15 @@ html.immersive,html.immersive body{height:100%;overflow:hidden;overscroll-behavi
 @media(min-width:701px) and (max-width:1050px) and (orientation:portrait) { .work-visual { min-height:480px; gap:14px; } .work-cover { max-height:310px; } .work-stage { height:130px; } }
 @media(max-width:700px) { .intro-stage { height:285px; } .work-visual { min-height:0; margin:16px 0 20px; gap:12px; } .work-figure { width:100%; max-width:none; } .work-cover { max-height:240px; width:100%; } .work-caption { font-size:9px; flex-direction:column; gap:3px; } .work-system { grid-template-columns:minmax(190px,65%) 1fr; gap:9px; padding-top:5px; } .work-stage { height:113px; } .work-system-caption p { font-size:10px; margin-top:6px; } .work-system-caption .micro-label { font-size:7px; } }
 @media(max-width:700px) { .intro-stage .software-node small { display:none; } }
+
+/* Keep the opening copy readable before the sculpture on short phone screens. */
+@media(max-width:700px) {
+ .chapter-0 .chapter-panel { overflow-anchor:none; }
+ .intro-copy { flex-shrink:0; }
+ .intro-content .section-kicker { font-size:10px; margin-bottom:8px; }
+ .intro-identity { font-size:11px; margin-bottom:12px; }
+ .hero-name { font-size:clamp(32px,9.2vw,40px); letter-spacing:-.055em; line-height:1.12; }
+ .hero-subtitle { font-size:15px; line-height:1.5; margin:12px 0; }
+ .intro-proof { margin-top:12px; padding-top:8px; }
+ .intro-stage { height:clamp(175px,27svh,245px); }
+}
