@@ -52,11 +52,13 @@ export function GoogleAnalytics({ consent, pathname }: { consent: ConsentChoice;
       if (!active) return;
       const page = `${window.location.origin}${pathname}`;
       if (window.__portfolioGaPage === page) return;
+      const referrer = window.__portfolioGaPage ?? document.referrer;
       window.__portfolioGaPage = page;
       window.gtag?.('event', 'page_view', {
         page_title: document.title,
         page_location: page,
         page_path: pathname,
+        ...(referrer ? { page_referrer: referrer } : {}),
       });
     });
     return () => { active = false; };
