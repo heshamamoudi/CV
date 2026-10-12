@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import type { JourneyDto, Lang } from "../types";
 import { useStrings } from "../i18n/useStrings";
 import { formatMonthYear } from "../date";
+import { trackAnalyticsEvent } from "./GoogleAnalytics";
 
 export function JourneyExplorer({journey,lang,onActive,archive=false,initialIndex=0}:{journey:JourneyDto[];lang:Lang;onActive:(index:number)=>void;archive?:boolean;initialIndex?:number}) {
   const initialPinned=journey.length?Math.max(0,Math.min(initialIndex,journey.length-1)):0;
@@ -22,7 +23,7 @@ export function JourneyExplorer({journey,lang,onActive,archive=false,initialInde
       <p className="atlas-caption"><span>{ar?"كل محطة تبني ما بعدها.":"Each chapter builds the next."}</span><span>{ar?"اختر محطة أدناه":"Select a station below"}</span></p>
     </div>
     <div className="journey-roles" data-scroll-region aria-label={t("section.journey")}>
-      {journey.map((role,i)=><button key={role.id} className={`journey-role${boundedPinned===i?" active pinned":""}`} onClick={()=>setPinned(i)} aria-pressed={boundedPinned===i} aria-label={`${role.start.slice(0,4)} ${role.title} ${role.organisation}`}>
+      {journey.map((role,i)=><button key={role.id} className={`journey-role${boundedPinned===i?" active pinned":""}`} onClick={()=>{if(i!==boundedPinned)trackAnalyticsEvent("select_journey_step",{step_id:role.id,step_title:role.title,site_language:lang});setPinned(i)}} aria-pressed={boundedPinned===i} aria-label={`${role.start.slice(0,4)} ${role.title} ${role.organisation}`}>
         <span className="journey-station-number" aria-hidden="true">{String(i+1).padStart(2,"0")}</span>
         <time dateTime={role.start}>{role.start.slice(0,4)}</time>
         <span><strong>{role.title}</strong><small>{role.organisation}</small></span>

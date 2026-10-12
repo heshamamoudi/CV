@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import type { Lang } from "../types";
 import { BrandMark } from "./BrandMark";
+import { trackAnalyticsEvent } from "./GoogleAnalytics";
 
 type ContactField = "name" | "email" | "subject" | "message";
 type ContactValues = Record<ContactField, string>;
@@ -58,6 +59,7 @@ export function ContactForm({ lang }: Props) {
         }),
       });
       if (response.ok) {
+        trackAnalyticsEvent("generate_lead", { form_name: "contact", site_language: lang });
         setValues(emptyValues);
         setWebsite("");
         request.current = null;

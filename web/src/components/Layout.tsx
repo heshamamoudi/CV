@@ -6,7 +6,7 @@ import { otherLang, twinPath } from "../paths";
 import { BrandMark } from "./BrandMark";
 import { IntroContext } from "./IntroContext";
 import { AnalyticsConsent } from "./AnalyticsConsent";
-import { GoogleAnalytics } from "./GoogleAnalytics";
+import { GoogleAnalytics, trackAnalyticsEvent } from "./GoogleAnalytics";
 import { readAnalyticsConsent } from "./AnalyticsConsent";
 
 let introShown = false;
@@ -69,7 +69,7 @@ export function Layout({
   useEffect(() => setMenu(false), [pathname, hash]);
   return (
     <IntroContext.Provider value={intro}>
-      <GoogleAnalytics consent={analyticsConsent} pathname={pathname} />
+      <GoogleAnalytics consent={analyticsConsent} pathname={pathname} hash={hash} />
       {splash && (
         <div
           className="identity-intro"
@@ -128,6 +128,7 @@ export function Layout({
               className="language-switch"
               to={`${twinPath(pathname.replace(/\/$/, ""), lang)}${hash}`}
               hrefLang={otherLang(lang)}
+              onClick={() => trackAnalyticsEvent("language_switch", { from_language: lang, to_language: otherLang(lang) })}
             >
               {t("language.other")}
             </Link>
