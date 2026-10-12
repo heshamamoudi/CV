@@ -9,8 +9,10 @@ namespace Profile.Api.Seo;
 public sealed class ResponseHeadersMiddleware(RequestDelegate next, SiteOptions site)
 {
     public const string ContentSecurityPolicy =
-        "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; " +
-        "connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+        "default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self'; " +
+        "img-src 'self' data: blob: https://www.googletagmanager.com https://*.google-analytics.com; font-src 'self'; " +
+        "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.google.com; " +
+        "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 
     public Task InvokeAsync(HttpContext http)
     {

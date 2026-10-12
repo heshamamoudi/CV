@@ -5,6 +5,9 @@ import { useStrings } from "../i18n/useStrings";
 import { otherLang, twinPath } from "../paths";
 import { BrandMark } from "./BrandMark";
 import { IntroContext } from "./IntroContext";
+import { AnalyticsConsent } from "./AnalyticsConsent";
+import { GoogleAnalytics } from "./GoogleAnalytics";
+import { readAnalyticsConsent } from "./AnalyticsConsent";
 
 let introShown = false;
 export function Layout({
@@ -18,6 +21,7 @@ export function Layout({
 }) {
   const t = useStrings(lang),
     { pathname, hash } = useLocation();
+  const [analyticsConsent, setAnalyticsConsent] = useState<'accepted' | 'rejected' | null>(readAnalyticsConsent);
   const displayName = name ?? (lang === 'ar' ? 'هشام العمودي' : 'Hesham Amoudi');
   const [firstName, ...familyName] = displayName.trim().split(/\s+/);
   const isHome = new RegExp(
@@ -65,6 +69,7 @@ export function Layout({
   useEffect(() => setMenu(false), [pathname, hash]);
   return (
     <IntroContext.Provider value={intro}>
+      <GoogleAnalytics consent={analyticsConsent} pathname={pathname} />
       {splash && (
         <div
           className="identity-intro"
@@ -139,8 +144,11 @@ export function Layout({
         <main id="main-content" tabIndex={-1}>
           {children}
         </main>
-        {!isHome && (
+        {isHome ? (
+          <AnalyticsConsent className="analytics-consent-home" lang={lang} onConsentChange={setAnalyticsConsent} />
+        ) : (
           <footer className="document-footer">
+            <AnalyticsConsent lang={lang} onConsentChange={setAnalyticsConsent} />
             <Link to={`/${lang}`}>
               {lang === "ar" ? "العودة إلى التجربة" : "Back to the experience"}
             </Link>

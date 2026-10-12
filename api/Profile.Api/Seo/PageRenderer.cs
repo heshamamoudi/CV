@@ -44,6 +44,8 @@ public sealed class PageRenderer(PageTemplate template, SiteOptions site)
         head.Append("<title>").Append(E(title)).Append("</title>");
         if (description.Length > 0)
             head.Append("<meta name=\"description\" content=\"").Append(E(Trim(description, 160))).Append("\">");
+        if (seo.GaMeasurementId is { } measurementId)
+            head.Append("<meta name=\"ga-measurement-id\" content=\"").Append(E(measurementId)).Append("\">");
 
         if (kind == PageKind.NotFound)
         {

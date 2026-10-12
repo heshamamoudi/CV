@@ -222,7 +222,28 @@ public class PageTests
         Assert.Equal("nosniff", reply.Headers.GetValues("X-Content-Type-Options").Single());
         Assert.Equal("DENY", reply.Headers.GetValues("X-Frame-Options").Single());
         Assert.Contains("frame-ancestors 'none'", reply.Headers.GetValues("Content-Security-Policy").Single());
+        var policy = reply.Headers.GetValues("Content-Security-Policy").Single();
+        Assert.Contains("https://www.googletagmanager.com", policy);
+        Assert.Contains("https://*.google-analytics.com", policy);
         Assert.False(reply.Headers.Contains("X-Robots-Tag")); // indexable by default
+    }
+
+    [Fact]
+    public async Task A_configured_measurement_id_is_exposed_as_data_not_an_inline_script()
+    {
+        var app = TestApp.Create(s => InMemoryDb.Use(s, "ga-seo-" + Guid.NewGuid()));
+        await InMemoryDb.SeededAsync(app.Services);
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ProfileContext>();
+            db.SiteSettings.Add(new SiteSettings { GaMeasurementId = "G-2K5BFWH1Z8" });
+            await db.SaveChangesAsync();
+        }
+
+        var html = await app.CreateClient().GetStringAsync("/ar");
+
+        Assert.Contains("<meta name=\"ga-measurement-id\" content=\"G-2K5BFWH1Z8\">", html);
+        Assert.DoesNotContain("googletagmanager.com/gtag/js", html);
     }
 
     [Fact]
