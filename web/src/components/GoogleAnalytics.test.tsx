@@ -28,6 +28,7 @@ it('keeps the Google tag off until acceptance, then tracks routes and revocation
 
   view.rerender(<GoogleAnalytics consent="accepted" pathname="/en" />);
   await waitFor(() => expect(window.dataLayer?.some(event => event[0] === 'event' && event[1] === 'page_view')).toBe(true));
+  expect(window.dataLayer?.every(event => Object.prototype.toString.call(event) === '[object Arguments]')).toBe(true);
   expect(document.querySelector<HTMLScriptElement>('script[data-portfolio-analytics]')?.src)
     .toBe('https://www.googletagmanager.com/gtag/js?id=G-2K5BFWH1Z8');
 
