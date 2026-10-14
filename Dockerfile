@@ -8,7 +8,7 @@ RUN npm ci
 COPY web/ ./
 RUN npm run build
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0@sha256:bb32ba3ba3ea36e38572d9d8db76fa15f7cbf722f3f886e06bca6d528bd4fba8 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0@sha256:f7e28a0a3f6f9235929ec19274fd0ddf8534e9159f99fac602ac73304f1ce99f AS build
 WORKDIR /src
 COPY api/Profile.Api/Profile.Api.csproj api/Profile.Api/
 COPY api/Profile.Api/packages.lock.json api/Profile.Api/
@@ -27,7 +27,7 @@ RUN mkdir -p /app/templates && mv /app/wwwroot/index.html /app/templates/page.ht
 # this digest had 0 known vulnerabilities across its 14 OS packages, where the
 # Ubuntu chiseled variants carried 5-6 fixable glibc findings that Microsoft had
 # not yet rebuilt (a chiseled image cannot be patched in place).
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless-extra@sha256:7a9720282e566a5561964011981100024a5311061b0ad78258666b18089ad991 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-azurelinux3.0-distroless-extra@sha256:e1ca3c7fc098591230784d98436670a1a4a098446df588ac1fe7a1c7a5e89036 AS final
 WORKDIR /app
 # Root-owned on purpose: the app user can read and run its binaries but not
 # change them, even if the filesystem were ever mounted writable.
